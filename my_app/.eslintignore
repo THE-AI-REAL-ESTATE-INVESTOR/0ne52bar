@@ -1,0 +1,6 @@
+# Ignore scripts directory that uses CommonJS
+src/scripts/
+node_modules/
+.next/
+out/
+public/ 

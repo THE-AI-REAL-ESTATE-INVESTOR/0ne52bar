@@ -1,0 +1,170 @@
+[
+  {
+    "id": "123456789012345",
+    "name": "Live Music Night at ONE-52 BAR",
+    "description": "Join us for an amazing night of live music featuring local talent. Great drinks, great atmosphere, and the best live music in town!",
+    "start_time": "2025-03-25T19:00:00-0700",
+    "end_time": "2025-03-25T23:00:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event1.jpg",
+      "id": "543210987654321"
+    },
+    "attending_count": 45,
+    "interested_count": 120,
+    "is_online": false,
+    "ticket_uri": "https://one52bar.com/events/tickets/live-music-night"
+  },
+  {
+    "id": "234567890123456",
+    "name": "Cocktail Masterclass",
+    "description": "Learn how to make 3 signature cocktails from our expert mixologists. Includes tasting and take-home recipe cards. Spaces limited, book now!",
+    "start_time": "2025-04-02T18:30:00-0700",
+    "end_time": "2025-04-02T20:30:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event2.jpg",
+      "id": "654321098765432"
+    },
+    "attending_count": 24,
+    "interested_count": 56,
+    "is_online": false,
+    "ticket_uri": "https://one52bar.com/events/tickets/cocktail-class"
+  },
+  {
+    "id": "345678901234567",
+    "name": "Weekend DJ Night",
+    "description": "Dance the night away with our resident DJ spinning the best tracks from the 80s to today. Happy hour specials from 8-10pm.",
+    "start_time": "2025-03-29T20:00:00-0700",
+    "end_time": "2025-03-30T02:00:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event3.jpg",
+      "id": "765432109876543"
+    },
+    "attending_count": 86,
+    "interested_count": 210,
+    "is_online": false,
+    "ticket_uri": null
+  },
+  {
+    "id": "456789012345678",
+    "name": "Wine Tasting Evening",
+    "description": "Join our sommelier for a guided tour of wines from the Napa Valley. Five wines paired with complementary appetizers. A perfect date night!",
+    "start_time": "2025-04-15T19:00:00-0700",
+    "end_time": "2025-04-15T21:00:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event4.jpg",
+      "id": "876543210987654"
+    },
+    "attending_count": 32,
+    "interested_count": 68,
+    "is_online": false,
+    "ticket_uri": "https://one52bar.com/events/tickets/wine-tasting"
+  },
+  {
+    "id": "567890123456789",
+    "name": "Trivia Night",
+    "description": "Test your knowledge at our weekly trivia night! Form teams of up to 6 people and compete for prizes. $5 entry fee per person, happy hour prices all night for participants.",
+    "start_time": "2025-03-27T19:30:00-0700",
+    "end_time": "2025-03-27T22:00:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event5.jpg",
+      "id": "987654321098765"
+    },
+    "attending_count": 54,
+    "interested_count": 112,
+    "is_online": false,
+    "ticket_uri": null
+  },
+  {
+    "id": "678901234567890",
+    "name": "Charity Fundraiser",
+    "description": "Join us for a special evening raising money for local children's hospitals. 20% of all sales will be donated, plus live auction and raffle prizes. Entertainment provided by local musicians.",
+    "start_time": "2025-04-20T18:00:00-0700",
+    "end_time": "2025-04-20T23:00:00-0700",
+    "location": "ONE-52 BAR & GRILL",
+    "place": {
+      "name": "ONE-52 BAR & GRILL",
+      "location": {
+        "city": "San Francisco",
+        "country": "United States",
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "152 Main Street",
+        "zip": "94105"
+      },
+      "id": "98765432109876"
+    },
+    "cover": {
+      "source": "https://example.com/images/event6.jpg",
+      "id": "098765432109876"
+    },
+    "attending_count": 118,
+    "interested_count": 250,
+    "is_online": false,
+    "ticket_uri": "https://one52bar.com/events/tickets/charity-fundraiser"
+  }
+] 

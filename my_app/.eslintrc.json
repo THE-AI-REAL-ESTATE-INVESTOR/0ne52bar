@@ -1,0 +1,27 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
+    "react/no-unescaped-entities": ["error", {
+      "forbid": [
+        { "char": ">", "alternatives": ["&gt;"] },
+        { "char": "\"", "alternatives": ["&quot;", "&ldquo;", "&#34;", "&rdquo;"] },
+        { "char": "'", "alternatives": ["&apos;", "&lsquo;", "&#39;", "&rsquo;"] }
+      ]
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["src/scripts/**/*"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["src/scripts/**/*"]
+} 
