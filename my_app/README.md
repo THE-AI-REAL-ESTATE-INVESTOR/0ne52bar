@@ -44,60 +44,6 @@ The application uses Next.js 15 with a hybrid approach:
 - **Type Safety**: TypeScript
 - **Package Management**: pnpm
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18.17 or later
-- pnpm (recommended) or npm
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/152bar.git
-   cd 152bar/my_app
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Set up environment variables:
-   Create a `.env.local` file with the following variables:
-   ```
-   FACEBOOK_APP_ID=your_facebook_app_id
-   FACEBOOK_APP_SECRET=your_facebook_app_secret
-   FACEBOOK_PAGE_ID=your_facebook_page_id
-   FACEBOOK_PAGE_TOKEN=your_long_lived_page_token
-   
-   NEXTAUTH_URL=http://localhost:3000
-   NEXTAUTH_SECRET=your_nextauth_secret
-   
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=your_password
-   ```
-
-### Development
-
-Start the development server:
-```bash
-pnpm dev
-```
-
-### Building for Production
-
-Build the application:
-```bash
-pnpm build
-```
-
-To start the production server (from the my_app directory):
-```bash
-pnpm start
-```
-
 ## Project Structure
 
 ```
@@ -128,21 +74,6 @@ This project uses Next.js 15, which has some important differences from earlier 
 - Dynamic rendering with `dynamic = 'force-dynamic'`
 - CSS handling improvements
 
-## Troubleshooting
-
-### Build Issues
-
-If you encounter CSS-related errors during build:
-- Make sure your CSS imports are correctly set up
-- Use the dynamic export for pages with CSS imports: `export const dynamic = 'force-dynamic'`
-
-### Type Errors
-
-Run with TypeScript checking disabled if needed:
-```bash
-pnpm build -- --no-typecheck
-```
-
 ## License
 
 [MIT License](LICENSE)
@@ -153,52 +84,7 @@ For questions or support, please contact [your-email@example.com](mailto:your-em
 
 ## Facebook Integration
 
-This app integrates with Facebook to display events from your Facebook page. Follow these steps to set up:
-
-### Development Mode
-During development, the app uses mock data. You can preview this by running:
-
-```bash
-npm run use-mock-events
-```
-
-### Production Mode with Real Facebook Data
-
-1. **Generate a secure Facebook API URL with appsecret_proof**:
-   ```bash
-   npm run generate-proof
-   ```
-   - Enter your User Access Token from the [Graph API Explorer](https://developers.facebook.com/tools/explorer/)
-   - Follow the instructions to obtain your Page Access Token
-
-2. **Save your Page Access Token**:
-   ```bash
-   npm run save-page-token
-   ```
-   - This will save the token to your `.env.local` file
-
-3. **Test your token**:
-   ```bash
-   npm run test-page-token
-   ```
-   - Confirms your token has the right permissions and can access your page data
-
-4. **Start the app with real data**:
-   ```bash
-   npm run dev
-   ```
-   - Visit the events page and toggle "Using API data" to use real Facebook data
-
-### Troubleshooting
-
-- If you encounter a "`appsecret_proof` required" error:
-  - Use the `npm run generate-proof` script to generate a secure URL
-  - Make sure both your App Secret and Page Access Token are in `.env.local`
-
-- If no events are showing:
-  - Verify your Facebook page has public events created
-  - Check your Page ID is correct in `.env.local`
-  - Ensure your token has the `pages_read_engagement` permission
+This app integrates with Facebook to display events from your Facebook page.
 
 ## Learn More
 
