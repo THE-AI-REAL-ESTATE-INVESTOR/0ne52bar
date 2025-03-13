@@ -1,17 +1,91 @@
-// Force dynamic rendering for this page
+import Link from 'next/link';
+import { EventsList } from '@/components/EventsList';
+import { getFacebookEvents } from '@/lib/facebook';
+
+// Force dynamic rendering for this page to avoid CSS issues with Next.js 15
 export const dynamic = 'force-dynamic';
 
-export default function Home() {
+// Define a basic Event type for the events array
+interface Event {
+  id: string;
+  name: string;
+  description?: string;
+  start_time?: string;
+  end_time?: string;
+  cover?: {
+    source?: string;
+  };
+  place?: {
+    name?: string;
+  };
+  [key: string]: any; // Allow other fields from Facebook events
+}
+
+interface EventsData {
+  error?: string;
+  events?: Event[];
+}
+
+export default async function Home() {
+  // Fetch events from the API
+  const eventsData: EventsData = await getFacebookEvents();
+  
   return (
-    <div className="min-h-screen flex items-center justify-center flex-col">
-      <h1 className="text-3xl font-bold mb-4">Welcome to 152 Bar</h1>
-      <p className="text-xl mb-6">Our website is being updated.</p>
-      <a 
-        href="/client-app" 
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-      >
-        Go to Application
-      </a>
-    </div>
+    <main className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-blue-800 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold mb-4">152 Bar & Restaurant</h1>
+          <p className="text-xl mb-8 max-w-2xl mx-auto">
+            Discover our upcoming events and join us for great food, drinks, and unforgettable moments.
+          </p>
+          <Link 
+            href="/admin" 
+            className="bg-white text-blue-800 px-6 py-3 rounded-lg font-medium hover:bg-blue-100 transition"
+          >
+            Admin Dashboard
+          </Link>
+        </div>
+      </section>
+
+      {/* Events Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8 text-center">Upcoming Events</h2>
+          
+          {eventsData.error ? (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg max-w-2xl mx-auto">
+              <h3 className="font-bold text-lg mb-2">Unable to load events</h3>
+              <p>{eventsData.error}</p>
+              <p className="mt-4 text-sm">
+                Please check the Facebook integration in the admin dashboard.
+              </p>
+            </div>
+          ) : eventsData.events && eventsData.events.length > 0 ? (
+            <EventsList events={eventsData.events} />
+          ) : (
+            <div className="text-center text-gray-600 py-8">
+              <p className="text-lg mb-4">No upcoming events found</p>
+              <p>Check back later for new events or visit our Facebook page.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-xl font-bold">152 Bar & Restaurant</h3>
+              <p className="text-gray-400 mt-1">Great drinks, great times.</p>
+            </div>
+            <div>
+              <p className="text-gray-400">© {new Date().getFullYear()} 152 Bar. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 } 

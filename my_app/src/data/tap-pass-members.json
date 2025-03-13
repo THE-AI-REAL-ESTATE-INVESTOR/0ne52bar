@@ -1,0 +1,64 @@
+{
+  "members": [
+    {
+      "name": "Markaus Carpenter",
+      "email": "Mark@localhousebuyers.net",
+      "birthday": "1987-08-03",
+      "phoneNumber": "4053080560",
+      "agreeToTerms": true,
+      "memberId": "ONE52-9481-0001",
+      "memberSince": "2025-03-13T20:08:20.925Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "Mark Carpenter",
+      "email": "markcarpenter0025@gmail.com",
+      "birthday": "1987-08-03",
+      "phoneNumber": "(405) 308-0560",
+      "agreeToTerms": true,
+      "memberId": "ONE52-6722-0002",
+      "memberSince": "2025-03-13T20:12:10.613Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "Portainer john ",
+      "email": "john@gmail.com",
+      "birthday": "1987-08-03",
+      "phoneNumber": "4053080560",
+      "agreeToTerms": true,
+      "memberId": "ONE52-2196-0003",
+      "memberSince": "2025-03-13T21:31:32.784Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "john doe",
+      "email": "john@futuritypm.com",
+      "birthday": "1984-08-04",
+      "phoneNumber": "4053987654",
+      "agreeToTerms": true,
+      "memberId": "ONE52-7833-0004",
+      "memberSince": "2025-03-13T21:32:45.467Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "Mark Carpenter",
+      "email": "Mark@futuritypm.com",
+      "birthday": "1987-08-03",
+      "phoneNumber": "4053080560",
+      "agreeToTerms": true,
+      "memberId": "ONE52-3973-0005",
+      "memberSince": "2025-03-13T22:09:17.147Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    }
+  ]
+}
