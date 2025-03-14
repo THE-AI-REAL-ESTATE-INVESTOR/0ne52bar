@@ -1,7 +1,7 @@
 {
   "members": [
     {
-      "name": "Markaus Carpenter",
+      "name": "Mark Carpenter",
       "email": "Mark@localhousebuyers.net",
       "birthday": "1987-08-03",
       "phoneNumber": "4053080560",
@@ -56,6 +56,18 @@
       "agreeToTerms": true,
       "memberId": "ONE52-3973-0005",
       "memberSince": "2025-03-13T22:09:17.147Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "Jamie Carpenter",
+      "email": "jamiec@gmail.com",
+      "birthday": "1974-12-14",
+      "phoneNumber": "4054148514",
+      "agreeToTerms": true,
+      "memberId": "ONE52-9721-0006",
+      "memberSince": "2025-03-14T19:46:01.797Z",
       "tier": "BRONZE",
       "points": 0,
       "visits": 0

@@ -1,5 +1,6 @@
-import { getEvent, getAllEvents } from '@/services/alternativeEvents';
+import { getEvent, getAllEvents, getAllPastEvents } from '@/services/alternativeEvents';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -8,8 +9,11 @@ type EventParams = { id: string };
 
 // Generate static params for all events
 export async function generateStaticParams() {
-  const events = getAllEvents();
-  return events.map((event) => ({
+  const upcomingEvents = getAllEvents();
+  const pastEvents = getAllPastEvents();
+  const allEvents = [...upcomingEvents, ...pastEvents];
+  
+  return allEvents.map((event) => ({
     id: event.id,
   }));
 }
@@ -47,19 +51,33 @@ export default function EventPage({
     notFound();
   }
 
+  // Format the date
+  const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Determine if event is in the past
+  const isPastEvent = event.id.startsWith('past-');
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/Events" className="text-blue-400 hover:underline mb-6 inline-block">
+      <Link href="/events" className="text-blue-400 hover:underline mb-6 inline-block">
         ← Back to all events
       </Link>
       
-      <div className="bg-gray-900 rounded-lg overflow-hidden shadow-xl">
+      <div className={`bg-gray-900 rounded-lg overflow-hidden shadow-xl ${isPastEvent ? 'opacity-90' : ''}`}>
         {event.image && (
-          <div className="h-64 md:h-80 bg-gray-800">
-            {/* Image placeholder - in production you would use next/image */}
-            <div className="h-full w-full flex items-center justify-center text-gray-500">
-              {event.image ? "Event Image" : "No Image"}
-            </div>
+          <div className={`h-64 md:h-80 bg-gray-800 relative ${isPastEvent ? 'grayscale hover:grayscale-0 transition-all duration-500' : ''}`}>
+            <Image
+              src={event.image}
+              alt={event.title}
+              fill
+              style={{objectFit: 'cover'}}
+              priority
+            />
           </div>
         )}
         
@@ -70,7 +88,7 @@ export default function EventPage({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-sm text-gray-400 uppercase">Date</h3>
-                <p className="text-lg">{event.date}</p>
+                <p className="text-lg">{formattedDate}</p>
               </div>
               <div>
                 <h3 className="text-sm text-gray-400 uppercase">Time</h3>
@@ -86,20 +104,32 @@ export default function EventPage({
             </p>
           </div>
           
-          <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            <Link 
-              href="#" 
-              className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-center font-medium"
-            >
-              RSVP for this Event
-            </Link>
-            <Link 
-              href="tel:4052565005" 
-              className="border border-white text-white py-3 px-6 rounded-lg text-center font-medium hover:bg-white hover:text-black transition-colors"
-            >
-              Call for Details
-            </Link>
-          </div>
+          {!isPastEvent && (
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <Link 
+                href={event.facebookEventUrl || "#"} 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-center font-medium"
+              >
+                RSVP for this Event
+              </Link>
+              <Link 
+                href="tel:4052565005" 
+                className="border border-white text-white py-3 px-6 rounded-lg text-center font-medium hover:bg-white hover:text-black transition-colors"
+              >
+                Call for Details
+              </Link>
+            </div>
+          )}
+          
+          {isPastEvent && (
+            <div className="mt-8 flex justify-center">
+              <div className="bg-gray-800 text-gray-300 py-2 px-4 rounded-full text-sm">
+                This event has already taken place
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

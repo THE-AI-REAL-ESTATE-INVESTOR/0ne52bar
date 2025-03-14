@@ -6,7 +6,7 @@ declare module 'dom-to-image-more';
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
-import { registerTapPassMember, emailMembershipCard } from '../actions';
+import { registerTapPassMember, emailMembershipCard, getMemberByEmail } from '../actions';
 import domtoimage from 'dom-to-image-more';
 
 // Override the problematic method to prevent CORS errors
@@ -43,6 +43,11 @@ interface FormData {
   birthday: string;
   phoneNumber: string;
   agreeToTerms: boolean;
+}
+
+// Type for login data
+interface LoginData {
+  email: string;
 }
 
 // Type definitions for server action responses
@@ -131,7 +136,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: n
 
 export default function TapPass() {
   // Form state
-  const [formStep, setFormStep] = useState(1);
+  const [formStep, setFormStep] = useState(0); // Start at step 0 now - login check
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -139,17 +144,22 @@ export default function TapPass() {
     phoneNumber: '',
     agreeToTerms: false,
   });
+  const [loginData, setLoginData] = useState<LoginData>({
+    email: ''
+  });
   const [submitted, setSubmitted] = useState(false);
   const [memberID, setMemberID] = useState('');
   const [cardImage, setCardImage] = useState('');
   const [formError, setFormError] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAccount, setIsCheckingAccount] = useState(false);
   
   // Reference to the membership card div for capturing as image
   const memberCardRef = useRef<HTMLDivElement>(null);
   
-  // Handle input changes
+  // Handle input changes for registration form
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -161,6 +171,79 @@ export default function TapPass() {
     if (formError) {
       setFormError('');
     }
+  };
+  
+  // Handle input changes for login form
+  const handleLoginChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData({
+      ...loginData,
+      [name]: value,
+    });
+    
+    // Clear error message when user starts typing
+    if (loginError) {
+      setLoginError('');
+    }
+  };
+  
+  // Check if user account exists
+  const checkExistingAccount = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!loginData.email) {
+      setLoginError('Please enter your email address');
+      return;
+    }
+    
+    setIsCheckingAccount(true);
+    
+    try {
+      const response = await getMemberByEmail(loginData.email);
+      
+      if (response && response.success && response.member) {
+        // User exists, populate form data and show card
+        const existingMember = response.member;
+        
+        setFormData({
+          name: existingMember.name,
+          email: existingMember.email,
+          birthday: existingMember.birthday,
+          phoneNumber: existingMember.phoneNumber,
+          agreeToTerms: existingMember.agreeToTerms
+        });
+        
+        setMemberID(existingMember.memberId);
+        setSubmitted(true);
+        
+        // Generate the card image
+        setTimeout(() => {
+          captureCardImage(existingMember.memberId);
+        }, 100);
+      } else {
+        // User doesn't exist, proceed to registration
+        setFormData({
+          ...formData,
+          email: loginData.email
+        });
+        setFormStep(1);
+      }
+    } catch (error) {
+      console.error('Error checking account:', error);
+      // If there's an error, proceed to registration anyway
+      setFormData({
+        ...formData,
+        email: loginData.email
+      });
+      setFormStep(1);
+    } finally {
+      setIsCheckingAccount(false);
+    }
+  };
+  
+  // Move to registration mode
+  const startRegistration = () => {
+    setFormStep(1);
   };
   
   // Move to next step
@@ -744,6 +827,13 @@ export default function TapPass() {
     clientAction(formData);
   };
   
+  // Return to the account check step
+  const returnToLogin = () => {
+    setFormStep(0);
+    setFormError('');
+    setLoginError('');
+  };
+  
   // Benefit cards component
   const BenefitCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-8">
@@ -853,256 +943,278 @@ export default function TapPass() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-900 py-12 text-white" style={{ backgroundImage: 'url(/bar-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundBlendMode: 'overlay' }}>
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-yellow-400">ONE-52 TAP PASS</h1>
-          <p className="text-xl mt-3 text-blue-300">Join our loyalty program and earn exclusive rewards!</p>
-        </div>
-        
-        {/* Sign-up incentive banner */}
-        <div className="bg-blue-900 bg-opacity-80 text-white rounded-lg p-4 mb-8 shadow-lg border border-blue-700">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-center md:text-left mb-4 md:mb-0">
-              <h2 className="text-2xl font-bold text-yellow-300">Join TODAY and get 10% OFF your bar tab!</h2>
-              <p className="mt-1 text-blue-200">Become a member to unlock all our exclusive benefits</p>
-            </div>
-            {!submitted && (
-              <button 
-                onClick={() => setFormStep(1)} 
-                className="bg-yellow-500 text-gray-900 hover:bg-yellow-400 font-bold py-2 px-6 rounded-full shadow-md transition-colors"
-              >
-                Sign Up Now
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {formError && (
-          <div className="bg-red-900 bg-opacity-80 border border-red-700 text-white px-4 py-3 rounded mb-4 relative" role="alert">
-            <div className="flex items-center">
-              <svg className="h-6 w-6 text-red-300 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span className="font-medium">Error:</span>
-              <span className="ml-1 block sm:inline">{formError}</span>
-            </div>
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-950 py-12">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <h1 className="text-4xl font-bold text-center mb-8 text-blue-300">TapPass Loyalty Program</h1>
+        <p className="text-center text-xl mb-12 text-white">Earn rewards every time you visit ONE-52 Bar & Grill!</p>
         
         {!submitted ? (
-          <>
-            {/* Benefits section for non-members */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-center mb-6 text-yellow-300">Member Benefits</h2>
-              <BenefitCards />
-            </div>
-            
-            <div className="bg-gray-800 bg-opacity-90 rounded-lg shadow-lg overflow-hidden border border-gray-700">
-              <div className="p-6 md:p-8">
-                <div className="flex justify-between mb-8">
-                  <div className="w-full max-w-xs">
-                    <div className="relative h-2 bg-gray-600 rounded">
-                      <div 
-                        className="absolute h-2 bg-yellow-500 rounded"
-                        style={{ width: `${(formStep / 3) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="mt-2 text-sm text-gray-300">Step {formStep} of 3</div>
+          <div className="bg-gray-800 bg-opacity-90 rounded-lg shadow-lg overflow-hidden border border-gray-700">
+            <div className="p-6 md:p-8">
+              <div className="flex justify-between mb-8">
+                <div className="w-full max-w-xs">
+                  <div className="relative h-2 bg-gray-600 rounded">
+                    <div 
+                      className="absolute h-2 bg-yellow-500 rounded"
+                      style={{ width: `${((formStep) / 4) * 100}%` }}
+                    ></div>
+                  </div>
+                  <div className="mt-2 text-sm text-gray-300">
+                    {formStep === 0 ? 'Account Check' : `Step ${formStep} of 3`}
                   </div>
                 </div>
-                
-                <form onSubmit={handleFormSubmit}>
-                  {formStep === 1 && (
-                    <div>
-                      <h2 className="text-2xl font-semibold mb-6 text-blue-300">Personal Information</h2>
-                      
-                      <div className="mb-4">
-                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="name">
-                          Full Name
-                        </label>
-                        <input
-                          className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          id="name"
-                          name="name"
-                          type="text"
-                          placeholder="John Doe"
-                          value={formData.name}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="mb-4">
-                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
-                          Email
-                        </label>
-                        <input
-                          className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="john@example.com"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end mt-6">
-                        <button
-                          type="button"
-                          onClick={nextStep}
-                          className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {formStep === 2 && (
-                    <div>
-                      <h2 className="text-2xl font-semibold mb-6 text-blue-300">Additional Details</h2>
-                      
-                      <div className="mb-4">
-                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="birthday">
-                          Birthday (for birthday rewards)
-                        </label>
-                        <input
-                          className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          id="birthday"
-                          name="birthday"
-                          type="date"
-                          value={formData.birthday}
-                          onChange={handleChange}
-                          required
-                        />
-                        <p className="text-sm text-yellow-400 mt-1">🎂 Free drink on your birthday with purchase over $10!</p>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="phoneNumber">
-                          Phone Number
-                        </label>
-                        <input
-                          className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                          id="phoneNumber"
-                          name="phoneNumber"
-                          type="tel"
-                          placeholder="(555) 555-5555"
-                          value={formData.phoneNumber}
-                          onChange={handleChange}
-                          required
-                        />
-                        <p className="text-sm text-yellow-400 mt-1">📱 We&apos;ll text you about exclusive member events</p>
-                      </div>
-                      
-                      <div className="flex justify-between mt-6">
-                        <button
-                          type="button"
-                          onClick={prevStep}
-                          className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Back
-                        </button>
-                        <button
-                          type="button"
-                          onClick={nextStep}
-                          className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {formStep === 3 && (
-                    <div>
-                      <h2 className="text-2xl font-semibold mb-6 text-blue-300">Confirm & Submit</h2>
-                      
-                      <div className="bg-blue-900 bg-opacity-50 border-l-4 border-blue-500 p-4 rounded mb-6">
-                        <div className="flex">
-                          <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-300" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-sm text-blue-200 font-medium">
-                              You&apos;re almost done! Sign up today and receive an immediate 10% discount on your next visit.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gray-700 bg-opacity-70 p-4 rounded mb-4">
-                        <h3 className="font-bold text-lg mb-2 text-yellow-300">TapPass Benefits</h3>
-                        <ul className="list-disc pl-5 space-y-1 text-gray-200">
-                          <li>Earn points on every purchase</li>
-                          <li>Free birthday drink with purchase over $10</li>
-                          <li>10% off your bar tab when you RSVP to events</li>
-                          <li>Exclusive member-only events and offers</li>
-                          <li>Beer of the month club discounts</li>
-                          <li>20% off when you invite friends to our Facebook page</li>
-                          <li>10% off when you bring 3 friends to ONE-52</li>
-                          <li>Tiered rewards system (Bronze to Platinum)</li>
-                          <li>Sunday double points</li>
-                        </ul>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <div className="flex items-center p-3 bg-gray-900 rounded-md border border-gray-600">
-                          <input
-                            id="agreeToTerms"
-                            name="agreeToTerms"
-                            type="checkbox"
-                            className="h-5 w-5 text-yellow-500 border-gray-400 rounded focus:ring-yellow-400"
-                            checked={formData.agreeToTerms}
-                            onChange={handleChange}
-                            required
-                          />
-                          <label className="ml-3 block text-white text-base" htmlFor="agreeToTerms">
-                            I agree to the ONE-52 TapPass terms and conditions
-                          </label>
-                        </div>
-                        <div className="mt-2 text-xs text-gray-300 px-3">
-                          By checking this box, you agree to our membership terms including receiving promotional emails and texts about events and special offers. You can unsubscribe at any time. View our full <a href="#" className="text-yellow-400 underline">Terms & Conditions</a>.
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between mt-6">
-                        <button
-                          type="button"
-                          onClick={prevStep}
-                          className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Back
-                        </button>
-                        <button
-                          type="submit"
-                          className={`${isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400'} text-gray-900 font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline flex items-center transition-all`}
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Processing...
-                            </>
-                          ) : (
-                            'Join Now & Get 10% Off'
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </form>
               </div>
+              
+              {/* Step 0: Check for existing account */}
+              {formStep === 0 && (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-6 text-blue-300">Check Your TapPass</h2>
+                  
+                  <form onSubmit={checkExistingAccount}>
+                    <div className="mb-4">
+                      <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
+                        Email Address
+                      </label>
+                      <input
+                        className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        id="login-email"
+                        name="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={loginData.email}
+                        onChange={handleLoginChange}
+                        required
+                      />
+                    </div>
+                    
+                    {loginError && (
+                      <div className="mb-4 p-2 bg-red-900 text-white rounded">
+                        {loginError}
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                      <button
+                        type="submit"
+                        disabled={isCheckingAccount}
+                        className="w-full md:w-auto bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center"
+                      >
+                        {isCheckingAccount ? 'Checking...' : 'Check My TapPass'}
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={startRegistration}
+                        className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Create New TapPass
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+              
+              {/* Registration steps - keep the existing ones */}
+              <form onSubmit={handleFormSubmit}>
+                {formStep === 1 && (
+                  <div>
+                    <h2 className="text-2xl font-semibold mb-6 text-blue-300">Personal Information</h2>
+                    
+                    <div className="mb-4">
+                      <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="name">
+                        Full Name
+                      </label>
+                      <input
+                        className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="John Doe"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
+                        Email
+                      </label>
+                      <input
+                        className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={returnToLogin}
+                        className="w-full md:w-auto bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Back
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        className="w-full md:w-auto bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {formStep === 2 && (
+                  <div>
+                    <h2 className="text-2xl font-semibold mb-6 text-blue-300">Additional Details</h2>
+                    
+                    <div className="mb-4">
+                      <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="birthday">
+                        Birthday (for birthday rewards)
+                      </label>
+                      <input
+                        className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        id="birthday"
+                        name="birthday"
+                        type="date"
+                        value={formData.birthday}
+                        onChange={handleChange}
+                        required
+                      />
+                      <p className="text-sm text-yellow-400 mt-1">🎂 Free drink on your birthday with purchase over $10!</p>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="phoneNumber">
+                        Phone Number
+                      </label>
+                      <input
+                        className="shadow appearance-none border border-gray-700 bg-gray-700 rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        type="tel"
+                        placeholder="(555) 555-5555"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        required
+                      />
+                      <p className="text-sm text-yellow-400 mt-1">📱 We&apos;ll text you about exclusive member events</p>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        className="w-full md:w-auto bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Back
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        className="w-full md:w-auto bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {formStep === 3 && (
+                  <div>
+                    <h2 className="text-2xl font-semibold mb-6 text-blue-300">Confirm & Submit</h2>
+                    
+                    <div className="bg-blue-900 bg-opacity-50 border-l-4 border-blue-500 p-4 rounded mb-6">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-blue-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-blue-200 font-medium">
+                            You&apos;re almost done! Sign up today and receive an immediate 10% discount on your next visit.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700 bg-opacity-70 p-4 rounded mb-4">
+                      <h3 className="font-bold text-lg mb-2 text-yellow-300">TapPass Benefits</h3>
+                      <ul className="list-disc pl-5 space-y-1 text-gray-200">
+                        <li>Earn points on every purchase</li>
+                        <li>Free birthday drink with purchase over $10</li>
+                        <li>10% off your bar tab when you RSVP to events</li>
+                        <li>Exclusive member-only events and offers</li>
+                        <li>Beer of the month club discounts</li>
+                        <li>20% off when you invite friends to our Facebook page</li>
+                        <li>10% off when you bring 3 friends to ONE-52</li>
+                        <li>Tiered rewards system (Bronze to Platinum)</li>
+                        <li>Sunday double points</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex items-center p-3 bg-gray-900 rounded-md border border-gray-600">
+                        <input
+                          id="agreeToTerms"
+                          name="agreeToTerms"
+                          type="checkbox"
+                          className="h-5 w-5 text-yellow-500 border-gray-400 rounded focus:ring-yellow-400"
+                          checked={formData.agreeToTerms}
+                          onChange={handleChange}
+                          required
+                        />
+                        <label className="ml-3 block text-white text-base" htmlFor="agreeToTerms">
+                          I agree to the ONE-52 TapPass terms and conditions
+                        </label>
+                      </div>
+                      <div className="mt-2 text-xs text-gray-300 px-3">
+                        By checking this box, you agree to our membership terms including receiving promotional emails and texts about events and special offers. You can unsubscribe at any time. View our full <a href="#" className="text-yellow-400 underline">Terms & Conditions</a>.
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        className="w-full md:w-auto bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Back
+                      </button>
+                      
+                      <button
+                        type="submit"
+                        className={`${isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400'} text-gray-900 font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline flex items-center transition-all`}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                          </>
+                        ) : (
+                          'Join Now & Get 10% Off'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
             </div>
-          </>
+          </div>
         ) : (
           <div className="bg-gray-800 bg-opacity-90 rounded-lg shadow-lg overflow-hidden border border-gray-700">
             <div className="p-6 md:p-8">

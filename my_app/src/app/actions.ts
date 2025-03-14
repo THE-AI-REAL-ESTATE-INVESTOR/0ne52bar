@@ -93,10 +93,23 @@ function getMemberById(memberId: string): TapPassMember | null {
 }
 
 // Helper to find a member by their email
-function getMemberByEmail(email: string): TapPassMember | null {
-  const members = getMembers();
-  const member = members.find(m => m.email === email);
-  return member || null;
+export async function getMemberByEmail(email: string): Promise<{ success: boolean; member: TapPassMember | null; error?: string }> {
+  try {
+    const members = getMembers();
+    const member = members.find(m => m.email === email);
+    
+    return {
+      success: true,
+      member: member || null
+    };
+  } catch (error) {
+    console.error('Error finding member by email:', error);
+    return {
+      success: false,
+      member: null,
+      error: 'Failed to find member. Please try again.'
+    };
+  }
 }
 
 // Helper to generate a unique member ID with tracking capability
@@ -204,8 +217,9 @@ export async function registerTapPassMember(formData: FormData): Promise<{ membe
       };
     }
 
-    // Check if member already exists
-    const existingMember = getMemberByEmail(email);
+    // Check if member already exists - using internal function directly for synchronous operation
+    const members = getMembers();
+    const existingMember = members.find(m => m.email === email);
     
     // Generate a unique member ID or use existing one
     const memberId = existingMember ? 

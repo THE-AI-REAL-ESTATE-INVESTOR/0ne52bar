@@ -7,7 +7,8 @@ export interface Event {
   date: string;
   time: string;
   description: string;
-  image?: string;
+  image: string;
+  facebookEventUrl?: string;
 }
 
 /**
