@@ -11,13 +11,13 @@ export const businessInfo: BusinessInfo = {
   },
   phone: "405-256-5005",
   hours: [
-    { day: "Sunday", hours: "2:00 pm - 2:00 am" },
-    { day: "Monday", hours: "12:00 pm - 2:00 am" },
-    { day: "Tuesday", hours: "12:00 pm - 2:00 am" },
-    { day: "Wednesday", hours: "12:00 pm - 2:00 am" },
-    { day: "Thursday", hours: "12:00 pm - 2:00 am" },
-    { day: "Friday", hours: "12:00 pm - 2:00 am" },
-    { day: "Saturday", hours: "12:00 pm - 2:00 am" }
+    { day: "Sunday", hours: "11:00 am - 2:00 am" },
+    { day: "Monday", hours: "11:00 am - 2:00 am" },
+    { day: "Tuesday", hours: "11:00 am - 2:00 am" },
+    { day: "Wednesday", hours: "11:00 am - 2:00 am" },
+    { day: "Thursday", hours: "11:00 am - 2:00 am" },
+    { day: "Friday", hours: "11:00 am - 2:00 am" },
+    { day: "Saturday", hours: "11:00 am - 2:00 am" }
   ],
   amenities: [
     "ADA Compliant",

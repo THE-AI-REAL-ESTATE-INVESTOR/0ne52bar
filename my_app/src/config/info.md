@@ -4,13 +4,13 @@ Read Less
 
 
 Hours
-Sunday: 2:00 pm - 2:00 am
-Monday: 12:00 pm - 2:00 am
-Tuesday: 12:00 pm - 2:00 am
-Wednesday: 12:00 pm - 2:00 am
-Thursday: 12:00 pm - 2:00 am
-Friday: 12:00 pm - 2:00 am
-Saturday: 12:00 pm - 2:00 am
+Sunday: 11:00 am - 2:00 am
+Monday: 11:00 am - 2:00 am
+Tuesday: 11:00 am - 2:00 am
+Wednesday: 11:00 am - 2:00 am
+Thursday: 11:00 am - 2:00 am
+Friday: 11:00 am - 2:00 am
+Saturday: 11:00 am - 2:00 am
 
 Meals Served
 
