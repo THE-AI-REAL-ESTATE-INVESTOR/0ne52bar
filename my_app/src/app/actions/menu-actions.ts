@@ -4,7 +4,15 @@ import { prisma } from '@/lib/prisma';
 import { handlePrismaError } from '@/lib/utils/error-handler';
 import type { MenuItem } from '@prisma/client';
 
-export async function getMenuItems() {
+type ApiResponse<T> = {
+  success: true;
+  data: T;
+} | {
+  success: false;
+  error: string;
+};
+
+export async function getMenuItems(): Promise<ApiResponse<MenuItem[]>> {
   try {
     const items = await prisma.menuItem.findMany({
       orderBy: {
@@ -17,6 +25,11 @@ export async function getMenuItems() {
       data: items
     };
   } catch (error) {
-    return handlePrismaError(error);
+    console.error('Error fetching menu items:', error);
+    const { message } = handlePrismaError(error);
+    return {
+      success: false,
+      error: message || 'Failed to fetch menu items'
+    };
   }
 } 
