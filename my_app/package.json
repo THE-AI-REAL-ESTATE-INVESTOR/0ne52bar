@@ -24,8 +24,8 @@
     "test-page-token": "node src/scripts/test-page-token.js",
     "save-page-token": "node src/scripts/save-page-token.js",
     "generate-proof": "node src/scripts/generate-proof.js",
-    "diagram": "ts-node scripts/generate-diagrams.ts",
-    "diagram:watch": "ts-node scripts/generate-diagrams.ts --watch",
+    "diagram": "ts-node src/scripts/generate-diagrams.ts",
+    "diagram:watch": "ts-node src/scripts/generate-diagrams.ts --watch",
     "git:clean": "ts-node scripts/clean-git.ts",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate",
@@ -43,7 +43,8 @@
     "test-watcher": "node scripts/test-watcher.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "check-members": "ts-node src/scripts/check-members.ts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

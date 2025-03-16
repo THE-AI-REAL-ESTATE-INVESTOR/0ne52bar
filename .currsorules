@@ -3,6 +3,12 @@ nextjs15 = {
   "rule": """
     # Next.js 15 and React 19 Best Practices
 
+    ### LINUX BASED DEV USING .zsh 
+    
+     - USE TOOLS LIKE TREE EXLUDE NODE_MODULES - FOR QUICKLY INDEXING FILES. 
+     - Tree -h 
+     - tree -L4 EXLUDE NODE_MODULES
+
     ## Component Architecture
 
     - Use Server Components by default where data fetching or backend logic is required
