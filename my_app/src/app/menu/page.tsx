@@ -2,8 +2,6 @@ import { Suspense } from 'react';
 import { getMenuItems } from '@/app/actions/menu-actions';
 import MenuDisplay from '@/components/menu/MenuDisplay';
 import { MenuSkeleton } from '@/components/menu/MenuSkeleton';
-import type { MenuItem } from '@prisma/client';
-import type { ApiResponse } from '@/app/actions/menu-actions';
 
 // Force dynamic rendering to prevent stale data
 export const dynamic = 'force-dynamic';
@@ -18,7 +16,7 @@ export default async function MenuPage() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
-    const menuResult: ApiResponse<MenuItem[]> = await getMenuItems();
+    const menuResult = await getMenuItems();
     clearTimeout(timeoutId);
     
     if (!menuResult.success) {
@@ -39,14 +37,11 @@ export default async function MenuPage() {
       );
     }
 
-    // Explicitly type the items array
-    const items: MenuItem[] = menuResult.data;
-
     return (
       <div className="max-w-5xl mx-auto py-8">
         <h1 className="text-4xl font-bold text-center mb-10">Our Menu</h1>
         <Suspense fallback={<MenuSkeleton />}>
-          <MenuDisplay items={items} />
+          <MenuDisplay items={menuResult.data} />
         </Suspense>
       </div>
     );
