@@ -13,10 +13,10 @@
       "visits": 0
     },
     {
-      "name": "Mark Carpenter",
+      "name": "Melissa Carpenter",
       "email": "markcarpenter0025@gmail.com",
       "birthday": "1987-08-03",
-      "phoneNumber": "(405) 308-0560",
+      "phoneNumber": "4053080560",
       "agreeToTerms": true,
       "memberId": "ONE52-6722-0002",
       "memberSince": "2025-03-13T20:12:10.613Z",
@@ -68,6 +68,18 @@
       "agreeToTerms": true,
       "memberId": "ONE52-9721-0006",
       "memberSince": "2025-03-14T19:46:01.797Z",
+      "tier": "BRONZE",
+      "points": 0,
+      "visits": 0
+    },
+    {
+      "name": "Markaus Carpenter",
+      "email": "mark@localhousbuyers.net",
+      "birthday": "1987-08-03",
+      "phoneNumber": "4053080560",
+      "agreeToTerms": true,
+      "memberId": "ONE52-7473-0007",
+      "memberSince": "2025-03-16T01:37:29.250Z",
       "tier": "BRONZE",
       "points": 0,
       "visits": 0

@@ -20,7 +20,7 @@ interface FacebookPage {
   name: string;
   access_token: string;
   category?: string;
-  tasks?: string[];
+  tasks: string[];
 }
 
 interface ApiResponse {
@@ -59,9 +59,7 @@ interface FacebookSDK {
     } 
   }) => void, options: { scope: string }) => void;
   logout: (callback: () => void) => void;
-  api: (path: string, params: any, callback: (response: any) => void) => void;
-  api: (path: string, method: string, params: any, callback: (response: any) => void) => void;
-  api: (path: string, callback: (response: any) => void) => void;
+  api: (path: string, methodOrParamsOrCallback?: any, paramsOrCallback?: any, callback?: (response: any) => void) => void;
 }
 
 // Extend the Window interface to include FB

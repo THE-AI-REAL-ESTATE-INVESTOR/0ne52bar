@@ -1,0 +1,1 @@
+const { PrismaClient } = require(\"@prisma/client\"); const prisma = new PrismaClient(); async function checkMembers() { try { const members = await prisma.member.findMany(); console.log(\"Total members:\", members.length); if (members.length > 0) { console.log(members[0]); } } catch (e) { console.error(e); } finally { await prisma.\$disconnect(); } } checkMembers();

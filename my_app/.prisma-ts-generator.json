@@ -1,0 +1,14 @@
+{
+  "rootDir": "./src",
+  "outputPath": "./prisma/schema.prisma",
+  "dbProvider": "postgresql",
+  "watch": {
+    "enabled": true,
+    "usePolling": true,
+    "pollInterval": 1000
+  },
+  "includeComments": true,
+  "preserveDirectives": true,
+  "excludePatterns": ["node_modules", ".next", "dist", "**/test-*.ts", "**/Test*.ts"],
+  "verbose": true
+} 

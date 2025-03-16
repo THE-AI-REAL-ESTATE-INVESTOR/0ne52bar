@@ -160,18 +160,92 @@ datasource db {
     
     this.log('cyan', '👀 Starting watch mode...');
     
-    // Create a watcher for TypeScript files
-    const watchPattern = path.join(config.rootDir, '**/*.{ts,tsx}');
-    this.watcher = chokidar.watch(watchPattern, {
+    // Create arrays of patterns to watch and directories to exclude
+    const typesPath = path.join(process.cwd(), 'src', 'types');
+    const absoluteRootDir = path.resolve(config.rootDir);
+    
+    // Create explicit patterns to watch
+    const watchPatterns = [
+      // Main glob pattern
+      path.join(absoluteRootDir, '**', '*.ts'),
+      path.join(absoluteRootDir, '**', '*.tsx'),
+      // Explicit path to test-model.ts
+      path.join(absoluteRootDir, 'types', 'test-model.ts')
+    ];
+    
+    this.log('yellow', `Absolute root dir: ${absoluteRootDir}`);
+    this.log('yellow', `Watch patterns: ${watchPatterns.join(', ')}`);
+    this.log('yellow', `Excluded patterns: ${config.excludePatterns.join(', ')}`);
+    this.log('yellow', `Types path: ${typesPath}`);
+    
+    // Check file existence
+    this.log('cyan', 'Testing specific file existence:');
+    const testModelPath = path.join(absoluteRootDir, 'types', 'test-model.ts');
+    this.log('cyan', `  ${testModelPath}: ${fs.existsSync(testModelPath) ? 'exists' : 'not found'}`);
+    
+    // Create watcher with explicit file patterns
+    this.watcher = chokidar.watch(watchPatterns, {
       ignored: config.excludePatterns,
       persistent: true,
-      ignoreInitial: true
+      ignoreInitial: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 300,
+        pollInterval: 100
+      },
+      alwaysStat: true,
+      usePolling: true,
+      interval: 1000,
+      binaryInterval: 3000
     });
+    
+    // Also explicitly watch the types directory
+    this.log('cyan', `Explicitly adding types directory to watcher: ${typesPath}`);
+    if (fs.existsSync(typesPath) && this.watcher) {
+      this.watcher.add(typesPath);
+      this.log('green', `✅ Types directory exists and was added to watcher`);
+      
+      // List files in the types directory
+      const typesFiles = fs.readdirSync(typesPath);
+      this.log('cyan', `Files in types directory:`);
+      typesFiles.forEach(file => {
+        this.log('cyan', `  - ${file}`);
+        // Explicitly add each .ts file
+        if (file.endsWith('.ts') && this.watcher) {
+          const fullPath = path.join(typesPath, file);
+          this.watcher.add(fullPath);
+          this.log('cyan', `    Added to watcher: ${fullPath}`);
+        }
+      });
+    } else {
+      this.log('red', `❌ Types directory does not exist or watcher not initialized`);
+    }
     
     // Log when watching starts
     this.watcher.on('ready', () => {
-      this.log('green', `✅ Watching for changes in TypeScript files in ${config.rootDir}`);
-      this.log('yellow', '💡 Press Ctrl+C to stop watching');
+      this.log('green', `✅ Watching for changes in TypeScript files`);
+      this.log('yellow', `💡 Press Ctrl+C to stop watching`);
+      
+      // Log the paths being watched
+      const watchedPaths = this.watcher?.getWatched();
+      this.log('cyan', 'Watched directories:');
+      if (watchedPaths) {
+        if (Object.keys(watchedPaths).length === 0) {
+          this.log('red', '  No directories are being watched! Check your watch pattern.');
+        } else {
+          Object.keys(watchedPaths).sort().forEach(dir => {
+            this.log('cyan', `  - ${dir}: ${watchedPaths[dir].length} files`);
+            // Log the first 5 files in each directory
+            if (watchedPaths[dir].length > 0) {
+              watchedPaths[dir].slice(0, 5).forEach(file => {
+                this.log('cyan', `      - ${file}`);
+              });
+              if (watchedPaths[dir].length > 5) {
+                this.log('cyan', `      - ... and ${watchedPaths[dir].length - 5} more files`);
+              }
+            }
+          });
+        }
+      }
     });
     
     // Generate schema when files change

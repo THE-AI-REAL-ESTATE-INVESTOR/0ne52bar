@@ -90,6 +90,56 @@ This document tracks the current working features and components of our applicat
 - ✅ Specialized TypeScript configurations
 - ✅ File watching with chokidar for schema updates (ENHANCED!)
 
+## Tech Stack Summary
+
+### Frontend
+- ✅ Next.js 15
+- ✅ React 19
+- ✅ Tailwind CSS
+- ✅ TypeScript
+- ✅ Shadcn/UI components
+
+### Backend/Data
+- ✅ Next.js API Routes and Server Components
+- ✅ Prisma ORM
+- ✅ TS2Prisma (custom tool)
+- ✅ PostgreSQL (migrated from SQLite)
+- ✅ NextAuth.js
+
+### Tooling
+- ✅ pnpm
+- ✅ ESLint
+- ✅ Prettier
+- ✅ GitHub Actions
+- ✅ Chokidar watch utilities
+
+## Challenges & Solutions
+
+### TypeScript-Prisma Workflow
+- **Challenge**: Keeping TypeScript and Prisma schema in sync
+- **Solution**: Created ts2prisma tool for automatic conversion and packaged it for reuse
+
+### Watch Mode Issues
+- **Challenge**: Chokidar watching sometimes reports "No directories watched"
+- **Solution**: 
+  1. Using explicit absolute directory paths
+  2. Implemented polling strategy for reliable file detection
+  3. Added logging and error handling for improved debugging
+
+### PostgreSQL Compatibility
+- **Challenge**: SQLite limitations with arrays and JSON fields
+- **Solution**:
+  1. Migrated to PostgreSQL for better type support
+  2. Updated schema generator to handle PostgreSQL-specific features
+  3. Modified connection string in .env.local for Prisma Data Accelerator
+
+### Database Migration
+- **Challenge**: Switching database providers required resetting migration history
+- **Solution**:
+  1. Created fresh migration with PostgreSQL provider
+  2. Updated environment variables to use the correct connection string
+  3. Successfully applied migrations to new database
+
 ## Application Architecture 📊
 
 ### Data Structure and Database Schema
