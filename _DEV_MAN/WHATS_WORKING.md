@@ -39,14 +39,15 @@ This document tracks the current working features and components of our applicat
 ## Feature Modules
 
 ### TapPass Membership System
-- ✅ Member registration with validation
-- ✅ Member lookup by email/phone
-- ✅ Digital membership cards
-- ✅ Visit tracking
-- ✅ Reward system
-- ✅ Member tiers (Bronze, Silver, Gold, Platinum)
-- ✅ Database models fully integrated with Prisma (NEW!)
-- 🚧 Server actions migration to Prisma (IN PROGRESS)
+- ✅ Member registration with validation - `src/app/tappass/actions.ts` (lines 40-99)
+- ✅ Member lookup by email/phone - `src/app/tappass/actions.ts` (lines 13-35)
+- ✅ Digital membership cards - Email functionality implemented
+- ✅ Visit tracking - `src/app/tappass/actions.ts` (lines 178-222)
+- ✅ Reward system - Models in place, UI implementation pending
+- ✅ Member tiers (Bronze, Silver, Gold, Platinum) - Defined in schema and supported in actions
+- ✅ Database models fully integrated with Prisma - `prisma/schema.prisma`
+- ✅ Server actions migration to Prisma - COMPLETED - `src/app/tappass/actions.ts`
+- ✅ Verification tests - `_tests/tappass/tappass-prisma-verification.test.ts`
 
 ### Event Management
 - ✅ Event creation and listing
@@ -60,6 +61,16 @@ This document tracks the current working features and components of our applicat
 - ✅ Admin controls for menu updates
 - ✅ Public menu display
 - ✅ Fully integrated with Prisma models (NEW!)
+
+### Merchandise Management
+- ✅ Merchandise categories - `src/actions/merchandiseActions.ts` (Category Management)
+- ✅ Merchandise items - `src/actions/merchandiseActions.ts` (Item Management)
+- ✅ Admin interface for merchandise management - `src/app/admin/merchandise/page.tsx`
+- ✅ Form validation with Zod - `src/actions/merchandiseActions.ts` (lines 8-17)
+- ✅ "Coming Soon" status functionality - `src/components/Merch.tsx`
+- ✅ Customer-facing display - `src/app/merch/page.tsx`
+- ✅ Image handling - Support in both schema and UI
+- ✅ Data seeding - `scripts/seed-merchandise.js`
 
 ## Development Tools
 
@@ -412,6 +423,12 @@ Our immediate next steps are:
 3. Fix any issues with the Zod validation integration
 4. Enhance error handling in the server actions
 5. Add comprehensive testing for the TapPass functionality
+
+## Completed Features Documented
+- ✅ TapPass Prisma Migration - `_DEV_MAN/ISSUES/completed/tappass-prisma-migration-complete.md`
+- ✅ Merchandise Implementation - `_DEV_MAN/ISSUES/completed/merchandise-implementation-complete.md`
+- ✅ TypeScript to Prisma Generator - `_DEV_MAN/ISSUES/completed/typescript-to-prisma-generator-completion.md`
+- ✅ TapPass Prisma Implementation - `_DEV_MAN/ISSUES/completed/tappass-prisma-implementation-completion.md`
 
 ---
 

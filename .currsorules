@@ -240,4 +240,61 @@ dev_workflow = {
     - Use watch mode for tools to get immediate feedback
     - Follow the development standards in the .currsorules file
   """
+}
+
+# ONE-52 Bar App Development Guidelines
+
+## Project Status - PRODUCTION PREPARATION
+
+We are moving this application from development to production. All features should now be fully database-driven with proper Prisma integration.
+
+## Current Focus:
+1. Ensuring all components use server actions with Prisma
+2. Complete full CRUD functionality in admin interfaces
+3. Eliminate JSON files and hardcoded data in favor of Prisma database operations
+4. Ensure frontend displays and admin forms are in sync with the database schema
+
+## Critical Guidelines:
+
+- NO hardcoded data or JSON files should be used for application data
+- ALL database operations must be performed via Prisma
+- ALL database operations must be wrapped in server actions (with "use server" directive)
+- ALL forms must be properly connected to server actions
+- ALL admin interfaces must provide complete CRUD functionality
+- Test files should be organized in the `tests` directory
+- Prioritize data consistency between admin views and user-facing displays
+
+## Specific Focus Areas:
+
+1. Menu system - Ensure full CRUD operations in admin and proper display in frontend
+2. Events system - Ensure event management interfaces are fully operational with Prisma
+3. TapPass system - Complete migration to Prisma (in progress)
+4. Business settings - Implement proper database storage for configuration
+5. User authentication - Ensure proper role-based access control
+
+## Architecture Principles:
+
+1. Server actions should be isolated and well-typed
+2. Frontend components should use React Server Components where possible
+3. Forms should include proper validation
+4. Error handling should be consistent and user-friendly
+5. All database schema changes should be managed through Prisma migrations
+
+Remember, we are preparing for production - focus on reliability, data consistency, and proper separation of concerns.
+
+folder_rules = {
+  "glob": "**/*",
+  "rule": """
+    # Folder-Specific Rules
+    
+    Always check for .cursorrules files in each directory you're working in.
+    Many directories have specific guidelines that should be followed.
+    
+    Directories with specific rules include:
+    - `/my_app/scripts/` - Script organization and usage guidelines
+    - `/my_app/_DEV_MAN/` - Development documentation guidelines
+    
+    Before making changes to files in these directories, read the corresponding .cursorrules file
+    to ensure you follow the established patterns and guidelines.
+  """
 } 
