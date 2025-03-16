@@ -57,20 +57,30 @@ This document tracks the current working features and components of our applicat
 - ✅ Fully integrated with Prisma models (NEW!)
 
 ### Menu Management
-- ✅ Menu categories and items
-- ✅ Admin controls for menu updates
-- ✅ Public menu display
-- ✅ Fully integrated with Prisma models (NEW!)
+- ✅ Menu categories and items - `src/app/actions/menu-actions.ts`
+- ✅ Server actions for menu data fetching - `src/app/actions/menu-actions.ts` (lines 1-25)
+- ✅ Client components for menu display - `src/components/menu/MenuDisplay.tsx`
+- ✅ Loading states with Suspense - `src/app/menu/page.tsx`
+- ✅ Loading skeleton component - `src/components/menu/MenuSkeleton.tsx`
+- ✅ Error handling and type safety - Using ApiResponse type
+- ✅ Responsive grid layout for categories
+- ✅ Proper separation of server/client components
+- ✅ Dynamic data fetching with force-dynamic
+- ✅ Fully integrated with Prisma models
 
 ### Merchandise Management
-- ✅ Merchandise categories - `src/actions/merchandiseActions.ts` (Category Management)
-- ✅ Merchandise items - `src/actions/merchandiseActions.ts` (Item Management)
-- ✅ Admin interface for merchandise management - `src/app/admin/merchandise/page.tsx`
-- ✅ Form validation with Zod - `src/actions/merchandiseActions.ts` (lines 8-17)
-- ✅ "Coming Soon" status functionality - `src/components/Merch.tsx`
-- ✅ Customer-facing display - `src/app/merch/page.tsx`
-- ✅ Image handling - Support in both schema and UI
-- ✅ Data seeding - `scripts/seed-merchandise.js`
+- ✅ Server actions for merchandise data - `src/app/actions/merchandise-actions.ts`
+- ✅ Client components for display - `src/components/merch/MerchList.tsx`
+- ✅ Loading states with Suspense - `src/app/merch/page.tsx`
+- ✅ Loading skeleton component - `src/components/merch/MerchSkeleton.tsx`
+- ✅ Error handling and type safety - Using ApiResponse type
+- ✅ Category-based icons and sorting
+- ✅ Coming Soon overlay and banners
+- ✅ Responsive grid layout
+- ✅ Image handling with fallbacks
+- ✅ Proper separation of server/client components
+- ✅ Type-safe category integration
+- ✅ Fully integrated with Prisma models
 
 ## Development Tools
 

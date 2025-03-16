@@ -10,11 +10,14 @@ const nextConfig = {
   },
   // Use standalone output for compatibility
   output: 'standalone',
-  // Force all pages to be rendered as dynamic pages
+  // Configure experimental features
   experimental: {
-    // This will disable static rendering - a workaround for the entryJSFiles error
-    disableStaticRendering: true,
-    optimizeCss: false
+    // Remove disableStaticRendering and use proper dynamic configuration
+    optimizeCss: false,
+    // Enable proper server actions handling
+    serverActions: {
+      bodySizeLimit: '2mb'
+    }
   },
   // Configure image domains
   images: {
