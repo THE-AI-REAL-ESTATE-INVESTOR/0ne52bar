@@ -6,7 +6,7 @@ declare module 'dom-to-image-more';
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
-import { registerTapPassMember, emailMembershipCard, getMemberByEmail } from '../actions';
+import { registerTapPassMember, emailMembershipCard, getMemberByEmail } from './actions';
 import domtoimage from 'dom-to-image-more';
 
 // Override the problematic method to prevent CORS errors
@@ -135,6 +135,9 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: n
 }
 
 export default function TapPass() {
+  console.log('TapPass component initialized');
+  console.log('Imported functions:', { registerTapPassMember, emailMembershipCard, getMemberByEmail });
+  
   // Form state
   const [formStep, setFormStep] = useState(0); // Start at step 0 now - login check
   const [formData, setFormData] = useState<FormData>({
@@ -199,10 +202,13 @@ export default function TapPass() {
     setIsCheckingAccount(true);
     
     try {
+      console.log("Checking for member with email:", loginData.email);
       const response = await getMemberByEmail(loginData.email);
+      console.log("Server response:", response);
       
       if (response && response.success && response.member) {
         // User exists, populate form data and show card
+        console.log("Member found:", response.member);
         const existingMember = response.member;
         
         setFormData({
@@ -222,6 +228,7 @@ export default function TapPass() {
         }, 100);
       } else {
         // User doesn't exist, proceed to registration
+        console.log("Member not found, redirecting to registration");
         setFormData({
           ...formData,
           email: loginData.email

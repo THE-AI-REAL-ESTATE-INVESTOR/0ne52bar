@@ -4,7 +4,7 @@ import ClientApp from './client';
 
 // Define the type for our params
 type SlugParams = {
-  slug?: string[];
+  slug: string[];
 };
 
 // Force dynamic rendering - this means this page won't be prerendered

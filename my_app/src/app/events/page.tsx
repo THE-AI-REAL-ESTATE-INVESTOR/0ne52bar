@@ -1,62 +1,152 @@
-import Link from 'next/link';
-import { getAllEvents, getAllPastEvents } from '@/services/alternativeEvents';
-import Image from 'next/image';
+"use client";
 
-export default async function EventsPage() {
+import Link from 'next/link';
+import Image from 'next/image';
+import { getAllEvents } from '@/services/alternativeEvents';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+export default function EventsPage() {
   // Get events from our service
   const allEvents = getAllEvents();
-  const pastEvents = getAllPastEvents();
+  const searchParams = useSearchParams();
   
-  // Sort upcoming events by date (closest date first)
+  // State to store our application date
+  const [appDate, setAppDate] = useState<Date | null>(null);
+  
+  useEffect(() => {
+    // Check if there's a date parameter for demo/testing purposes
+    const dateParam = searchParams.get('demoDate');
+    
+    if (dateParam) {
+      // If date parameter exists, use it
+      const parsedDate = new Date(dateParam);
+      
+      // Check if the parsed date is valid
+      if (!isNaN(parsedDate.getTime())) {
+        console.log('Using demo date:', parsedDate.toDateString());
+        setAppDate(parsedDate);
+      } else {
+        console.log('Invalid demo date, using current date');
+        setAppDate(new Date());
+      }
+    } else {
+      // Use the current date
+      setAppDate(new Date());
+    }
+  }, [searchParams]);
+  
+  // Don't render until we have our date
+  if (!appDate) {
+    return <div className="container mx-auto px-4 py-8">Loading events...</div>;
+  }
+  
+  // Reset time component to compare dates only
+  const today = new Date(appDate);
+  today.setHours(0, 0, 0, 0);
+  
+  // Split events into upcoming (including today) and past
   const upcomingEvents = [...allEvents]
+    .filter(event => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= today;
+    })
     .sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       return dateA.getTime() - dateB.getTime();
     });
+    
+  const pastEvents = [...allEvents]
+    .filter(event => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate < today;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime(); // Most recent past events first
+    });
 
-  console.log('Events page events:', upcomingEvents.map(e => `${e.title} (${e.date})`));
-  
+  console.log('Events page events:', allEvents.map(e => `${e.title} (${e.date})`));
+  console.log('Current date in app:', today.toDateString());
+  console.log('Upcoming events:', upcomingEvents.map(e => `${e.title} (${e.date})`));
+  console.log('Past events:', pastEvents.map(e => `${e.title} (${e.date})`));
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Date Override Demo Controls (only visible in development) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-800 p-4 mb-8 rounded-lg">
+          <h3 className="text-xl text-amber-400 mb-2">Demo Date Controls</h3>
+          <p className="text-gray-300 mb-2">Current app date: {today.toDateString()}</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/events" className="px-3 py-1 bg-blue-600 rounded text-white text-sm">Current Date</Link>
+            <Link href="/events?demoDate=2025-03-14" className="px-3 py-1 bg-amber-500 rounded text-white text-sm">Mar 14, 2025</Link>
+            <Link href="/events?demoDate=2024-10-30" className="px-3 py-1 bg-purple-600 rounded text-white text-sm">Oct 30, 2024</Link>
+            <Link href="/events?demoDate=2025-04-01" className="px-3 py-1 bg-green-600 rounded text-white text-sm">Apr 1, 2025</Link>
+          </div>
+        </div>
+      )}
+      
       {/* Upcoming Events Section */}
       <section className="mb-16">
         <h1 className="text-3xl font-bold mb-8 text-center">Upcoming Events</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {upcomingEvents.map((event) => (
-            <Link 
-              href={`/events/${event.id}`} 
-              key={event.id}
-              className="block bg-gray-900 rounded-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              {event.image && (
-                <div className="h-48 bg-gray-800 relative">
-                  {/* Use actual images instead of placeholders */}
-                  <div className="h-full w-full flex items-center justify-center">
-                    <Image 
-                      src={event.image}
-                      alt={event.title}
-                      fill
-                      style={{objectFit: 'cover'}}
-                    />
+            <div key={event.id} className="flex flex-col bg-gray-900 rounded-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <Link 
+                href={`/events/${event.id}`}
+                className="flex-1 block"
+              >
+                {event.image && (
+                  <div className="h-48 bg-gray-800 relative">
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Image 
+                        src={event.image}
+                        alt={event.title}
+                        fill
+                        style={{objectFit: 'cover'}}
+                      />
+                    </div>
                   </div>
+                )}
+                <div className="p-4">
+                  <h2 className="text-xl font-bold mb-2">{event.title}</h2>
+                  <div className="text-gray-400 text-sm mb-2">
+                    <span>{(() => {
+                      // Create date with time set to noon to avoid timezone issues
+                      const [year, month, day] = event.date.split('-').map(Number);
+                      const eventDate = new Date(year, month - 1, day, 12, 0, 0);
+                      return eventDate.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      });
+                    })()}</span> • <span>{event.time}</span>
+                  </div>
+                  <p className="text-gray-300 line-clamp-2">{event.description}</p>
+                  <div className="mt-4 text-amber-500 font-medium">View Details →</div>
+                </div>
+              </Link>
+              
+              {event.facebookEventUrl && (
+                <div className="px-4 pb-4 mt-auto">
+                  <a 
+                    href={event.facebookEventUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 font-medium inline-block"
+                  >
+                    Facebook Event →
+                  </a>
                 </div>
               )}
-              <div className="p-4">
-                <h2 className="text-xl font-bold mb-2">{event.title}</h2>
-                <div className="text-gray-400 text-sm mb-2">
-                  <span>{new Date(event.date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</span> • <span>{event.time}</span>
-                </div>
-                <p className="text-gray-300 line-clamp-2">{event.description}</p>
-                <div className="mt-4 text-blue-400 font-medium">View Details →</div>
-              </div>
-            </Link>
+            </div>
           ))}
         </div>
         
@@ -69,45 +159,67 @@ export default async function EventsPage() {
       </section>
       
       {/* Past Events Section */}
-      <section>
-        <h2 className="text-3xl font-bold mb-8 text-center border-t border-gray-700 pt-12">Past Events</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pastEvents.map((event) => (
-            <Link 
-              href={`/events/${event.id}`} 
-              key={event.id}
-              className="block bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transition-shadow opacity-90 hover:opacity-100"
-            >
-              {event.image && (
-                <div className="h-48 bg-gray-800 relative grayscale hover:grayscale-0 transition-all">
-                  <div className="h-full w-full flex items-center justify-center">
-                    <Image 
-                      src={event.image}
-                      alt={event.title}
-                      fill
-                      style={{objectFit: 'cover'}}
-                    />
+      {pastEvents.length > 0 && (
+        <section className="mt-16 pt-8 border-t border-gray-700">
+          <h2 className="text-2xl font-bold mb-8 text-center text-gray-400">Past Events</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pastEvents.map((event) => (
+              <div key={event.id} className="flex flex-col bg-gray-800/50 rounded-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <Link 
+                  href={`/events/${event.id}`}
+                  className="flex-1 block"
+                >
+                  {event.image && (
+                    <div className="h-48 bg-gray-800 relative">
+                      <div className="h-full w-full flex items-center justify-center">
+                        <Image 
+                          src={event.image}
+                          alt={event.title}
+                          fill
+                          style={{objectFit: 'cover'}}
+                          className="grayscale hover:grayscale-0 transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h2 className="text-xl font-bold mb-2 text-gray-300">{event.title}</h2>
+                    <div className="text-gray-500 text-sm mb-2">
+                      <span>{(() => {
+                        // Create date with time set to noon to avoid timezone issues
+                        const [year, month, day] = event.date.split('-').map(Number);
+                        const eventDate = new Date(year, month - 1, day, 12, 0, 0);
+                        return eventDate.toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        });
+                      })()}</span> • <span>{event.time}</span>
+                    </div>
+                    <p className="text-gray-400 line-clamp-2">{event.description}</p>
+                    <div className="mt-4 text-gray-400 font-medium">View Details →</div>
                   </div>
-                </div>
-              )}
-              <div className="p-4">
-                <h2 className="text-xl font-bold mb-2">{event.title}</h2>
-                <div className="text-gray-400 text-sm mb-2">
-                  <span>{new Date(event.date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</span> • <span>{event.time}</span>
-                </div>
-                <p className="text-gray-300 line-clamp-2">{event.description}</p>
-                <div className="mt-4 text-blue-400 font-medium">View Details →</div>
+                </Link>
+                
+                {event.facebookEventUrl && (
+                  <div className="px-4 pb-4 mt-auto">
+                    <a 
+                      href={event.facebookEventUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-500 font-medium inline-block"
+                    >
+                      Facebook Event →
+                    </a>
+                  </div>
+                )}
               </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

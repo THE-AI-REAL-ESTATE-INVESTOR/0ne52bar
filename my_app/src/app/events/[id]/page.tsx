@@ -52,12 +52,17 @@ export default function EventPage({
   }
 
   // Format the date
-  const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const formattedDate = (() => {
+    // Create date with time set to noon to avoid timezone issues
+    const [year, month, day] = event.date.split('-').map(Number);
+    const eventDate = new Date(year, month - 1, day, 12, 0, 0);
+    return eventDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  })();
 
   // Determine if event is in the past
   const isPastEvent = event.id.startsWith('past-');

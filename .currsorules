@@ -1,0 +1,306 @@
+nextjs15 = {
+  "glob": "**/*.{js,jsx,ts,tsx}",
+  "rule": """
+    # Next.js 15 and React 19 Best Practices
+
+    ### LINUX BASED DEV USING .zsh 
+    
+     - USE TOOLS LIKE TREE EXLUDE NODE_MODULES - FOR QUICKLY INDEXING FILES. 
+     - Tree -h 
+     - tree -L4 EXLUDE NODE_MODULES
+
+    ## Component Architecture
+
+    - Use Server Components by default where data fetching or backend logic is required
+    - Add 'use client' directive only when client-side interactivity is needed
+    - Keep components small and focused on a single responsibility
+    - Use TypeScript interfaces for all component props
+    - Use JSDoc comments to document component purpose and props
+
+    ## Data Fetching
+
+    - Use Server Components for data fetching whenever possible
+    - Use Server Actions for mutations and forms
+    - Implement optimistic updates for better UX
+    - Use suspense boundaries for loading states
+    - Prefer Prisma for database operations over direct SQL
+
+    ## Routing
+
+    - Follow App Router patterns with layout, page, and loading components
+    - Use dynamic route segments appropriately
+    - Keep route handlers in separate files (route.ts)
+    - Use middleware only when necessary
+
+    ## State Management
+
+    - Use React's built-in hooks (useState, useReducer) for simple state
+    - Consider context providers for shared state
+    - Avoid prop drilling with composition patterns
+    - Server Components shouldn't use client-side state hooks
+
+    ## Form Handling
+
+    - Use Zod for form validation on both client and server
+    - Implement proper error handling and user feedback
+    - Use React Hook Form only when complex form handling is needed
+    - Prefer Server Actions for form submission
+
+    ## Styling
+
+    - Use Tailwind CSS for styling
+    - Follow mobile-first responsive design principles
+    - Use shadcn/ui components for UI elements
+    - Keep classnames organized and readable
+    - Use Tailwind CSS variables for themes
+
+    ## Performance
+
+    - Implement proper code splitting
+    - Use Image component for optimized images
+    - Minimize client-side JavaScript
+    - Implement appropriate caching strategies
+    - Use streaming for large data sets
+
+    ## TapPass Implementation
+
+    - Use Prisma for database operations
+    - Validate all inputs with Zod
+    - Implement clear error handling
+    - Use Server Actions for mutations
+    - Keep database logic in lib/db directory
+    - Server Components for data display
+    - Client Components for interactive elements
+    - Document code with appropriate comments
+    - Create mermaid diagrams for architecture changes
+  """
+}
+
+git = {
+  "glob": "**/*",
+  "rule": """
+    # Git Best Practices
+
+    - Create feature branches for all changes
+    - Use conventional commits format (feat, fix, chore, docs, etc.)
+    - Keep PRs small and focused on a single feature or bug fix
+    - Squash commits before merging when appropriate
+    - Never commit sensitive information (.env files, tokens, etc.)
+    - Never commit node_modules or other large generated directories
+    - Use the git:clean script before committing to ensure clean workspace
+    - Update documentation when making significant changes
+    - Run linting and tests before committing
+  """
+}
+
+database = {
+  "glob": "**/prisma/**/*.{ts,prisma}",
+  "rule": """
+    # Database Best Practices
+    
+    - Use Prisma for all database operations
+    - Keep schema.prisma well-documented
+    - Create appropriate indexes for query performance
+    - Implement proper relations between models
+    - Use enums for fixed sets of values
+    - Create database service files in src/lib/db
+    - Validate all input with Zod before database operations
+    - Implement proper error handling for database operations
+    - Use migrations for schema changes in production
+    - Keep migration files clean and focused
+    - Add seed data for development
+    - Document complex queries with comments
+    - Use the TypeScript-to-Prisma Schema Generator to maintain schema consistency with types
+    - Run `npm run generate-schema` after significant type changes
+    - Commit the generated schema.prisma file to version control
+  """
+}
+
+schema_generator = {
+  "glob": "**/scripts/generate-prisma-schema.ts",
+  "rule": """
+    # TypeScript-to-Prisma Schema Generator Best Practices
+    
+    ## Purpose and Usage
+    
+    - Use this tool to automatically generate Prisma schema from TypeScript types
+    - TypeScript types should be the single source of truth for data models
+    - Run the generator before creating database migrations
+    - Use watch mode (`npm run generate-schema:watch`) during active development
+    
+    ## Type Definitions Guidelines
+    
+    - Add JSDoc comments to interfaces/types for auto-generated documentation
+    - Use PascalCase for model names (e.g., `User`, `Post`)
+    - Model names should not end with `Props`, `State`, `Config` or start with `I`
+    - Include explicit ID fields in your types (or they will be auto-generated)
+    - Relationship fields should reference other model types (e.g., `posts: Post[]`)
+    - Use nullable/optional types (`string | null` or `string?`) for optional fields
+    
+    ## Schema Generator Commands
+    
+    - `npm run generate-schema`: One-time schema generation
+    - `npm run generate-schema:db --db=<provider>`: Specify a database provider
+    - `npm run generate-schema:watch`: Continuously watch for type changes
+    - Command line options:
+      - `--dir=<path>`: Set root directory to scan
+      - `--output=<path>`: Set output file path
+      - `--db=<provider>`: Set database provider
+      - `--watch`: Watch for file changes
+    
+    ## Workflow Integration
+    
+    - Include schema generation in CI/CD pipelines
+    - Run generator after pulling changes that modify type definitions
+    - Use watch mode for immediate feedback during development
+    - Update Zod validation schemas when type definitions change
+    - Create database migrations after schema changes
+    - Verify generated schema matches domain model expectations
+  """
+}
+
+typescript = {
+  "glob": "**/*.{ts,tsx}",
+  "rule": """
+    # TypeScript Best Practices
+    
+    ## General Guidelines
+    
+    - Use TypeScript for all new files
+    - Enable strict mode for better type checking
+    - Avoid `any` type when possible
+    - Use specific types rather than `object`
+    - Use interfaces for object types that represent entities or models
+    - Use type aliases for simple type definitions or unions
+    - Add JSDoc comments to public functions, interfaces, and complex types
+    
+    ## Type Definitions
+    
+    - Model types should be defined as interfaces
+    - Keep type definitions consistent with Prisma schema
+    - Place shared types in dedicated files under src/types
+    - Export types used by multiple components
+    - Use descriptive names that reflect the domain model
+    - Type database models with proper relationships
+    - Add JSDoc comments to document fields, especially non-obvious ones
+    
+    ## Type Consistency
+    
+    - Ensure TypeScript types, Prisma models, and Zod schemas stay in sync
+    - Use the TypeScript-to-Prisma Schema Generator to maintain consistency
+    - Follow the single source of truth principle (TypeScript types → Prisma schema)
+    - Update related Zod schemas when changing TypeScript interfaces
+    - Use the same naming conventions across all type systems
+  """
+}
+
+documentation = {
+  "glob": "**/_DEV_MAN/**/*.md",
+  "rule": """
+    # Documentation Best Practices
+    
+    - Document all features with mermaid diagrams
+    - Keep implementation plans up-to-date
+    - Document database schema changes
+    - Create diagrams for complex workflows
+    - Document API endpoints and parameters
+    - Keep a development diary for major changes
+    - Document component architecture
+    - Document deployment process
+    - Create user documentation for features
+    - Document troubleshooting steps for common issues
+    - Update WHATS_WORKING.md when adding new features
+    - Include architectural diagrams for data flow and entity relationships
+    - Tag new features with (NEW!) in lists for visibility
+    - Document tool usage with examples and common commands
+  """
+}
+
+dev_workflow = {
+  "glob": "**/*.{ts,tsx,json,md}",
+  "rule": """
+    # Developer Workflow Best Practices
+    
+    ## Tools and Automation
+    
+    - Use TypeScript-to-Prisma Generator to maintain schema/type consistency
+    - Run `npm run generate-schema:watch` during active development on types
+    - Use `git:clean` script before commits to clean up workspace
+    - Run linting and type checking before submitting PRs
+    - Use `diagram` scripts to generate architecture diagrams
+    
+    ## Code Organization
+    
+    - Keep related functionality together
+    - Group by feature rather than by file type
+    - Maintain clear separation between server and client code
+    - Use dedicated service files for database operations
+    - Store reusable components in appropriate component directories
+    
+    ## Development Process
+    
+    - Start new features with a feature branch
+    - Update documentation before submitting PRs
+    - Run automated tests for affected components
+    - Add comprehensive JSDoc comments to public interfaces
+    - Use watch mode for tools to get immediate feedback
+    - Follow the development standards in the .currsorules file
+  """
+}
+
+# ONE-52 Bar App Development Guidelines
+
+## Project Status - PRODUCTION PREPARATION
+
+We are moving this application from development to production. All features should now be fully database-driven with proper Prisma integration.
+
+## Current Focus:
+1. Ensuring all components use server actions with Prisma
+2. Complete full CRUD functionality in admin interfaces
+3. Eliminate JSON files and hardcoded data in favor of Prisma database operations
+4. Ensure frontend displays and admin forms are in sync with the database schema
+
+## Critical Guidelines:
+
+- NO hardcoded data or JSON files should be used for application data
+- ALL database operations must be performed via Prisma
+- ALL database operations must be wrapped in server actions (with "use server" directive)
+- ALL forms must be properly connected to server actions
+- ALL admin interfaces must provide complete CRUD functionality
+- Test files should be organized in the `tests` directory
+- Prioritize data consistency between admin views and user-facing displays
+
+## Specific Focus Areas:
+
+1. Menu system - Ensure full CRUD operations in admin and proper display in frontend
+2. Events system - Ensure event management interfaces are fully operational with Prisma
+3. TapPass system - Complete migration to Prisma (in progress)
+4. Business settings - Implement proper database storage for configuration
+5. User authentication - Ensure proper role-based access control
+
+## Architecture Principles:
+
+1. Server actions should be isolated and well-typed
+2. Frontend components should use React Server Components where possible
+3. Forms should include proper validation
+4. Error handling should be consistent and user-friendly
+5. All database schema changes should be managed through Prisma migrations
+
+Remember, we are preparing for production - focus on reliability, data consistency, and proper separation of concerns.
+
+folder_rules = {
+  "glob": "**/*",
+  "rule": """
+    # Folder-Specific Rules
+    
+    Always check for .cursorrules files in each directory you're working in.
+    Many directories have specific guidelines that should be followed.
+    
+    Directories with specific rules include:
+    - `/my_app/scripts/` - Script organization and usage guidelines
+    - `/my_app/_DEV_MAN/` - Development documentation guidelines
+    
+    Before making changes to files in these directories, read the corresponding .cursorrules file
+    to ensure you follow the established patterns and guidelines.
+  """
+} 

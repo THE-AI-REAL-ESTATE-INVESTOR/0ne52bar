@@ -1,0 +1,141 @@
+scripts = {
+  "glob": "**/*.{js,ts,sh,mjs}",
+  "rule": """
+    # Scripts Directory Guidelines
+
+    ## Directory Structure
+    
+    - Respect the directory structure for organizing scripts
+    - Place scripts in the appropriate category folder:
+      - `database/` - Database management and data migration
+      - `dev-only/` - Development-only scripts (NOT for production)
+      - `documentation/` - Documentation and guide generation
+      - `production/` - Scripts needed in production
+      - `schema-management/` - Prisma schema management
+      - `testing/` - Test setup and execution
+    
+    ## Script Development
+    
+    - Add appropriate shebang lines for executable scripts
+    - Make shell scripts executable with `chmod +x`
+    - Include comprehensive help/usage information
+    - Use consistent error handling patterns
+    - Add logging for better visibility into execution
+    - Validate input parameters
+    - Handle edge cases gracefully
+    
+    ## Documentation
+    
+    - Document the purpose of each script at the top
+    - Add JSDoc comments to functions
+    - Update the README.md when adding new scripts
+    - Indicate whether scripts are needed in production
+    
+    ## Production Considerations
+    
+    - Never include development-only scripts in production builds
+    - Only production scripts should be part of deployment
+    - Consider creating production-specific versions of seeding scripts
+    - Remove sensitive information from production scripts
+    
+    ## Best Practices
+    
+    - Use TypeScript for complex scripts
+    - Prefer CommonJS for Node.js scripts unless ESM is required
+    - Make scripts idempotent when possible
+    - Add proper error handling with exit codes
+    - Consider adding a dry-run mode for destructive operations
+    - Add confirmation prompts for dangerous operations
+  """
+}
+
+schema_management = {
+  "glob": "schema-management/**/*.{js,ts,mjs}",
+  "rule": """
+    # Schema Management Scripts Guidelines
+    
+    - Run schema generation after TypeScript type changes
+    - Verify schema validity before pushing to database
+    - Keep schema management workflows aligned with the TypeScript-to-Prisma Schema Generator
+    - Validate schema changes with the appropriate scripts
+    - Check for test models before production deployment
+    - Use `validate-prisma-schema.js` to identify unused models
+    - Run verification after schema generation
+  """
+}
+
+database = {
+  "glob": "database/**/*.{js,ts,mjs}",
+  "rule": """
+    # Database Scripts Guidelines
+    
+    - Handle database connection errors gracefully
+    - Close database connections properly
+    - Use transactions for multi-step operations
+    - Add retry logic for intermittent failures
+    - Validate data before database operations
+    - Include proper error handling for database errors
+    - Add logging for debugging database operations
+    - Use mock data for testing
+    - Create separate seeding scripts for development and production
+  """
+}
+
+testing = {
+  "glob": "testing/**/*.{js,ts,sh,mjs}",
+  "rule": """
+    # Testing Scripts Guidelines
+    
+    - Follow Jest best practices
+    - Isolate tests from production data
+    - Use mock data for testing
+    - Clean up test data after tests
+    - Make tests repeatable and deterministic
+    - Handle asynchronous operations properly
+    - Use the testing tools and utilities provided
+  """
+}
+
+documentation = {
+  "glob": "documentation/**/*.{js,ts,mjs,md}",
+  "rule": """
+    # Documentation Scripts Guidelines
+    
+    - Keep documentation up-to-date with code changes
+    - Use Mermaid diagrams for visualizing architecture
+    - Document complex workflows and data flows
+    - Include examples for common operations
+    - Update documentation when making significant changes
+    - Follow the established documentation structure
+  """
+}
+
+production = {
+  "glob": "production/**/*.{js,ts,mjs}",
+  "rule": """
+    # Production Scripts Guidelines
+    
+    - These scripts may be included in production builds
+    - Remove debugging code and console logs
+    - Handle errors gracefully
+    - Add comprehensive logging
+    - Make sure they work in production environment
+    - Test thoroughly before deployment
+    - Document usage in production context
+    - Respect production environment variables
+  """
+}
+
+dev_only = {
+  "glob": "dev-only/**/*.{js,ts,sh,mjs}",
+  "rule": """
+    # Development-Only Scripts Guidelines
+    
+    - These scripts should NEVER be included in production
+    - Use for development and testing only
+    - May contain development-specific functionality
+    - Documentation should clearly indicate they're for development
+    - Use for automating development tasks
+    - Test before committing changes
+  """
+} 
