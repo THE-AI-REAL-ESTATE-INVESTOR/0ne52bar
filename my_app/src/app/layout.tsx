@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Providers } from "./providers";
+import Nav from "@/components/Nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
         <Providers>
-          <header className="flex flex-col items-center justify-center">
+          <header className="flex flex-col items-center justify-center px-4 pt-6 pb-2">
             {/* License Plate Design */}
             <div className="relative mb-6 mx-auto">
               <div className="bg-white rounded-lg border-4 border-black p-4 px-8 max-w-md mx-auto shadow-lg" style={{ filter: 'grayscale(10%)', background: 'linear-gradient(to bottom, #f5f5f5, #e0e0e0)' }}>
@@ -44,24 +45,8 @@ export default function RootLayout({
               </div>
             </div>
             
-            {/* Navigation */}
-            <nav className="flex gap-8 mb-4">
-              <Link href="/tappass" className="text-white hover:text-blue-300 transition-colors">
-                TAP PASS 🍺
-              </Link>
-              <Link href="/menu" className="text-white hover:text-blue-300 transition-colors">
-                Menu
-              </Link>
-              <Link href="/about" className="text-white hover:text-blue-300 transition-colors">
-                About
-              </Link>
-              <Link href="/one52stories" className="text-white hover:text-blue-300 transition-colors">
-                One52stories 📖 
-              </Link>
-              <Link href="/events" className="text-white hover:text-blue-300 transition-colors">
-                events 📖 
-              </Link>
-            </nav>
+            {/* Navigation Component */}
+            <Nav />
           </header>
           <main className="p-4 max-w-6xl mx-auto">
             {children}

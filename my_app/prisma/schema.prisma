@@ -730,3 +730,47 @@ model Reward {
   /// When the reward was updated
   updatedAt   DateTime  @updatedAt
 }
+
+/// Represents a merchandise category (Apparel, Drinkware, etc.)
+model MerchandiseCategory {
+  /// Unique identifier for the category
+  id          String        @id @default(cuid())
+  /// Category name
+  name        String
+  /// Category description
+  description String?
+  /// When the category was created
+  createdAt   DateTime      @default(now())
+  /// When the category was updated
+  updatedAt   DateTime      @updatedAt
+  /// Related merchandise items
+  items       Merchandise[]
+}
+
+/// Represents a merchandise item available for purchase
+model Merchandise {
+  /// Unique identifier for the merchandise item
+  id          String              @id @default(cuid())
+  /// Merchandise name
+  name        String
+  /// Merchandise description
+  description String
+  /// Price in USD (stored as string for display purposes)
+  price       String
+  /// Path to the merchandise image 
+  imagePath   String?
+  /// Whether the item is in stock
+  inStock     Boolean             @default(false)
+  /// Whether the item is coming soon (not yet available)
+  comingSoon  Boolean             @default(true)
+  /// Display order for sorting (lower numbers appear first)
+  sortOrder   Int                 @default(100)
+  /// Related category ID
+  categoryId  String
+  /// When the merchandise was created
+  createdAt   DateTime            @default(now())
+  /// When the merchandise was updated
+  updatedAt   DateTime            @updatedAt
+  /// Related category
+  category    MerchandiseCategory @relation(fields: [categoryId], references: [id])
+}
