@@ -3,23 +3,26 @@ import { getMenuItems } from '@/app/actions/menu-actions';
 import MenuDisplay from '@/components/menu/MenuDisplay';
 import { MenuSkeleton } from '@/components/menu/MenuSkeleton';
 import type { MenuItem } from '@prisma/client';
+import type { ApiResponse } from '@/app/actions/menu-actions';
 
-type ApiResponse<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: string;
-};
-
+// Force dynamic rendering to prevent stale data
 export const dynamic = 'force-dynamic';
+// Disable static page generation
+export const generateStaticParams = false;
+// Disable caching
 export const revalidate = 0;
 
 export default async function MenuPage() {
   try {
-    const menuResult = await getMenuItems() as ApiResponse<MenuItem[]>;
+    // Add timeout for the request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const menuResult: ApiResponse<MenuItem[]> = await getMenuItems();
+    clearTimeout(timeoutId);
     
     if (!menuResult.success) {
+      console.error('Menu fetch error:', menuResult.error);
       return (
         <div className="max-w-5xl mx-auto py-8">
           <h1 className="text-4xl font-bold text-center mb-10">Our Menu</h1>
@@ -36,15 +39,21 @@ export default async function MenuPage() {
       );
     }
 
+    // Explicitly type the items array
+    const items: MenuItem[] = menuResult.data;
+
     return (
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto py-8">
+        <h1 className="text-4xl font-bold text-center mb-10">Our Menu</h1>
         <Suspense fallback={<MenuSkeleton />}>
-          <MenuDisplay items={menuResult.data} />
+          <MenuDisplay items={items} />
         </Suspense>
       </div>
     );
   } catch (error) {
+    // Log the error for debugging
     console.error('Error in MenuPage:', error);
+    
     return (
       <div className="max-w-5xl mx-auto py-8">
         <h1 className="text-4xl font-bold text-center mb-10">Our Menu</h1>
