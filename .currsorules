@@ -288,6 +288,114 @@ We are moving this application from development to production. All features shou
 
 Remember, we are preparing for production - focus on reliability, data consistency, and proper separation of concerns.
 
+documentation_management = {
+  "glob": "**/_DEV_MAN/**/*.{md,MD}",
+  "rule": """
+    # Documentation Management Best Practices
+
+    ## Directory Structure and Workflow
+
+    1. Development Flow:
+       - `/plans/` - Initial implementation plans and proposals
+       - `/issues/` - Active issues with versioning and dates
+       - `/issues/completed/` - Completed issues with completion dates
+       - `/whats-working/` - Production-ready, tested features
+       - `MASTER_WHATS_WORKING.md` - Source of truth for stakeholders
+
+    2. Documentation Requirements:
+       - Every feature must have:
+         - Mermaid diagrams showing architecture
+         - Clear implementation examples
+         - Version information (following GitHub versioning)
+         - Completion date
+         - Test verification status
+
+    ## Documentation Standards
+
+    1. Whats-Working Updates:
+       - Must be updated before every git push
+       - Required files to update:
+         a. `whats-working/title-date-(version)`
+         b. `status.md`
+         c. `USER_FLOW.md`
+         d. `MASTER_WHATS_WORKING.md` (versioned like GitHub)
+       - All updates must be code-verified (no assumptions)
+       - Use tools like chokidar for file monitoring
+
+    2. Issue Management:
+       - Create GitHub issues for all changes
+       - Follow proper branching strategy
+       - Require PR reviews
+       - Move to /completed only after testing
+       - Version all issues with dates
+
+    3. Documentation Quality:
+       - Include clear implementation examples
+       - Add Mermaid diagrams for visual clarity
+       - Document all dependencies and versions
+       - Include troubleshooting guides
+       - Add configuration requirements
+
+    ## Verification Process
+
+    1. Before Production Ready:
+       - Must be properly tested
+       - Must have complete documentation
+       - Must be reviewed by team
+       - Must have proper version tracking
+       - Must be added to MASTER_WHATS_WORKING.md
+
+    2. Quality Checks:
+       - No assumptions - verify with code
+       - Include test results
+       - Document edge cases
+       - Include performance metrics
+       - List known limitations
+
+    ## Best Practices
+
+    1. Issue Creation:
+       - Create detailed GitHub issues
+       - Link related PRs
+       - Include acceptance criteria
+       - Add implementation timeline
+       - Reference related documentation
+
+    2. PR Process:
+       - Create feature branches
+       - Update documentation
+       - Include test results
+       - Update WHATS_WORKING.md
+       - Get proper reviews
+
+    3. Documentation Updates:
+       - Keep real-time snapshots
+       - Include stakeholder-friendly summaries
+       - Maintain version history
+       - Document breaking changes
+       - Include upgrade guides
+
+    ## Tooling Requirements
+
+    1. Required Tools:
+       - Use chokidar for file monitoring
+       - Use tree for directory structure
+       - Use Mermaid for diagrams
+       - Use proper markdown formatting
+       - Use version control effectively
+
+    2. Commands to Use:
+       - `tree -h` for directory structure
+       - `tree -L4 --exclude node_modules` for clean views
+       - Git commands for version control
+       - Markdown linting tools
+       - Documentation generators
+
+    Remember: We are not good devs, we are GREAT devs.
+    Documentation is not an afterthought - it's a critical deliverable.
+  """
+}
+
 folder_rules = {
   "glob": "**/*",
   "rule": """
@@ -302,5 +410,15 @@ folder_rules = {
     
     Before making changes to files in these directories, read the corresponding .cursorrules file
     to ensure you follow the established patterns and guidelines.
+
+    ## Documentation Flow
+    1. New features start in /plans
+    2. Active development tracked in /issues
+    3. Completed work moves to /issues/completed
+    4. Tested features documented in /whats-working
+    5. Production-ready features added to MASTER_WHATS_WORKING.md
+
+    Always verify documentation accuracy with code.
+    No guessing - use tools and automation for verification.
   """
 } 
