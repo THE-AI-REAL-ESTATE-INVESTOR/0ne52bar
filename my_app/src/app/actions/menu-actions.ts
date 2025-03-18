@@ -4,10 +4,27 @@ import { prisma } from '@/lib/prisma';
 import { handlePrismaError } from '@/lib/utils/error-handler';
 import type { MenuItem, Category, Prisma } from '@prisma/client';
 import type { ApiResponse } from '@/types/api';
+import { z } from 'zod';
 
 export type MenuItemWithCategory = MenuItem & {
   category: Category;
 };
+
+// Validation schemas
+const menuItemSchema = z.object({
+  name: z.string().min(1),
+  price: z.string().min(1),
+  description: z.string().optional(),
+  categoryId: z.string().min(1),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().default(100)
+});
+
+const categorySchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  sortOrder: z.number().default(100)
+});
 
 export async function getMenuItems(): Promise<ApiResponse<MenuItemWithCategory[]>> {
   try {
@@ -71,10 +88,14 @@ export async function getCategories(): Promise<ApiResponse<Category[]>> {
   }
 }
 
-export async function createMenuItem(data: Prisma.MenuItemCreateInput): Promise<ApiResponse<MenuItem>> {
+export async function createMenuItem(data: z.infer<typeof menuItemSchema>): Promise<ApiResponse<MenuItem>> {
   try {
+    const validatedData = menuItemSchema.parse(data);
     const item = await prisma.menuItem.create({
-      data
+      data: validatedData,
+      include: {
+        category: true
+      }
     });
 
     return {
@@ -91,11 +112,15 @@ export async function createMenuItem(data: Prisma.MenuItemCreateInput): Promise<
   }
 }
 
-export async function updateMenuItem(id: string, data: Prisma.MenuItemUpdateInput): Promise<ApiResponse<MenuItem>> {
+export async function updateMenuItem(id: string, data: Partial<z.infer<typeof menuItemSchema>>): Promise<ApiResponse<MenuItem>> {
   try {
+    const validatedData = menuItemSchema.partial().parse(data);
     const item = await prisma.menuItem.update({
       where: { id },
-      data
+      data: validatedData,
+      include: {
+        category: true
+      }
     });
 
     return {
@@ -133,6 +158,68 @@ export async function deleteMenuItem(id: string): Promise<ApiResponse<MenuItem>>
     return {
       success: false,
       error: message || 'Failed to delete menu item'
+    };
+  }
+}
+
+export async function createCategory(data: z.infer<typeof categorySchema>): Promise<ApiResponse<Category>> {
+  try {
+    const validatedData = categorySchema.parse(data);
+    const category = await prisma.category.create({
+      data: validatedData
+    });
+
+    return {
+      success: true,
+      data: category
+    };
+  } catch (error) {
+    console.error('Error creating category:', error);
+    const { message } = handlePrismaError(error);
+    return {
+      success: false,
+      error: message || 'Failed to create category'
+    };
+  }
+}
+
+export async function updateCategory(id: string, data: Partial<z.infer<typeof categorySchema>>): Promise<ApiResponse<Category>> {
+  try {
+    const validatedData = categorySchema.partial().parse(data);
+    const category = await prisma.category.update({
+      where: { id },
+      data: validatedData
+    });
+
+    return {
+      success: true,
+      data: category
+    };
+  } catch (error) {
+    console.error('Error updating category:', error);
+    const { message } = handlePrismaError(error);
+    return {
+      success: false,
+      error: message || 'Failed to update category'
+    };
+  }
+}
+
+export async function deleteCategory(id: string): Promise<ApiResponse<void>> {
+  try {
+    await prisma.category.delete({
+      where: { id }
+    });
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    const { message } = handlePrismaError(error);
+    return {
+      success: false,
+      error: message || 'Failed to delete category'
     };
   }
 } 

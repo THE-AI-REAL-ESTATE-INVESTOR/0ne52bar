@@ -59,27 +59,26 @@ model EventAttendee {
 
 /// Menu models
 model MenuItem {
-  id          String    @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String
-  price       String
   description String?
-  category    String?   // Keep old column temporarily for migration
-  categoryId  String?   // Make it optional during migration
-  Category    Category? @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
-  isActive    Boolean   @default(true)
-  sortOrder   Int       @default(100)
+  price       String
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(100)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Category {
-  id          String     @id @default(cuid())
+  id          String     @id @default(uuid())
   name        String     @unique
   description String?
-  items       MenuItem[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
   sortOrder   Int        @default(100)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       MenuItem[]
 }
 
 /// Merchandise models

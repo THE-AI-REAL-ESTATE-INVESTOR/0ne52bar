@@ -1,50 +1,59 @@
 'use client';
 
-import { type MenuItem } from '@prisma/client';
+import type { MenuItem, Category } from '@prisma/client';
+
+type MenuItemWithCategory = MenuItem & {
+  Category: Category & {
+    sortOrder: number;
+    description?: string;
+  };
+};
 
 interface MenuDisplayProps {
-  items: MenuItem[];
+  items: MenuItemWithCategory[];
 }
 
 export default function MenuDisplay({ items }: MenuDisplayProps) {
   // Group items by category
   const itemsByCategory = items.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
+    const category = item.Category;
+    if (!acc[category.id]) {
+      acc[category.id] = {
+        category,
+        items: []
+      };
     }
-    acc[item.category].push(item);
+    acc[category.id].items.push(item);
     return acc;
-  }, {} as Record<string, MenuItem[]>);
+  }, {} as Record<string, { category: MenuItemWithCategory['Category']; items: MenuItem[] }>);
+
+  // Sort categories by sortOrder
+  const sortedCategories = Object.values(itemsByCategory).sort(
+    (a, b) => a.category.sortOrder - b.category.sortOrder
+  );
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <h1 className="text-4xl font-bold text-center mb-10">Our Menu</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-          <div key={category} className="bg-gray-800 rounded-lg p-6 shadow-lg">
-            <div className="flex items-center mb-4">
-              <div className="h-0.5 w-6 bg-amber-500 mr-2"></div>
-              <h2 className="text-2xl font-bold text-amber-500">{category.toUpperCase()}</h2>
-              <div className="h-0.5 w-6 bg-amber-500 ml-2"></div>
-            </div>
-            
-            <div className="space-y-3">
-              {categoryItems.map((item) => (
-                <div key={item.id}>
-                  <div className="flex justify-between">
-                    <p className="font-medium">{item.name}</p>
-                    <p className="font-mono">{item.price}</p>
-                  </div>
-                  {item.description && (
-                    <p className="text-gray-400 text-sm">{item.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
+    <div className="space-y-8">
+      {sortedCategories.map(({ category, items }) => (
+        <div key={category.id} className="space-y-4">
+          <h2 className="text-xl font-semibold">{category.name}</h2>
+          {category.description && (
+            <p className="text-gray-600">{category.description}</p>
+          )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <h3 className="font-medium">{item.name}</h3>
+                <p className="text-gray-600">{item.description}</p>
+                <p className="mt-2 font-semibold">{item.price}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 } 
