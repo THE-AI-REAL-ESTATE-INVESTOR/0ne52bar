@@ -1,18 +1,4 @@
 -- CreateTable
-CREATE TABLE "MenuItem" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "price" TEXT NOT NULL,
-    "description" TEXT,
-    "category" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "sortOrder" INTEGER NOT NULL DEFAULT 100,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    CONSTRAINT "MenuItem_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Category" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -20,6 +6,7 @@ CREATE TABLE "Category" (
     "sortOrder" INTEGER NOT NULL DEFAULT 100,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
@@ -52,4 +39,4 @@ FROM "Category" c
 WHERE m.category = c.name;
 
 -- DropColumn
-ALTER TABLE "MenuItem" DROP COLUMN "category";
+ALTER TABLE "MenuItem" DROP COLUMN "category"; 
