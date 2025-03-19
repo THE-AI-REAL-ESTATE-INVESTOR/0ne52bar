@@ -294,25 +294,6 @@ CREATE TABLE "Event" (
 );
 
 -- CreateTable
-CREATE TABLE "MenuItem" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "price" TEXT NOT NULL,
-    "category" TEXT NOT NULL,
-    "description" TEXT,
-
-    CONSTRAINT "MenuItem_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Category" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "BusinessHours" (
     "id" TEXT NOT NULL,
     "day" TEXT NOT NULL,

@@ -8,14 +8,32 @@ datasource db {
 }
 
 /// Member data type including additional fields for storage
-model TapPassMember {
-  id          String  @id @default(cuid())
-  memberId    String
-  memberSince String
-  tier        String
-  points      Int
-  visits      Int
-  lastVisit   String?
+model Member {
+  id            String   @id @default(cuid())
+  memberId      String   @unique
+  name          String
+  email         String   @unique
+  phoneNumber   String
+  birthday      DateTime
+  agreeToTerms  Boolean
+  membershipLevel String @default("BRONZE")
+  joinDate      DateTime @default(now())
+  points        Int      @default(0)
+  visits        Int      @default(0)
+  lastVisit     DateTime?
+  visitHistory  Visit[]
+}
+
+/// Visit records for members
+model Visit {
+  id        String   @id @default(cuid())
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id])
+  visitDate DateTime @default(now())
+  points    Int      @default(0)
+  amount    Float    @default(0)
+
+  @@index([memberId])
 }
 
 /// Types for our form data
