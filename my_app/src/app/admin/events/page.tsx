@@ -12,7 +12,7 @@ interface Event {
   description: string;
   date: string;
   time: string;
-  imageUrl?: string;
+  image?: string;
   featured: boolean;
 }
 
@@ -22,8 +22,9 @@ export default function EventsManagement() {
   
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // New/Edit event form state
+  // Form states
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState<Partial<Event>>({
@@ -31,55 +32,32 @@ export default function EventsManagement() {
     description: '',
     date: '',
     time: '',
-    imageUrl: '',
+    image: '',
     featured: false
   });
-  
+
   // Check authentication
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login');
     }
   }, [status, router]);
-  
-  // Load events data
-  useEffect(() => {
-    if (status === 'authenticated') {
-      // This is a placeholder - in a real implementation, you would fetch from your API
-      const demoEvents: Event[] = [
-        {
-          id: 'event-1',
-          title: 'Live Music - Classic Rock',
-          description: 'Join us for a night of classic rock hits performed by local favorites The Rockers!',
-          date: '2023-12-15',
-          time: '20:00',
-          imageUrl: '/assets/food/tacos.jpg', // Placeholder image
-          featured: true
-        },
-        {
-          id: 'event-2',
-          title: 'Happy Hour Special',
-          description: 'Half-price drinks and appetizers from 4-6pm every Friday!',
-          date: '2023-12-08',
-          time: '16:00',
-          featured: false
-        },
-        {
-          id: 'event-3',
-          title: 'Sunday Football Special',
-          description: 'Watch the game with us! Drink specials and free wings during NFL games.',
-          date: '2023-12-10',
-          time: '13:00',
-          imageUrl: '/assets/food/tacos.jpg', // Placeholder image
-          featured: true
-        }
-      ];
-      
-      setEvents(demoEvents);
+
+  // Fetch events
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch('/api/events');
+      if (!response.ok) throw new Error('Failed to fetch events');
+      const data = await response.json();
+      setEvents(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch events');
+    } finally {
       setLoading(false);
     }
-  }, [status]);
-  
+  };
+
+
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -93,7 +71,7 @@ export default function EventsManagement() {
       setFormData({ ...formData, [name]: value });
     }
   };
-  
+
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -101,7 +79,7 @@ export default function EventsManagement() {
       description: '',
       date: '',
       time: '',
-      imageUrl: '',
+      image: '',
       featured: false
     });
     setEditingEvent(null);
@@ -121,68 +99,81 @@ export default function EventsManagement() {
       description: event.description,
       date: event.date,
       time: event.time,
-      imageUrl: event.imageUrl || '',
+      image: event.image || '',
       featured: event.featured
     });
     setIsFormOpen(true);
   };
+
+  // Fetch events
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title || !formData.date || !formData.time) {
       alert('Please fill out all required fields');
       return;
     }
-    
-    // Create or update the event
-    if (editingEvent) {
-      // Update existing event
-      const updatedEvents = events.map(event => 
-        event.id === editingEvent.id 
-          ? { 
-              ...event, 
-              title: formData.title || '',
-              description: formData.description || '',
-              date: formData.date || '',
-              time: formData.time || '',
-              imageUrl: formData.imageUrl,
-              featured: formData.featured || false
-            } 
-          : event
-      );
-      setEvents(updatedEvents);
-    } else {
-      // Create new event with a unique ID
-      const newId = `event-${Date.now()}`;
-      const newEvent: Event = {
-        id: newId,
-        title: formData.title || '',
-        description: formData.description || '',
-        date: formData.date || '',
-        time: formData.time || '',
-        imageUrl: formData.imageUrl,
-        featured: formData.featured || false
-      };
-      setEvents([...events, newEvent]);
+
+    try {
+      if (editingEvent) {
+        // Update existing event
+        const response = await fetch(`/api/events/${editingEvent.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        
+        if (!response.ok) throw new Error('Failed to update event');
+      } else {
+        // Create new event
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        
+        if (!response.ok) throw new Error('Failed to create event');
+      }
+      
+      // Refresh events list
+      await fetchEvents();
+      setIsFormOpen(false);
+      resetForm();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
     }
-    
-    // Close form and reset
-    setIsFormOpen(false);
-    resetForm();
   };
-  
+
   // Handle event deletion
-  const handleDeleteEvent = (id: string) => {
-    if (confirm('Are you sure you want to delete this event?')) {
-      setEvents(events.filter(event => event.id !== id));
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+
+    try {
+      const response = await fetch(`/api/events/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete event');
+      
+      // Refresh events list
+      await fetchEvents();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete event');
     }
   };
-  
+
   // Format date for display
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
   
@@ -228,10 +219,10 @@ export default function EventsManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map(event => (
               <div key={event.id} className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                {event.imageUrl && (
+                {event.image && (
                   <div className="h-48 relative">
                     <Image 
-                      src={event.imageUrl || '/placeholder-event.jpg'} 
+                      src={event.image || '/placeholder-event.jpg'} 
                       alt={event.title}
                       width={500}
                       height={300}
@@ -345,12 +336,12 @@ export default function EventsManagement() {
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="imageUrl" className="block text-gray-300 mb-2">Image URL (optional)</label>
+                  <label htmlFor="image" className="block text-gray-300 mb-2">Image URL (optional)</label>
                   <input
                     type="text"
-                    id="imageUrl"
-                    name="imageUrl"
-                    value={formData.imageUrl}
+                    id="image"
+                    name="image"
+                    value={formData.image}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-lg"
                     placeholder="/assets/event-image.jpg"
