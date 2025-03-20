@@ -1,150 +1,138 @@
-'use server';
+"use server";
 
-import { prisma } from '@/lib/prisma';
-import type { ApiResponse } from '@/lib/utils/api-response';
-import type { Member, Visit } from '@prisma/client';
+import { createModelActions } from "@/lib/server/action-factory";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { createSuccessResponse, safeAsync } from "@/lib/utils/api-response";
+import { createNotFoundError } from "@/lib/utils/error-handler";
 
-interface ListMembersParams {
-  page: number;
-  pageSize: number;
-}
+/**
+ * Membership Level Enum
+ * Defines the different tiers of membership available
+ * Used across both Member and TapPassMember models
+ */
+const MembershipLevels = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'] as const;
 
-interface MemberWithVisits extends Member {
-  visitHistory: Visit[];
-}
+/**
+ * Main Member Schema
+ * This is the primary member model in the database
+ * Used for core member data and relationships
+ * 
+ * Key differences from TapPassMember:
+ * - Has direct relationships with visits and rewards
+ * - Contains more detailed member information
+ * - Used for all member operations
+ * 
+ * Key differences from TapPassFormData:
+ * - Contains system-generated fields (id, memberId, timestamps)
+ * - Has relationships to other models
+ * - Used for database operations
+ */
+const MemberSchema = z.object({
+  id: z.string(),
+  memberId: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  phoneNumber: z.string(),
+  birthday: z.date(),
+  agreeToTerms: z.boolean(),
+  membershipLevel: z.enum(MembershipLevels),
+  joinDate: z.date(),
+  points: z.number(),
+  visitCount: z.number(),
+  lastVisit: z.date().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  visits: z.array(z.any()),
+  rewards: z.array(z.any())
+});
 
-interface PaginatedResponse<T> extends ApiResponse<T> {
-  pagination?: {
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  };
-}
+/**
+ * Member Creation Schema
+ * Used when creating a new member
+ * 
+ * Key differences from MemberSchema:
+ * - Omits system-generated fields (id, timestamps)
+ * - Omits relationship fields (visits, rewards)
+ * - Includes memberId generation logic
+ * 
+ * Key differences from TapPassFormData:
+ * - Contains additional fields required for member creation
+ * - Uses proper date types instead of strings
+ * - Includes membership level
+ */
+const MemberCreateSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phoneNumber: z.string(),
+  birthday: z.date(),
+  agreeToTerms: z.boolean(),
+  membershipLevel: z.enum(MembershipLevels),
+  joinDate: z.date(),
+  memberId: z.string().default(() => `TAP${Date.now()}`) // Generate unique memberId
+});
 
-export async function listMembers({ page, pageSize }: ListMembersParams): Promise<PaginatedResponse<MemberWithVisits[]>> {
-  try {
-    const skip = (page - 1) * pageSize;
+/**
+ * Member Update Schema
+ * Used when updating an existing member
+ * 
+ * Key differences from MemberCreateSchema:
+ * - All fields are optional (partial)
+ * - Requires id field
+ * - Can update any member field
+ */
+const MemberUpdateSchema = MemberSchema.partial().extend({
+  id: z.string()
+});
+
+/**
+ * Server actions for Member model
+ * Uses the action factory to create CRUD operations
+ * 
+ * Note: Model name must match Prisma schema exactly ("Member")
+ * This is different from TapPassMember which uses camelCase
+ */
+const MemberActions = createModelActions(
+  "Member" as keyof typeof prisma,
+  MemberCreateSchema,
+  MemberUpdateSchema,
+  {
+    defaultSortField: "updatedAt",
+    relations: ["visits", "rewards"]
+  }
+);
+
+export const createMember = MemberActions.create;
+export const getMember = MemberActions.getById;
+export const updateMember = MemberActions.update;
+export const deleteMember = MemberActions.remove;
+export const listMembers = MemberActions.list;
+
+/**
+ * Find a member by email
+ * Custom action for email-based member lookup
+ * 
+ * Note: This is separate from the standard CRUD operations
+ * because it uses a different unique identifier (email)
+ */
+export const getMemberByEmail = async (email: string) => {
+  return safeAsync(async () => {
+    console.log(`🔍 DATABASE QUERY - Model: Member, Email: ${email}`);
     
-    const members = await prisma.member.findMany({
-      skip,
-      take: pageSize,
-      orderBy: {
-        joinDate: 'desc'
-      },
+    const record = await prisma.member.findUnique({
+      where: { email },
       include: {
-        visitHistory: {
-          orderBy: {
-            visitDate: 'desc'
-          },
-          take: 5
-        }
+        visits: true,
+        rewards: true
       }
     });
-
-    const total = await prisma.member.count();
-
-    return {
-      success: true,
-      data: members,
-      pagination: {
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize)
-      }
-    };
-  } catch (error) {
-    console.error('Error listing members:', error);
-    return {
-      success: false,
-      error: {
-        message: 'Failed to list members',
-        code: 'LIST_MEMBERS_ERROR'
-      }
-    };
-  }
-}
-
-export async function getMemberById(id: string): Promise<ApiResponse<MemberWithVisits>> {
-  try {
-    const member = await prisma.member.findUnique({
-      where: { id },
-      include: {
-        visitHistory: {
-          orderBy: {
-            visitDate: 'desc'
-          }
-        }
-      }
-    });
-
-    if (!member) {
-      return {
-        success: false,
-        error: {
-          message: 'Member not found',
-          code: 'MEMBER_NOT_FOUND'
-        }
-      };
+    
+    if (!record) {
+      console.log(`❌ DATABASE NOT FOUND - Model: Member, Email: ${email}`);
+      throw createNotFoundError('Member not found');
     }
-
-    return {
-      success: true,
-      data: member
-    };
-  } catch (error) {
-    console.error('Error getting member:', error);
-    return {
-      success: false,
-      error: {
-        message: 'Failed to get member',
-        code: 'GET_MEMBER_ERROR'
-      }
-    };
-  }
-}
-
-export async function updateMember(id: string, data: Partial<Member>): Promise<ApiResponse<Member>> {
-  try {
-    const member = await prisma.member.update({
-      where: { id },
-      data
-    });
-
-    return {
-      success: true,
-      data: member
-    };
-  } catch (error) {
-    console.error('Error updating member:', error);
-    return {
-      success: false,
-      error: {
-        message: 'Failed to update member',
-        code: 'UPDATE_MEMBER_ERROR'
-      }
-    };
-  }
-}
-
-export async function deleteMember(id: string): Promise<ApiResponse<void>> {
-  try {
-    await prisma.member.delete({
-      where: { id }
-    });
-
-    return {
-      success: true
-    };
-  } catch (error) {
-    console.error('Error deleting member:', error);
-    return {
-      success: false,
-      error: {
-        message: 'Failed to delete member',
-        code: 'DELETE_MEMBER_ERROR'
-      }
-    };
-  }
-} 
+    
+    console.log(`✅ DATABASE FOUND - Model: Member, Email: ${email}`);
+    return createSuccessResponse(record);
+  });
+}; 

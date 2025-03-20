@@ -9,31 +9,48 @@ datasource db {
 
 /// Member data type including additional fields for storage
 model Member {
-  id            String   @id @default(cuid())
-  memberId      String   @unique
-  name          String
-  email         String   @unique
-  phoneNumber   String
-  birthday      DateTime
-  agreeToTerms  Boolean
-  membershipLevel String @default("BRONZE")
-  joinDate      DateTime @default(now())
-  points        Int      @default(0)
-  visits        Int      @default(0)
-  lastVisit     DateTime?
-  visitHistory  Visit[]
+  id              String          @id @default(cuid())
+  memberId        String          @unique
+  name            String
+  email           String          @unique
+  phoneNumber     String
+  birthday        DateTime
+  agreeToTerms    Boolean         @default(true)
+  membershipLevel MembershipLevel @default(BRONZE)
+  joinDate        DateTime        @default(now())
+  points          Int             @default(0)
+  visitCount      Int             @default(0)
+  lastVisit       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  rewards         Reward[]
+  visits          Visit[]
 }
 
 /// Visit records for members
 model Visit {
   id        String   @id @default(cuid())
   memberId  String
-  member    Member   @relation(fields: [memberId], references: [id])
   visitDate DateTime @default(now())
-  points    Int      @default(0)
   amount    Float    @default(0)
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id])
+}
 
-  @@index([memberId])
+/// Reward records for members
+model Reward {
+  id          String    @id @default(cuid())
+  memberId    String
+  rewardType  String
+  description String
+  value       Float
+  isRedeemed  Boolean   @default(false)
+  redeemedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  member      Member    @relation(fields: [memberId], references: [id])
 }
 
 /// Types for our form data
@@ -61,10 +78,10 @@ model Event {
 }
 
 model EventTag {
-  id     String  @id @default(cuid())
-  name   String
-  color  String
-  Event  Event[]
+  id    String  @id @default(cuid())
+  name  String
+  color String
+  Event Event[]
 }
 
 model EventAttendee {
@@ -77,16 +94,16 @@ model EventAttendee {
 
 /// Menu models
 model MenuItem {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   description String?
   price       String
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(100)
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(100)
   categoryId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   category    Category? @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model Category {
@@ -106,30 +123,30 @@ model Merchandise {
   description String
   price       String
   imagePath   String?
-  inStock     Boolean            @default(false)
-  comingSoon  Boolean            @default(true)
-  sortOrder   Int                @default(100)
+  inStock     Boolean             @default(false)
+  comingSoon  Boolean             @default(true)
+  sortOrder   Int                 @default(100)
   categoryId  String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   category    MerchandiseCategory @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
 }
 
 model MerchandiseCategory {
   id          String        @id @default(cuid())
   name        String        @unique
   description String?
-  items       Merchandise[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  items       Merchandise[]
 }
 
 /// Business information types
 model BusinessHours {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   day            String
   hours          String
-  businessInfoId String?     // Keep optional for now
+  businessInfoId String?
   BusinessInfo   BusinessInfo? @relation(fields: [businessInfoId], references: [id])
 }
 
@@ -140,9 +157,9 @@ model BusinessInfo {
   address     String
   phone       String
   email       String          @unique
-  hours       BusinessHours[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @default(now()) @updatedAt
+  hours       BusinessHours[]
 }
 
 /// Authentication models - required for admin functionality
@@ -191,4 +208,11 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum MembershipLevel {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
 }
