@@ -47,7 +47,7 @@ export default function TapPassAdmin({ members }: TapPassAdminProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">{member.points}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{member.visits}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{member.visitCount}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                       {member.lastVisit ? new Date(member.lastVisit).toLocaleDateString() : 'Never'}
                     </td>
