@@ -294,38 +294,41 @@ export default function TapPass() {
       serverFormData.append('phoneNumber', formData.phoneNumber);
       serverFormData.append('agreeToTerms', String(formData.agreeToTerms));
       
-      // Attempt to use the imported function, fall back to mock if it fails
-      let result;
-      try {
-        // Check if registerTapPassMember is defined and is a function
-        if (typeof registerTapPassMember === 'function') {
-          result = await registerTapPassMember(serverFormData);
-        } else {
-          throw new Error('Server action not available');
-        }
-      } catch (error) {
-        console.warn('Using mock implementation for registration:', error);
-        result = await mockRegisterTapPass();
+      // Register the member first
+      const registerResult = await registerTapPassMember(serverFormData);
+      console.log("Registration result:", registerResult);
+      
+      if (!registerResult.success) {
+        setFormError(registerResult.error || 'An error occurred during registration.');
+        return;
       }
       
-      if (result.success && result.memberId) {
-        console.log("Member ID received:", result.memberId);
+      // After successful registration, get member data
+      const response = await getMemberByEmail(formData.email);
+      console.log("Member lookup response:", response);
+      
+      if (response && response.success && response.member) {
+        // User exists, populate form data and show card
+        console.log("Member found:", response.member);
+        const existingMember = response.member;
         
-        // Store the raw member ID from server
-        const receivedMemberId = result.memberId;
+        setFormData({
+          name: existingMember.name,
+          email: existingMember.email,
+          birthday: existingMember.birthday,
+          phoneNumber: existingMember.phoneNumber,
+          agreeToTerms: existingMember.agreeToTerms
+        });
         
-        // Set the member ID directly - our validation function will handle formatting
-        setMemberID(receivedMemberId);
-        console.log("Member ID set to:", receivedMemberId);
+        setMemberID(existingMember.memberId);
         setSubmitted(true);
         
-        // Wait for component to render with memberID, then capture card as image
+        // Generate the card image
         setTimeout(() => {
-          console.log("About to capture card with memberID:", receivedMemberId);
-          captureCardImage(receivedMemberId); // Pass the ID directly to avoid state timing issues
-        }, 2000);
+          captureCardImage(existingMember.memberId);
+        }, 100);
       } else {
-        setFormError(result.error || 'An error occurred during registration.');
+        setFormError(response.error || 'An error occurred during registration.');
       }
     } catch (error) {
       console.error('Error during registration:', error);

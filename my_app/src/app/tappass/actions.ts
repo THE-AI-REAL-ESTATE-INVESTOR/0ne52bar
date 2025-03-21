@@ -22,7 +22,12 @@ export async function getMemberByEmail(email: string) {
       console.log(`[Server] Member found: ${member.name}, ID: ${member.memberId}`);
       return {
         success: true,
-        member
+        member: {
+          ...member,
+          birthday: member.birthday.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          joinDate: member.joinDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          lastVisit: member.lastVisit ? member.lastVisit.toISOString().split('T')[0] : null
+        }
       };
     } else {
       console.log(`[Server] No member found with email: ${email}`);
@@ -66,23 +71,21 @@ export async function registerTapPassMember(formData: FormData) {
     });
     
     if (existingMember) {
-      return {
-        success: true,
-        memberId: existingMember.memberId
-      };
+      // If member exists, use getMemberByEmail to return in consistent format
+      return getMemberByEmail(email);
     }
     
     // Generate member ID parts
     const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
     
-    // Get count for sequential ID
+    // Get count for sequential ID, starting from 2000
     const memberCount = await prisma.member.count();
-    const sequentialId = (memberCount + 1).toString().padStart(4, '0');
+    const sequentialId = (memberCount + 2000).toString().padStart(4, '0');
     
     const memberId = `ONE52-${randomPart}-${sequentialId}`;
     
-    // Create the new member
-    const newMember = await prisma.member.create({
+    // Create the new member and immediately create their first visit
+    await prisma.member.create({
       data: {
         memberId,
         name,
@@ -93,24 +96,19 @@ export async function registerTapPassMember(formData: FormData) {
         membershipLevel: 'BRONZE',
         joinDate: new Date(),
         points: 0,
-        visits: 0
+        visits: {
+          create: {
+            visitDate: new Date(),
+            points: 100, // Signup bonus
+            amount: 0
+          }
+        }
       }
     });
     
-    // Record this as a visit
-    await prisma.visit.create({
-      data: {
-        memberId: newMember.id,
-        visitDate: new Date(),
-        points: 100, // Signup bonus
-        amount: 0
-      }
-    });
+    // Use getMemberByEmail to return in consistent format
+    return getMemberByEmail(email);
     
-    return {
-      success: true,
-      memberId: newMember.memberId
-    };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     console.error('Error registering member:', error);
@@ -156,7 +154,7 @@ export async function getAllMembers() {
     const members = await prisma.member.findMany({
       orderBy: { joinDate: 'desc' },
       include: {
-        visitHistory: {
+        visits: {
           orderBy: { visitDate: 'desc' },
           take: 5
         }
@@ -211,8 +209,12 @@ export async function recordVisit(memberId: string, amount: number) {
     await prisma.member.update({
       where: { id: member.id },
       data: {
-        visits: { increment: 1 },
-        points: { increment: points },
+        visitCount: {
+          increment: 1
+        },
+        points: {
+          increment: points
+        },
         lastVisit: new Date()
       }
     });
