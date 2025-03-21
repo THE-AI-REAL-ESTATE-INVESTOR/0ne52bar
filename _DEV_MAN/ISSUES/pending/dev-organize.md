@@ -1,5 +1,0 @@
-this is the file that will explain how we will reogranize our entire app and put dev scripts in place that help actualy look at all the typescript code using a library instead of hhaving ai parse it finding errors faster using code and npm librarys for what they are good at then using ai for what it is good at it. this is the document that explais how we wil implemnat everythign. heelping us write safeer code fastrer making sure every commit is  full servece code upgrade so we dont play whack a mole code issues everytime somethign comes up we solve it but create another issue. we will also use the git hub like a smart developer to help plan then turn into issues then create documented memraid digrams to solve the issues then make 
-  "chokidar": "^4.0.3",
-run to see if the issues are solved gettign us to produciton further and faster ensuring true full stack solutoins not solving one problem in a code base but making sure the code base is always using the best tools npm has to offer to push us further faster and give our ai clear best praciteces. 
-
-

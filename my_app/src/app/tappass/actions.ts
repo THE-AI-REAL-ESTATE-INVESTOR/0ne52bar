@@ -6,6 +6,10 @@
 "use server";
 
 import { prisma } from '@/lib/prisma';
+import { memberService } from '@/lib/db/member';
+import { ZodError } from 'zod';
+import { registrationSchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get a member by email
@@ -14,9 +18,7 @@ export async function getMemberByEmail(email: string) {
   try {
     console.log(`[Server] Looking for member with email: ${email}`);
     
-    const member = await prisma.member.findUnique({
-      where: { email }
-    });
+    const member = await memberService.find({ email });
     
     if (member) {
       console.log(`[Server] Member found: ${member.name}, ID: ${member.memberId}`);
@@ -51,41 +53,46 @@ export async function getMemberByEmail(email: string) {
  */
 export async function registerTapPassMember(formData: FormData) {
   try {
+    // Extract form data
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const birthday = formData.get('birthday') as string;
     const phoneNumber = formData.get('phoneNumber') as string;
     const agreeToTerms = formData.get('agreeToTerms') === 'true';
     
-    // Check for required fields
-    if (!name || !email || !birthday || !phoneNumber) {
-      return {
-        success: false,
-        error: 'Missing required fields'
-      };
+    // Validate with Zod schema
+    try {
+      registrationSchema.parse({
+        name,
+        email,
+        birthday,
+        phoneNumber,
+        agreeToTerms
+      });
+    } catch (validationError) {
+      if (validationError instanceof ZodError) {
+        return { 
+          success: false, 
+          error: validationError.errors.map(err => err.message).join(', ')
+        };
+      }
+      return { success: false, error: 'Invalid form data' };
     }
     
     // Check if member already exists
-    const existingMember = await prisma.member.findUnique({
-      where: { email }
-    });
-    
+    const existingMember = await memberService.find({ email });
     if (existingMember) {
-      // If member exists, use getMemberByEmail to return in consistent format
       return getMemberByEmail(email);
     }
     
     // Generate member ID parts
     const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
-    
-    // Get count for sequential ID, starting from 2000
     const memberCount = await prisma.member.count();
     const sequentialId = (memberCount + 2000).toString().padStart(4, '0');
-    
     const memberId = `ONE52-${randomPart}-${sequentialId}`;
     
-    // Create the new member and immediately create their first visit
-    await prisma.member.create({
+    // Create the new member with initial visit
+    const newMember = await memberService.create({
       data: {
         memberId,
         name,
@@ -106,7 +113,10 @@ export async function registerTapPassMember(formData: FormData) {
       }
     });
     
-    // Use getMemberByEmail to return in consistent format
+    // Revalidate the path to ensure fresh data
+    revalidatePath('/tappass');
+    
+    // Return in consistent format
     return getMemberByEmail(email);
     
   } catch (error: unknown) {
@@ -147,12 +157,11 @@ export async function emailMembershipCard(formData: FormData) {
 }
 
 /**
- * Get all members
+ * Get all members with their visit history
  */
 export async function getAllMembers() {
   try {
-    const members = await prisma.member.findMany({
-      orderBy: { joinDate: 'desc' },
+    const members = await memberService.findAll({
       include: {
         visits: {
           orderBy: { visitDate: 'desc' },
@@ -180,52 +189,19 @@ export async function getAllMembers() {
  */
 export async function recordVisit(memberId: string, amount: number) {
   try {
-    // Find the member
-    const member = await prisma.member.findUnique({
-      where: { memberId }
-    });
+    const result = await memberService.recordVisit(memberId, amount);
     
-    if (!member) {
-      return {
-        success: false,
-        error: 'Member not found'
-      };
+    if (!result.success) {
+      return result;
     }
     
-    // Calculate points (1 point per dollar spent)
-    const points = Math.floor(amount);
-    
-    // Create visit record
-    const visit = await prisma.visit.create({
-      data: {
-        memberId: member.id,
-        visitDate: new Date(),
-        amount,
-        points
-      }
-    });
-    
-    // Update member stats
-    await prisma.member.update({
-      where: { id: member.id },
-      data: {
-        visitCount: {
-          increment: 1
-        },
-        points: {
-          increment: points
-        },
-        lastVisit: new Date()
-      }
-    });
-    
     // Check if member should be upgraded based on points
-    const newLevel = await checkAndUpdateMembershipLevel(member.id);
+    const newLevel = await checkAndUpdateMembershipLevel(result.member.id);
     
     return {
       success: true,
-      visit,
-      newPoints: member.points + points,
+      visit: result.visit,
+      newPoints: result.newPoints,
       membershipLevel: newLevel
     };
   } catch (error: unknown) {

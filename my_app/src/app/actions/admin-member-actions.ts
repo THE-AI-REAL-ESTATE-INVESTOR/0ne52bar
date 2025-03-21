@@ -3,7 +3,9 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import type { Member } from '@prisma/client';
 
+// Validation schema for member updates
 const memberUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
@@ -12,9 +14,56 @@ const memberUpdateSchema = z.object({
   points: z.number().min(0, 'Points cannot be negative'),
 });
 
-export type MemberUpdateData = z.infer<typeof memberUpdateSchema>;
+export type AdminMemberUpdateData = z.infer<typeof memberUpdateSchema>;
 
-export async function updateMember(id: string, data: MemberUpdateData) {
+/**
+ * Get all members with optional filtering and sorting
+ */
+export async function getAdminMembers(options?: {
+  orderBy?: 'lastVisit' | 'points' | 'membershipLevel';
+  order?: 'asc' | 'desc';
+  filter?: {
+    membershipLevel?: 'BRONZE' | 'SILVER' | 'GOLD';
+    search?: string;
+  };
+}) {
+  try {
+    const members = await prisma.member.findMany({
+      orderBy: options?.orderBy ? {
+        [options.orderBy]: options.order || 'desc'
+      } : {
+        lastVisit: 'desc'
+      },
+      where: {
+        ...(options?.filter?.membershipLevel && {
+          membershipLevel: options.filter.membershipLevel
+        }),
+        ...(options?.filter?.search && {
+          OR: [
+            { name: { contains: options.filter.search, mode: 'insensitive' } },
+            { email: { contains: options.filter.search, mode: 'insensitive' } },
+            { memberId: { contains: options.filter.search, mode: 'insensitive' } }
+          ]
+        })
+      }
+    });
+
+    return { success: true, members };
+  } catch (error) {
+    console.error('Error fetching members:', error);
+    return {
+      success: false,
+      error: {
+        message: 'Failed to fetch members'
+      }
+    };
+  }
+}
+
+/**
+ * Update a member's information
+ */
+export async function updateMember(id: string, data: AdminMemberUpdateData) {
   try {
     const validatedFields = memberUpdateSchema.safeParse(data);
 
@@ -46,6 +95,9 @@ export async function updateMember(id: string, data: MemberUpdateData) {
   }
 }
 
+/**
+ * Delete a member and their associated data
+ */
 export async function deleteMember(id: string) {
   try {
     // First delete all visits associated with this member
