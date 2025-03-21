@@ -11,7 +11,7 @@ import { createModelActions } from "@/lib/server/action-factory";
  * Server actions for TapPassMember
  */
 const TapPassMemberActions = createModelActions(
-  "tapPassMember" as const, // Prisma model name (must match client type)
+  "tapPassMember", // Prisma model name (camelCase)
   TapPassMemberCreateSchema,
   TapPassMemberUpdateSchema,
   {
