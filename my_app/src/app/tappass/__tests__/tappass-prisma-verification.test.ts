@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import {
   getMemberByEmail,
   registerTapPassMember,
@@ -30,12 +29,10 @@ class MockFormData {
  */
 describe('TapPass Prisma Integration', () => {
   // Setup
-  let prisma: PrismaClient;
   let testMemberId: string;
   const testEmail = `test-${Date.now()}@example.com`;
 
   beforeAll(async () => {
-    prisma = new PrismaClient();
     // Create a test member directly in the database for verification
     const testMember = await prisma.member.create({
       data: {
@@ -48,7 +45,15 @@ describe('TapPass Prisma Integration', () => {
         membershipLevel: 'BRONZE',
         joinDate: new Date(),
         points: 0,
-        visits: 0
+        visits: 0,
+        lastVisit: null,
+        visitHistory: {
+          create: {
+            visitDate: new Date(),
+            points: 0,
+            amount: 0
+          }
+        }
       }
     });
     testMemberId = testMember.memberId;
@@ -68,7 +73,6 @@ describe('TapPass Prisma Integration', () => {
         email: testEmail
       }
     });
-    await prisma.$disconnect();
   });
 
   // Tests

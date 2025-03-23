@@ -9,7 +9,7 @@ const createJestConfig = nextJest({
 // Custom Jest configuration
 const customJestConfig = {
   // Setup files to run before each test
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   
   // The directory where Jest should output its coverage files
   coverageDirectory: '.coverage',
