@@ -1,0 +1,11 @@
+{
+  "plugins": ["prisma"],
+  "rules": {
+    "prisma/no-empty-blocks": "error",
+    "prisma/prefer-field-defaults": "warn",
+    "prisma/prefer-unique-index": "warn",
+    "prisma/require-foreign-key-index": "warn",
+    "prisma/no-unnecessary-indexes": "warn",
+    "prisma/no-raw-queries": "warn"
+  }
+} 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Member } from '@prisma/client';
+import { type Member } from '@prisma/client';
 import { updateMember, deleteMember } from '@/app/actions/admin-member-actions';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
@@ -77,16 +77,17 @@ export default function TapPassAdmin({ members }: TapPassAdminProps) {
         setError('Failed to update member');
       }
     } else {
-      setIsEditing(id);
+      // When starting to edit, populate all required fields from the member data
       const member = members.find(m => m.id === id);
       if (member) {
         setEditData({
           name: member.name,
           email: member.email,
-          phoneNumber: member.phoneNumber,
+          phoneNumber: member.phoneNumber || '',
           membershipLevel: member.membershipLevel as 'BRONZE' | 'SILVER' | 'GOLD',
-          points: member.points
+          points: member.points || 0 // Ensure points is always a number
         });
+        setIsEditing(id);
       }
     }
   };

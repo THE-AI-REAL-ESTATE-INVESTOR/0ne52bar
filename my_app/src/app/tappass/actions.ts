@@ -94,23 +94,24 @@ export async function registerTapPassMember(formData: FormData) {
     // Create the new member with initial visit
     const newMember = await memberService.create({
       data: {
-        memberId,
         name,
         email,
         phoneNumber,
         birthday: new Date(birthday),
         agreeToTerms,
         membershipLevel: 'BRONZE',
-        joinDate: new Date(),
         points: 0,
-        visits: {
+        visits: 1,
+        lastVisit: new Date(),
+        visitHistory: {
           create: {
             visitDate: new Date(),
             points: 100, // Signup bonus
             amount: 0
           }
         }
-      }
+      },
+      memberId
     });
     
     // Revalidate the path to ensure fresh data
@@ -163,7 +164,7 @@ export async function getAllMembers() {
   try {
     const members = await memberService.findAll({
       include: {
-        visits: {
+        visitHistory: {
           orderBy: { visitDate: 'desc' },
           take: 5
         }
@@ -191,7 +192,7 @@ export async function recordVisit(memberId: string, amount: number) {
   try {
     const result = await memberService.recordVisit(memberId, amount);
     
-    if (!result.success) {
+    if (!result.success || !result.member) {
       return result;
     }
     

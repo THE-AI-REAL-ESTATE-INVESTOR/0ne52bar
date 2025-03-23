@@ -2,6 +2,7 @@ import { MembershipLevel, type Member, type Visit, type Prisma } from '@prisma/c
 import { prisma } from '@/lib/prisma';
 import { type RegistrationFormData } from '@/lib/validations';
 import { db } from './index';
+import { DateTime } from 'luxon';
 
 export interface CreateMemberParams {
   data: {
@@ -10,9 +11,11 @@ export interface CreateMemberParams {
     phoneNumber: string;
     birthday: Date;
     agreeToTerms: boolean;
-    membershipLevel?: MembershipLevel;
+    membershipLevel?: string;
     points?: number;
-    visits?: {
+    visits?: number;
+    lastVisit?: Date;
+    visitHistory?: {
       create: {
         visitDate: Date;
         points: number;
