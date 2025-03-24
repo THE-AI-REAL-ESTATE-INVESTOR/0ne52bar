@@ -1,5 +1,9 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:prisma/recommended"
+  ],
+  "plugins": ["prisma"],
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", {
       "argsIgnorePattern": "^_",
@@ -11,7 +15,13 @@
         { "char": "\"", "alternatives": ["&quot;", "&ldquo;", "&#34;", "&rdquo;"] },
         { "char": "'", "alternatives": ["&apos;", "&lsquo;", "&#39;", "&rsquo;"] }
       ]
-    }]
+    }],
+    "prisma/no-empty-blocks": "error",
+    "prisma/prefer-field-defaults": "warn",
+    "prisma/prefer-unique-index": "warn",
+    "prisma/require-foreign-key-index": "warn",
+    "prisma/no-unnecessary-indexes": "warn",
+    "prisma/no-raw-queries": "warn"
   },
   "overrides": [
     {
@@ -24,6 +34,29 @@
       },
       "parserOptions": {
         "project": "./tsconfig.json"
+      }
+    },
+    {
+      "files": ["prisma/**/*.{ts,prisma}", "src/lib/db/**/*.ts"],
+      "rules": {
+        "prisma/no-empty-blocks": "error",
+        "prisma/prefer-field-defaults": "error",
+        "prisma/prefer-unique-index": "error",
+        "prisma/require-foreign-key-index": "error",
+        "prisma/no-unnecessary-indexes": "warn",
+        "prisma/no-raw-queries": "warn",
+        "@typescript-eslint/explicit-function-return-type": "error",
+        "@typescript-eslint/no-explicit-any": "error"
+      }
+    },
+    {
+      "files": ["prisma/schema.prisma"],
+      "rules": {
+        "prisma/no-empty-blocks": "error",
+        "prisma/prefer-field-defaults": "warn",
+        "prisma/prefer-unique-index": "warn",
+        "prisma/require-foreign-key-index": "warn",
+        "prisma/no-unnecessary-indexes": "warn"
       }
     }
   ],

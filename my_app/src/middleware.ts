@@ -14,9 +14,14 @@ export async function middleware(request: NextRequest) {
     
     // Redirect to login if not authenticated or not admin
     if (!token || token.role !== "admin") {
-      const url = new URL("/admin/login", request.url);
-      url.searchParams.set("callbackUrl", encodeURI(request.url));
-      return NextResponse.redirect(url);
+      // Create login URL with the correct domain
+      const baseUrl = process.env.NEXTAUTH_URL || request.nextUrl.origin;
+      const loginUrl = new URL("/admin/login", baseUrl);
+      
+      // Set callback URL as just the pathname
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      
+      return NextResponse.redirect(loginUrl);
     }
   }
   

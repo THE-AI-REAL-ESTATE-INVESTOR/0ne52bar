@@ -24,6 +24,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000').hostname,
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'graph.facebook.com',
         pathname: '/**',
       },

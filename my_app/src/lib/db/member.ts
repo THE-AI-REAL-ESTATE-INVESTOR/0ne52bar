@@ -1,16 +1,43 @@
-import { MembershipLevel, type Prisma } from '@prisma/client';
-import { db } from './index';
+import { type Member, type Visit, type Prisma, type MembershipLevel } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { type RegistrationFormData } from '@/lib/validations';
+import { db } from './index';
+import { DateTime } from 'luxon';
 
-interface CreateMemberParams {
-  data: RegistrationFormData;
+export interface CreateMemberParams {
+  data: {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    birthday?: Date;
+    agreeToTerms: boolean;
+    membershipLevel?: MembershipLevel;
+    points?: number;
+    visits?: number;
+    lastVisit?: Date;
+    visitHistory?: {
+      create: {
+        visitDate?: Date;
+        points?: number;
+        amount?: number;
+      }
+    }
+  };
   memberId: string;
 }
 
-interface FindMemberParams {
+export interface FindMemberParams {
   email?: string;
   phoneNumber?: string;
   memberId?: string;
+}
+
+export interface RecordVisitResult {
+  success: boolean;
+  error?: string;
+  member?: Member;
+  visit?: Visit;
+  newPoints?: number;
 }
 
 /**
@@ -22,62 +49,160 @@ export const memberService = {
    * Create a new member
    */
   async create({ data, memberId }: CreateMemberParams) {
-    return db.member.create({
+    return prisma.member.create({
       data: {
-        name: data.name,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        birthday: new Date(data.birthday),
-        agreeToTerms: data.agreeToTerms,
+        ...data,
         memberId,
-        membershipLevel: MembershipLevel.BRONZE, // All new members start at BRONZE
-        joinDate: new Date(),
-      },
+        membershipLevel: data.membershipLevel || 'BRONZE',
+        visits: data.visits || 0
+      }
     });
   },
 
   /**
-   * Find a member by email, phone number, or member ID
+   * Find a member by email, phone, or memberId
    */
   async find({ email, phoneNumber, memberId }: FindMemberParams) {
     if (!email && !phoneNumber && !memberId) {
       throw new Error('At least one search parameter is required');
     }
 
-    const whereClause: Prisma.MemberWhereInput = {};
-
-    if (email) {
-      whereClause.email = email;
-    }
-
-    if (phoneNumber) {
-      whereClause.phoneNumber = phoneNumber;
-    }
-
-    if (memberId) {
-      whereClause.memberId = memberId;
-    }
-
-    return db.member.findFirst({
-      where: whereClause,
-      include: {
-        rewards: {
-          where: {
-            isRedeemed: false,
-            OR: [
-              { expiresAt: null },
-              { expiresAt: { gt: new Date() } },
-            ],
-          },
-        },
-        visits: {
-          orderBy: {
-            visitDate: 'desc',
-          },
-          take: 5,
-        },
+    return prisma.member.findFirst({
+      where: {
+        OR: [
+          email ? { email } : {},
+          phoneNumber ? { phoneNumber } : {},
+          memberId ? { memberId } : {}
+        ]
       },
+      include: {
+        visitHistory: true
+      }
     });
+  },
+
+  /**
+   * Get all members with optional include
+   */
+  async findAll(options?: { 
+    include?: Prisma.MemberInclude; 
+    orderBy?: Prisma.MemberOrderByWithRelationInput 
+  }) {
+    return prisma.member.findMany({
+      orderBy: options?.orderBy || { joinDate: 'desc' },
+      ...options
+    });
+  },
+
+  /**
+   * Record a visit for a member
+   */
+  async recordVisit(memberId: string, amount: number): Promise<RecordVisitResult> {
+    const member = await prisma.member.findUnique({
+      where: { memberId }
+    });
+
+    if (!member) {
+      return {
+        success: false,
+        error: 'Member not found'
+      };
+    }
+
+    // Calculate points (1 point per dollar spent)
+    const points = Math.floor(amount);
+
+    // Create visit record
+    const visit = await prisma.visit.create({
+      data: {
+        memberId: member.id,
+        visitDate: new Date(),
+        amount,
+        points
+      }
+    });
+
+    // Update member stats
+    const updatedMember = await prisma.member.update({
+      where: { id: member.id },
+      data: {
+        visits: {
+          increment: 1
+        },
+        points: {
+          increment: points
+        },
+        lastVisit: new Date()
+      }
+    });
+
+    return {
+      success: true,
+      member: updatedMember,
+      visit,
+      newPoints: updatedMember.points
+    };
+  },
+
+  /**
+   * Update a member's details
+   */
+  async update(memberId: string, data: Partial<Omit<CreateMemberParams['data'], 'visits'>>) {
+    return prisma.member.update({
+      where: { memberId },
+      data: {
+        ...data,
+        membershipLevel: data.membershipLevel as MembershipLevel || undefined
+      }
+    });
+  },
+
+  /**
+   * Delete a member
+   */
+  async delete(memberId: string) {
+    return prisma.member.delete({
+      where: { memberId }
+    });
+  },
+
+  /**
+   * Get member's visit history
+   */
+  async getVisitHistory(memberId: string, limit?: number) {
+    return prisma.visit.findMany({
+      where: {
+        member: {
+          memberId
+        }
+      },
+      orderBy: {
+        visitDate: 'desc'
+      },
+      take: limit
+    });
+  },
+
+  /**
+   * Add reward points to a member
+   */
+  async addPoints(memberId: string, points: number) {
+    return prisma.member.update({
+      where: { memberId },
+      data: {
+        points: {
+          increment: points
+        }
+      }
+    });
+  },
+
+  /**
+   * Redeem points for a reward
+   */
+  async redeemReward(memberId: string) {
+    // TODO: Implement reward redemption logic
+    throw new Error('Not implemented');
   },
 
   /**
@@ -92,22 +217,6 @@ export const memberService = {
   },
 
   /**
-   * Update a member
-   */
-  async update(id: string, data: Partial<RegistrationFormData>) {
-    return db.member.update({
-      where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.email && { email: data.email }),
-        ...(data.phoneNumber && { phoneNumber: data.phoneNumber }),
-        ...(data.birthday && { birthday: new Date(data.birthday) }),
-        ...(data.agreeToTerms !== undefined && { agreeToTerms: data.agreeToTerms }),
-      },
-    });
-  },
-
-  /**
    * Upgrade a member's membership level
    */
   async upgradeMembership(id: string, level: MembershipLevel) {
@@ -115,23 +224,6 @@ export const memberService = {
       where: { id },
       data: {
         membershipLevel: level,
-      },
-    });
-  },
-
-  /**
-   * Record a new visit for a member
-   */
-  async recordVisit(id: string, amount: number) {
-    const points = Math.floor(amount); // 1 point per dollar spent
-
-    return db.visit.create({
-      data: {
-        member: {
-          connect: { id },
-        },
-        amount,
-        points,
       },
     });
   },
@@ -151,19 +243,6 @@ export const memberService = {
         description,
         value,
         expiresAt,
-      },
-    });
-  },
-
-  /**
-   * Redeem a reward
-   */
-  async redeemReward(id: string) {
-    return db.reward.update({
-      where: { id },
-      data: {
-        isRedeemed: true,
-        redeemedAt: new Date(),
       },
     });
   },

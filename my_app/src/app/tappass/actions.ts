@@ -5,9 +5,11 @@
 
 "use server";
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { memberService } from '@/lib/db/member';
+import { ZodError } from 'zod';
+import { registrationSchema } from '@/lib/validations';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Get a member by email
@@ -16,15 +18,18 @@ export async function getMemberByEmail(email: string) {
   try {
     console.log(`[Server] Looking for member with email: ${email}`);
     
-    const member = await prisma.member.findUnique({
-      where: { email }
-    });
+    const member = await memberService.find({ email });
     
     if (member) {
       console.log(`[Server] Member found: ${member.name}, ID: ${member.memberId}`);
       return {
         success: true,
-        member
+        member: {
+          ...member,
+          birthday: member.birthday.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          joinDate: member.joinDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          lastVisit: member.lastVisit ? member.lastVisit.toISOString().split('T')[0] : null
+        }
       };
     } else {
       console.log(`[Server] No member found with email: ${email}`);
@@ -48,71 +53,73 @@ export async function getMemberByEmail(email: string) {
  */
 export async function registerTapPassMember(formData: FormData) {
   try {
+    // Extract form data
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const birthday = formData.get('birthday') as string;
     const phoneNumber = formData.get('phoneNumber') as string;
     const agreeToTerms = formData.get('agreeToTerms') === 'true';
     
-    // Check for required fields
-    if (!name || !email || !birthday || !phoneNumber) {
-      return {
-        success: false,
-        error: 'Missing required fields'
-      };
+    // Validate with Zod schema
+    try {
+      registrationSchema.parse({
+        name,
+        email,
+        birthday,
+        phoneNumber,
+        agreeToTerms
+      });
+    } catch (validationError) {
+      if (validationError instanceof ZodError) {
+        return { 
+          success: false, 
+          error: validationError.errors.map(err => err.message).join(', ')
+        };
+      }
+      return { success: false, error: 'Invalid form data' };
     }
     
     // Check if member already exists
-    const existingMember = await prisma.member.findUnique({
-      where: { email }
-    });
-    
+    const existingMember = await memberService.find({ email });
     if (existingMember) {
-      return {
-        success: true,
-        memberId: existingMember.memberId
-      };
+      return getMemberByEmail(email);
     }
     
     // Generate member ID parts
     const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
-    
-    // Get count for sequential ID
     const memberCount = await prisma.member.count();
-    const sequentialId = (memberCount + 1).toString().padStart(4, '0');
-    
+    const sequentialId = (memberCount + 2000).toString().padStart(4, '0');
     const memberId = `ONE52-${randomPart}-${sequentialId}`;
     
-    // Create the new member
-    const newMember = await prisma.member.create({
+    // Create the new member with initial visit
+    const newMember = await memberService.create({
       data: {
-        memberId,
         name,
         email,
         phoneNumber,
         birthday: new Date(birthday),
         agreeToTerms,
         membershipLevel: 'BRONZE',
-        joinDate: new Date(),
         points: 0,
-        visits: 0
-      }
+        visits: 1,
+        lastVisit: new Date(),
+        visitHistory: {
+          create: {
+            visitDate: new Date(),
+            points: 100, // Signup bonus
+            amount: 0
+          }
+        }
+      },
+      memberId
     });
     
-    // Record this as a visit
-    await prisma.visit.create({
-      data: {
-        memberId: newMember.id,
-        visitDate: new Date(),
-        points: 100, // Signup bonus
-        amount: 0
-      }
-    });
+    // Revalidate the path to ensure fresh data
+    revalidatePath('/tappass');
     
-    return {
-      success: true,
-      memberId: newMember.memberId
-    };
+    // Return in consistent format
+    return getMemberByEmail(email);
+    
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     console.error('Error registering member:', error);
@@ -151,12 +158,11 @@ export async function emailMembershipCard(formData: FormData) {
 }
 
 /**
- * Get all members
+ * Get all members with their visit history
  */
 export async function getAllMembers() {
   try {
-    const members = await prisma.member.findMany({
-      orderBy: { joinDate: 'desc' },
+    const members = await memberService.findAll({
       include: {
         visitHistory: {
           orderBy: { visitDate: 'desc' },
@@ -184,48 +190,19 @@ export async function getAllMembers() {
  */
 export async function recordVisit(memberId: string, amount: number) {
   try {
-    // Find the member
-    const member = await prisma.member.findUnique({
-      where: { memberId }
-    });
+    const result = await memberService.recordVisit(memberId, amount);
     
-    if (!member) {
-      return {
-        success: false,
-        error: 'Member not found'
-      };
+    if (!result.success || !result.member) {
+      return result;
     }
     
-    // Calculate points (1 point per dollar spent)
-    const points = Math.floor(amount);
-    
-    // Create visit record
-    const visit = await prisma.visit.create({
-      data: {
-        memberId: member.id,
-        visitDate: new Date(),
-        amount,
-        points
-      }
-    });
-    
-    // Update member stats
-    await prisma.member.update({
-      where: { id: member.id },
-      data: {
-        visits: { increment: 1 },
-        points: { increment: points },
-        lastVisit: new Date()
-      }
-    });
-    
     // Check if member should be upgraded based on points
-    const newLevel = await checkAndUpdateMembershipLevel(member.id);
+    const newLevel = await checkAndUpdateMembershipLevel(result.member.id);
     
     return {
       success: true,
-      visit,
-      newPoints: member.points + points,
+      visit: result.visit,
+      newPoints: result.newPoints,
       membershipLevel: newLevel
     };
   } catch (error: unknown) {

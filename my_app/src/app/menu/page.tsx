@@ -1,4 +1,4 @@
-import { getMenuItems } from '@/app/actions/menu-actions';
+import { getMenuItems } from '@/actions/menu-actions';
 import MenuDisplay from '@/components/menu/MenuDisplay';
 
 // Force dynamic rendering to prevent stale data

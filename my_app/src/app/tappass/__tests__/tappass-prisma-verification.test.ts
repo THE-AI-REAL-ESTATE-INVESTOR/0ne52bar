@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import {
   getMemberByEmail,
   registerTapPassMember,
   recordVisit,
   getAllMembers
-} from '../src/app/tappass/actions';
+} from '../actions';
 
 // Mock FormData
 class MockFormData {
@@ -30,12 +29,10 @@ class MockFormData {
  */
 describe('TapPass Prisma Integration', () => {
   // Setup
-  let prisma: PrismaClient;
   let testMemberId: string;
   const testEmail = `test-${Date.now()}@example.com`;
 
   beforeAll(async () => {
-    prisma = new PrismaClient();
     // Create a test member directly in the database for verification
     const testMember = await prisma.member.create({
       data: {
@@ -48,7 +45,15 @@ describe('TapPass Prisma Integration', () => {
         membershipLevel: 'BRONZE',
         joinDate: new Date(),
         points: 0,
-        visits: 0
+        visits: 0,
+        lastVisit: null,
+        visitHistory: {
+          create: {
+            visitDate: new Date(),
+            points: 0,
+            amount: 0
+          }
+        }
       }
     });
     testMemberId = testMember.memberId;
@@ -68,7 +73,6 @@ describe('TapPass Prisma Integration', () => {
         email: testEmail
       }
     });
-    await prisma.$disconnect();
   });
 
   // Tests
@@ -94,24 +98,28 @@ describe('TapPass Prisma Integration', () => {
 
     const result = await registerTapPassMember(formData);
     expect(result.success).toBe(true);
-    expect(result.memberId).toBeDefined();
+    expect(result.member).toBeDefined();
+    if (result.success && result.member) {
+      expect(result.member.email).toBe(newEmail);
+      expect(result.member.memberId).toBeDefined();
 
-    // Verify the member was created in the database
-    const member = await prisma.member.findUnique({
-      where: { email: newEmail }
-    });
-    expect(member).toBeDefined();
-    expect(member?.email).toBe(newEmail);
-    expect(member?.memberId).toBe(result.memberId);
+      // Verify the member was created in the database
+      const member = await prisma.member.findUnique({
+        where: { email: newEmail }
+      });
+      expect(member).toBeDefined();
+      expect(member?.email).toBe(newEmail);
+      expect(member?.memberId).toBe(result.member.memberId);
 
-    // Clean up
-    if (member) {
-      await prisma.visit.deleteMany({
-        where: { memberId: member.id }
-      });
-      await prisma.member.delete({
-        where: { id: member.id }
-      });
+      // Clean up
+      if (member) {
+        await prisma.visit.deleteMany({
+          where: { memberId: member.id }
+        });
+        await prisma.member.delete({
+          where: { id: member.id }
+        });
+      }
     }
   });
 
@@ -131,7 +139,7 @@ describe('TapPass Prisma Integration', () => {
     const updatedMember = await prisma.member.findUnique({
       where: { email: testEmail },
       include: {
-        visitHistory: {
+        visits: {
           orderBy: { visitDate: 'desc' },
           take: 1
         }
@@ -140,8 +148,8 @@ describe('TapPass Prisma Integration', () => {
 
     expect(updatedMember).toBeDefined();
     expect(updatedMember?.points).toBe(initialPoints + amount);
-    expect(updatedMember?.visitHistory.length).toBeGreaterThan(0);
-    expect(updatedMember?.visitHistory[0].amount).toBe(amount);
+    expect(updatedMember?.visits.length).toBeGreaterThan(0);
+    expect(updatedMember?.visits[0].amount).toBe(amount);
   });
 
   test('getAllMembers returns members with visit history', async () => {
@@ -152,7 +160,7 @@ describe('TapPass Prisma Integration', () => {
     // Look for our test member
     const testMember = result.members?.find(m => m.email === testEmail);
     expect(testMember).toBeDefined();
-    expect(testMember?.visitHistory).toBeDefined();
-    expect(Array.isArray(testMember?.visitHistory)).toBe(true);
+    expect(testMember?.visits).toBeDefined();
+    expect(Array.isArray(testMember?.visits)).toBe(true);
   });
 }); 

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getEvents } from '@/app/actions/event-actions';
+import { getEvents } from '@/actions/event-actions';
 import EventsClientPage from '@/components/events/EventsClientPage';
 import { EventsPageSkeleton } from '@/components/events/EventsPageSkeleton';
 

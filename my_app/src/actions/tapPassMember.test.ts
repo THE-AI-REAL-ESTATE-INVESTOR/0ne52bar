@@ -4,11 +4,11 @@
 
 // Import the actions to test
 import {
-  createTapPassMember,
-  getTapPassMember,
-  listTapPassMembers,
-  updateTapPassMember,
-  deleteTapPassMember
+  create,
+  getById,
+  list,
+  update,
+  remove
 } from './tapPassMember';
 
 // Import types and utilities
@@ -26,7 +26,7 @@ describe('TapPassMember Actions', () => {
     jest.clearAllMocks();
   });
 
-  describe('createTapPassMember', () => {
+  describe('create', () => {
     it('should create a TapPassMember when valid data is provided', async () => {
       // Arrange
       const mockMember = {
@@ -43,7 +43,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.create as jest.Mock).mockResolvedValue(mockMember);
 
       // Act
-      const result = await createTapPassMember({
+      const result = await create({
         name: 'John Doe',
         email: 'john@example.com',
         phone: '555-123-4567',
@@ -65,7 +65,7 @@ describe('TapPassMember Actions', () => {
 
     it('should return an error when validation fails', async () => {
       // Act
-      const result = await createTapPassMember({
+      const result = await create({
         name: '', // Invalid: empty name
         email: 'not-an-email', // Invalid: not a valid email
         phone: '123', // Invalid: too short
@@ -84,7 +84,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.create as jest.Mock).mockRejectedValue(dbError);
 
       // Act
-      const result = await createTapPassMember({
+      const result = await create({
         name: 'John Doe',
         email: 'john@example.com',
         phone: '555-123-4567',
@@ -97,7 +97,7 @@ describe('TapPassMember Actions', () => {
     });
   });
 
-  describe('getTapPassMember', () => {
+  describe('getById', () => {
     it('should return a TapPassMember when it exists', async () => {
       // Arrange
       const mockMember = {
@@ -113,7 +113,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.findUnique as jest.Mock).mockResolvedValue(mockMember);
 
       // Act
-      const result = await getTapPassMember('mock-id');
+      const result = await getById('mock-id');
 
       // Assert
       expect(result.success).toBe(true);
@@ -128,7 +128,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Act
-      const result = await getTapPassMember('non-existent-id');
+      const result = await getById('non-existent-id');
 
       // Assert
       expect(result.success).toBe(false);
@@ -136,7 +136,7 @@ describe('TapPassMember Actions', () => {
     });
   });
 
-  describe('listTapPassMembers', () => {
+  describe('list', () => {
     it('should return a list of members', async () => {
       // Arrange
       const mockMembers = [
@@ -164,7 +164,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.count as jest.Mock).mockResolvedValue(2);
 
       // Act
-      const result = await listTapPassMembers({ page: 1, pageSize: 10 });
+      const result = await list({ page: 1, pageSize: 10 });
 
       // Assert
       expect(result.success).toBe(true);
@@ -183,7 +183,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.count as jest.Mock).mockResolvedValue(0);
 
       // Act
-      const result = await listTapPassMembers({ page: 1, pageSize: 10 });
+      const result = await list({ page: 1, pageSize: 10 });
 
       // Assert
       expect(result.success).toBe(true);
@@ -192,7 +192,7 @@ describe('TapPassMember Actions', () => {
     });
   });
 
-  describe('updateTapPassMember', () => {
+  describe('update', () => {
     it('should update a member when valid data is provided', async () => {
       // Arrange
       const mockUpdatedMember = {
@@ -208,7 +208,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.update as jest.Mock).mockResolvedValue(mockUpdatedMember);
 
       // Act
-      const result = await updateTapPassMember('mock-id', {
+      const result = await update('mock-id', {
         name: 'John Updated',
         email: 'john.updated@example.com',
         phone: '555-999-8888',
@@ -231,7 +231,7 @@ describe('TapPassMember Actions', () => {
 
     it('should return an error when validation fails', async () => {
       // Act
-      const result = await updateTapPassMember('mock-id', {
+      const result = await update('mock-id', {
         name: '', // Invalid: empty name
         email: 'invalid-email', // Invalid: not a valid email
         phone: '123', // Invalid: too short
@@ -250,7 +250,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.update as jest.Mock).mockRejectedValue(prismaError);
 
       // Act
-      const result = await updateTapPassMember('non-existent-id', {
+      const result = await update('non-existent-id', {
         name: 'John Updated',
         email: 'john.updated@example.com',
         phone: '555-999-8888',
@@ -263,7 +263,7 @@ describe('TapPassMember Actions', () => {
     });
   });
 
-  describe('deleteTapPassMember', () => {
+  describe('remove', () => {
     it('should delete a member when it exists', async () => {
       // Arrange
       const mockDeletedMember = {
@@ -279,7 +279,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.delete as jest.Mock).mockResolvedValue(mockDeletedMember);
 
       // Act
-      const result = await deleteTapPassMember('mock-id');
+      const result = await remove('mock-id');
 
       // Assert
       expect(result.success).toBe(true);
@@ -295,7 +295,7 @@ describe('TapPassMember Actions', () => {
       (prisma.tapPassMember.delete as jest.Mock).mockRejectedValue(prismaError);
 
       // Act
-      const result = await deleteTapPassMember('non-existent-id');
+      const result = await remove('non-existent-id');
 
       // Assert
       expect(result.success).toBe(false);

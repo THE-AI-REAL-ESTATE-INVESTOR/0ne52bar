@@ -13,7 +13,12 @@ function LoginForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get('callbackUrl') || '/admin/dashboard';
+  const rawCallbackUrl = searchParams?.get('callbackUrl') || '/admin/dashboard';
+  
+  // Ensure callback URL uses the correct domain
+  const callbackUrl = rawCallbackUrl.startsWith('http') 
+    ? new URL(rawCallbackUrl).pathname 
+    : rawCallbackUrl;
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +39,8 @@ function LoginForm() {
       }
       
       // Redirect to dashboard or callback URL
-      router.push(callbackUrl);
+      const targetPath = callbackUrl.startsWith('/') ? callbackUrl : `/${callbackUrl}`;
+      router.push(targetPath);
     } catch (_error) {
       console.error('Login error:', _error);
       setError('An error occurred. Please try again.');

@@ -15,7 +15,7 @@ The TapPass feature currently uses in-memory storage for member data, causing al
 **Completed Tasks:**
 - ✅ Update `registerTapPassMember` to use Prisma
 - ✅ Update `getMemberByEmail` to use Prisma
-- ✅ Update `getMemberByPhone` to use Prisma
+- [ ] Update `getMemberByPhone` to use Prisma
 - ✅ Update `emailMembershipCard` to use Prisma
 - ✅ Test data persistence across server restarts
 - ✅ Implement proper error handling
@@ -36,15 +36,8 @@ The current implementation has separate Zod validation and database access layer
 **Current Status:**
 - ✅ Zod schemas defined for form validation
 - ✅ Prisma models defined for database access
-- 🔄 Partial integration between the two
+- ✅  Partial integration between the two
 
-**Tasks:**
-- [ ] Create Zod schemas that align with Prisma models
-- [ ] Implement validation middleware for server actions
-- [ ] Add Zod validation to Prisma inputs
-- [ ] Update client-side validation to match
-
-**Priority:** Medium
 
 ---
 
@@ -112,13 +105,12 @@ Development documentation is currently spread across multiple files and location
 
 **Current Status:**
 - ✅ Documentation in both `/my_app/_DEV_MAN` and `/_DEV_MAN`
-- 🔄 Some duplicate information
-- 🔄 Structure being improved
+- ✅  Removed duplicate docs. 
 
 **Tasks:**
 - ✅ Move completed documentation to `completed` folder
 - ✅ Create verification tests for completed features
-- [ ] Organize by feature/component
+- ✅  Organize by feature/component
 - [ ] Create an index/README for navigation
 - [ ] Remove duplicate or outdated information
 - [ ] Add missing documentation for recent features
@@ -181,8 +173,8 @@ Complete the Events system which currently has models but lacks UI and server ac
 
 **Current Status:**
 - ✅ Database models created
-- ❌ Server actions not implemented
-- ❌ Admin UI not created
+- ✅  Server actions not implemented
+- ✅  Admin UI not created
 - ❌ Customer-facing calendar not implemented
 - ❌ RSVP functionality not implemented
 

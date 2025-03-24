@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: one52-bar
+    env: node
+    buildCommand: cd my_app && npm install && npm run build
+    startCommand: cd my_app && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_BASE_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: FACEBOOK_ACCESS_TOKEN
+        sync: false
+      - key: FACEBOOK_PAGE_ID
+        sync: false
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_FACEBOOK_APP_ID
+        sync: false 

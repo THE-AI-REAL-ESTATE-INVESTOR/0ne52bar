@@ -22,9 +22,9 @@ model Member {
   visitCount      Int             @default(0)
   lastVisit       DateTime?
   createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  rewards         Reward[]
-  visits          Visit[]
+  updatedAt       DateTime
+  Reward          Reward[]
+  visitHistory    Visit[]
 }
 
 /// Visit records for members
@@ -36,21 +36,6 @@ model Visit {
   points    Int      @default(0)
   createdAt DateTime @default(now())
   member    Member   @relation(fields: [memberId], references: [id])
-}
-
-/// Reward records for members
-model Reward {
-  id          String    @id @default(cuid())
-  memberId    String
-  rewardType  String
-  description String
-  value       Float
-  isRedeemed  Boolean   @default(false)
-  redeemedAt  DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  member      Member    @relation(fields: [memberId], references: [id])
 }
 
 /// Types for our form data
@@ -208,6 +193,20 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Reward {
+  id          String    @id
+  memberId    String
+  rewardType  String
+  description String
+  value       Float
+  isRedeemed  Boolean   @default(false)
+  redeemedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  Member      Member    @relation(fields: [memberId], references: [id])
 }
 
 enum MembershipLevel {
