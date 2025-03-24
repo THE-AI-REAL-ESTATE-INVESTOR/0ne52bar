@@ -36,19 +36,19 @@ export default function WebsiteSettings() {
   
   // Initial demo data
   const [settings, setSettings] = useState<BusinessSettings>({
-    businessName: 'ONE 52 Bar & Kitchen',
-    address: '152 Main Street, Houston, TX 77001',
-    phoneNumber: '(713) 555-1234',
-    email: 'contact@one52bar.com',
-    aboutText: 'ONE 52 Bar & Kitchen offers a unique dining experience with great food, drinks, and atmosphere. Join us for daily specials, live music, and more!',
+    businessName: 'ONE 52 Bar & GRILL',
+    address: '211 N Trade Center Terrace, Mustang, OK 73064',
+    phoneNumber: '(405) 256-5005',
+    email: 'contactus@one52bar.com',
+    aboutText: `ONE 52 Bar & GRILL\n\nOne-52 Bar and Grill is a great Mustang hangout for locals and visitors alike. This family-owned bar makes guests feel right at home with comfort food favorites, weekly live music and plenty of entertainment options.\n\nStop in for a game of pool, darts or poker, and stick around for live music each Friday evening. While you're enjoying the friendly atmosphere, share a plate of nachos or fried pickles with your crew. For entree choices, dig into an assortment of delicious tacos, burgers, wings and other bar-style staples. Pair your food with a local brew on tap for the complete One-52 experience.`,
     hours: [
-      { day: 'Monday', open: '11:00', close: '22:00', closed: false },
-      { day: 'Tuesday', open: '11:00', close: '22:00', closed: false },
-      { day: 'Wednesday', open: '11:00', close: '23:00', closed: false },
-      { day: 'Thursday', open: '11:00', close: '23:00', closed: false },
-      { day: 'Friday', open: '11:00', close: '00:00', closed: false },
-      { day: 'Saturday', open: '11:00', close: '00:00', closed: false },
-      { day: 'Sunday', open: '12:00', close: '21:00', closed: false },
+      { day: 'Monday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Tuesday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Wednesday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Thursday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Friday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Saturday', open: '11:00', close: '02:00', closed: false },
+      { day: 'Sunday', open: '12:00', close: '02:00', closed: false },
     ],
     socialMedia: {
       facebook: 'https://facebook.com/one52bar',
