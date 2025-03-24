@@ -3,7 +3,7 @@
 import type { MenuItem, Category } from '@prisma/client';
 
 type MenuItemWithCategory = MenuItem & {
-  Category: Category & {
+  category: Category & {
     sortOrder: number;
     description?: string;
   };
@@ -16,7 +16,7 @@ interface MenuDisplayProps {
 export default function MenuDisplay({ items }: MenuDisplayProps) {
   // Group items by category
   const itemsByCategory = items.reduce((acc, item) => {
-    const category = item.Category;
+    const category = item.category;
     if (!acc[category.id]) {
       acc[category.id] = {
         category,
@@ -25,7 +25,7 @@ export default function MenuDisplay({ items }: MenuDisplayProps) {
     }
     acc[category.id].items.push(item);
     return acc;
-  }, {} as Record<string, { category: MenuItemWithCategory['Category']; items: MenuItem[] }>);
+  }, {} as Record<string, { category: MenuItemWithCategory['category']; items: MenuItem[] }>);
 
   // Sort categories by sortOrder
   const sortedCategories = Object.values(itemsByCategory).sort(

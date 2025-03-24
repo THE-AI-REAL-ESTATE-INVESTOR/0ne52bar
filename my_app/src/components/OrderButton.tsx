@@ -1,34 +1,21 @@
 "use client";
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
-interface OrderButtonProps {
-  className?: string;
-}
-
-const OrderButton: React.FC<OrderButtonProps> = ({ className }) => {
+export default function OrderButton() {
   const handleClick = () => {
-    const orderSystem = document.getElementById('menu-order-system');
-    if (orderSystem) {
-      orderSystem.classList.remove('hidden');
-      
-      // Set a custom attribute or class to indicate it should be visible
-      orderSystem.setAttribute('data-visible', 'true');
-      
-      // Dispatch a custom event that the MenuOrderSystem can listen for
-      const event = new CustomEvent('open-menu-order');
-      document.dispatchEvent(event);
-    }
+    // Dispatch a custom event that MenuOrderSystem listens for
+    const event = new CustomEvent('open-menu-order');
+    document.dispatchEvent(event);
   };
 
   return (
-    <button 
+    <Button
       onClick={handleClick}
-      className={`order-now-btn bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 px-8 rounded-full text-xl shadow-lg transform transition-all ${className || ''}`}
+      className="fixed bottom-4 right-4 bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 px-4 rounded-full shadow-lg"
     >
-      ORDER NOW
-    </button>
+      Order Now
+    </Button>
   );
-};
-
-export default OrderButton; 
+} 
