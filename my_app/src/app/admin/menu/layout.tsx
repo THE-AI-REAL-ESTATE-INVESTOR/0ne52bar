@@ -11,9 +11,9 @@ export default function AdminMenuLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0A0B0D]">
       <div className="container mx-auto py-8">
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-gray-900/50 rounded-lg shadow-sm border border-gray-800 p-6">
           {children}
         </div>
       </div>

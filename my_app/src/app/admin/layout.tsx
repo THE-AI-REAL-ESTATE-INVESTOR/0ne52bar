@@ -7,9 +7,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-[#0A0B0D]">
       {/* Admin Header */}
-      <header className="bg-gray-900 text-white p-4">
+      <header className="bg-gray-900/50 text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold">ONE-52 Admin</h1>
           <Link href="/" className="text-gray-300 hover:text-white transition-colors">
@@ -20,7 +20,7 @@ export default function AdminLayout({
 
       <div className="container mx-auto p-4">
         {/* Admin Navigation */}
-        <nav className="bg-gray-900 p-4 mb-6 rounded-lg">
+        <nav className="bg-gray-900/50 p-4 mb-6 rounded-lg">
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/admin/dashboard" className="text-gray-300 hover:text-white transition-colors">
               Dashboard
@@ -47,7 +47,7 @@ export default function AdminLayout({
         </nav>
 
         {/* Main Content */}
-        <main className="bg-gray-900 p-6 rounded-lg">
+        <main className="bg-gray-900/50 p-6 rounded-lg">
           {children}
         </main>
 

@@ -78,17 +78,28 @@ model EventAttendee {
 }
 
 /// Menu models
+enum MenuItemStatus {
+  AVAILABLE
+  NEEDS_PRICING
+  COMING_SOON
+  ARCHIVED
+}
+
 model MenuItem {
-  id          String    @id @default(uuid())
+  id          String        @id @default(uuid())
   name        String
   description String?
   price       String
-  isActive    Boolean   @default(true)
-  sortOrder   Int       @default(100)
+  imageUrl    String?
+  isActive    Boolean       @default(true)
+  sortOrder   Int          @default(100)
   categoryId  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  category    Category? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  status      MenuItemStatus @default(AVAILABLE)
+
+  @@index([categoryId])
 }
 
 model Category {

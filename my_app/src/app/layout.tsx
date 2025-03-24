@@ -1,34 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Providers } from "./providers";
 import Nav from "@/components/Nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "ONE-52 BAR & GRILL",
-  description: "ONE-52 BAR & GRILL website",
+  title: "ONE-52 Bar & Grill",
+  description: "ONE-52 Bar & Grill - Your neighborhood bar and grill",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
+      <body className="bg-[#0A0B0D] text-white">
         <Providers>
           <header className="flex flex-col items-center justify-center px-4 pt-6 pb-2">
             {/* License Plate Design */}
@@ -53,12 +41,12 @@ export default function RootLayout({
           </main>
           
           {/* Footer Links for Legal Pages */}
-          <div className="bg-gray-900 text-gray-400 text-sm py-4">
+          <div className="bg-gray-900/50 text-gray-400 text-sm py-4">
             <div className="container mx-auto px-4 text-center">
               <p className="mb-2">© {new Date().getFullYear()} 152 Bar & Restaurant. All rights reserved.</p>
               <div className="flex justify-center space-x-4">
-                <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
-                <a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a>
+                <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
               </div>
             </div>
           </div>

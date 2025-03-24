@@ -1,10 +1,25 @@
 import { MenuItem as PrismaMenuItem, Category as PrismaCategory } from '@prisma/client';
 
-export interface MenuItem extends Omit<PrismaMenuItem, 'category'> {
-  category?: Category;
+export type MenuItemStatus = 'AVAILABLE' | 'NEEDS_PRICING' | 'COMING_SOON' | 'ARCHIVED';
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description?: string;
+  price: string;
+  categoryId: string;
+  isActive: boolean;
+  status: MenuItemStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface Category extends PrismaCategory {}
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  sortOrder: number;
+}
 
 export interface OrderItem {
   menuItem: MenuItem;
@@ -22,11 +37,11 @@ export interface Order {
 
 export interface MenuItemFormData {
   name: string;
-  price: string;
   description?: string;
+  price: string;
   categoryId: string;
   isActive: boolean;
-  sortOrder: number;
+  status: MenuItemStatus;
 }
 
 export interface CategoryFormData {
