@@ -3,7 +3,7 @@ const nextConfig = {
   // Experimental features configuration
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000']
+      allowedOrigins: [process.env.NEXTAUTH_URL || 'http://localhost:3000']
     }
   },
   // Enable strict mode for better development practices
