@@ -17,6 +17,8 @@ export default function MenuDisplay({ items }: MenuDisplayProps) {
   // Group items by category
   const itemsByCategory = items.reduce((acc, item) => {
     const category = item.Category;
+    if (!category) return acc;
+    
     if (!acc[category.id]) {
       acc[category.id] = {
         category,
