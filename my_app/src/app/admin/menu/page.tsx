@@ -8,14 +8,24 @@ import Link from 'next/link';
 interface MenuItem {
   id: string;
   name: string;
-  price: string;
-  category: string;
   description?: string;
+  price: string;
+  isActive: boolean;
+  sortOrder: number;
+  categoryId: string | null;
+  category: Category | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Category {
   id: string;
   name: string;
+  description?: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function MenuManagement() {
@@ -33,8 +43,10 @@ export default function MenuManagement() {
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     name: '',
     price: '',
-    category: '',
-    description: ''
+    categoryId: '',
+    description: '',
+    sortOrder: 100,
+    isActive: true
   });
   
   // Check authentication
@@ -47,27 +59,19 @@ export default function MenuManagement() {
   // Load menu data
   useEffect(() => {
     if (status === 'authenticated') {
-      // This is a placeholder - in a real implementation, you would fetch from your API
-      const demoCategories: Category[] = [
-        { id: 'kickstarters', name: 'KICK STARTERS' },
-        { id: 'maindishes', name: 'MAIN DISHES' },
-        { id: 'salads', name: 'SALADS & WRAPS' },
-        { id: 'extras', name: 'EXTRAS' },
-        { id: 'burgers', name: 'BURGERS & SANDWICHES' },
-      ];
-      
-      const demoMenuItems: MenuItem[] = [
-        { id: 'chips-salsa', name: 'CHIPS & SALSA', price: '6.00', category: 'kickstarters' },
-        { id: 'chips-queso', name: 'CHIPS AND QUESO', price: '7.50', category: 'kickstarters' },
-        { id: 'quesadillas-half', name: 'QUESADILLAS - Half', price: '6.50', category: 'maindishes', description: 'Your Choice of Steak or Chicken Stuffed with Cheese & Onions' },
-        { id: 'chicken-wrap', name: 'CHICKEN WRAP', price: '8.00', category: 'salads', description: 'Grilled or breaded chicken, lettuce, tomatoes, bacon, cheese and ranch wrapped up in a flour tortilla.' },
-        { id: 'bowl-chili', name: 'BOWL OF CHILI', price: '4.50', category: 'extras' },
-        { id: 'one-52-burger', name: 'ONE-52 BURGER', price: '8.00', category: 'burgers', description: '½ lb 100% Beef Patty Topped with Lettuce, Tomato, Onion and Pickle' },
-      ];
-      
-      setCategories(demoCategories);
-      setMenuItems(demoMenuItems);
-      setLoading(false);
+      Promise.all([
+        fetch('/api/categories').then(res => res.json()),
+        fetch('/api/menu-items').then(res => res.json())
+      ])
+      .then(([categoriesData, menuItemsData]) => {
+        setCategories(categoriesData);
+        setMenuItems(menuItemsData);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading data:', error);
+        setLoading(false);
+      });
     }
   }, [status]);
   
@@ -82,7 +86,7 @@ export default function MenuManagement() {
     setFormData({
       name: '',
       price: '',
-      category: '',
+      categoryId: '',
       description: ''
     });
     setEditingItem(null);
@@ -100,59 +104,81 @@ export default function MenuManagement() {
     setFormData({
       name: item.name,
       price: item.price,
-      category: item.category,
+      categoryId: item.categoryId,
       description: item.description || ''
     });
     setIsFormOpen(true);
   };
   
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.price || !formData.category) {
+    if (!formData.name || !formData.price || !formData.categoryId) {
       alert('Please fill out all required fields');
       return;
     }
     
-    // Create or update the item
-    if (editingItem) {
-      // Update existing item
-      const updatedItems = menuItems.map(item => 
-        item.id === editingItem.id 
-          ? { ...item, ...formData, price: formData.price || '' } 
-          : item
+    try {
+      const response = await fetch(
+        editingItem ? `/api/menu-items/${editingItem.id}` : '/api/menu-items',
+        {
+          method: editingItem ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            price: formData.price,
+            categoryId: formData.categoryId
+          }),
+        }
       );
-      setMenuItems(updatedItems);
-    } else {
-      // Create new item with a unique ID
-      const newId = `item-${Date.now()}`;
-      const newItem: MenuItem = {
-        id: newId,
-        name: formData.name || '',
-        price: formData.price || '',
-        category: formData.category || '',
-        description: formData.description
-      };
-      setMenuItems([...menuItems, newItem]);
+
+      if (!response.ok) throw new Error('Failed to save menu item');
+
+      const updatedItem = await response.json();
+      
+      // Update state
+      if (editingItem) {
+        setMenuItems(menuItems.map(item => 
+          item.id === editingItem.id ? updatedItem : item
+        ));
+      } else {
+        setMenuItems([...menuItems, updatedItem]);
+      }
+
+      // Close form and reset
+      setIsFormOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving menu item:', error);
+      alert('Failed to save menu item. Please try again.');
     }
-    
-    // Close form and reset
-    setIsFormOpen(false);
-    resetForm();
   };
-  
-  // Handle item deletion
-  const handleDeleteItem = (id: string) => {
+
+  // Handle item deletion with API call
+  const handleDeleteItem = async (id: string) => {
     if (confirm('Are you sure you want to delete this menu item?')) {
-      setMenuItems(menuItems.filter(item => item.id !== id));
+      try {
+        const response = await fetch(`/api/menu-items/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) throw new Error('Failed to delete menu item');
+
+        setMenuItems(menuItems.filter(item => item.id !== id));
+      } catch (error) {
+        console.error('Error deleting menu item:', error);
+        alert('Failed to delete menu item. Please try again.');
+      }
     }
   };
   
   // Filter items by category
   const filteredItems = selectedCategory === 'all' 
     ? menuItems 
-    : menuItems.filter(item => item.category === selectedCategory);
+    : menuItems.filter(item => item.categoryId === selectedCategory);
   
   if (status === 'loading' || loading) {
     return (
@@ -221,7 +247,7 @@ export default function MenuManagement() {
                     <td className="px-6 py-4 whitespace-nowrap text-lg text-white">{item.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-lg text-white">${item.price}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-lg text-white">
-                      {categories.find(c => c.id === item.category)?.name || item.category}
+                      {categories.find(c => c.id === item.categoryId)?.name || item.categoryId}
                     </td>
                     <td className="px-6 py-4 text-lg text-white">
                       {item.description || <span className="text-gray-500">No description</span>}
@@ -299,11 +325,11 @@ export default function MenuManagement() {
                 </div>
                 
                 <div className="mb-4">
-                  <label htmlFor="category" className="block text-gray-300 mb-2">Category *</label>
+                  <label htmlFor="categoryId" className="block text-gray-300 mb-2">Category *</label>
                   <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
+                    id="categoryId"
+                    name="categoryId"
+                    value={formData.categoryId || ''}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-lg"
                     required
