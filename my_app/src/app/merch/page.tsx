@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getMerchandise } from '@/app/actions/merchandise-actions';
+import { getMerchandise } from '@/actions/merchandise-actions';
 import MerchList from '@/components/merch/MerchList';
 import MerchSkeleton from '@/components/merch/MerchSkeleton';
 import type { Merchandise, MerchandiseCategory } from '@prisma/client';

@@ -24,7 +24,7 @@ const customJestConfig = {
   ],
   
   // Test environment setup
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: 'node',
   
   // Files to consider as tests
   testMatch: [

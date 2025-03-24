@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { type Member } from '@prisma/client';
-import { updateMember, deleteMember } from '@/app/actions/admin-member-actions';
+import { updateMember, deleteMember } from '@/actions/admin-member-actions';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
@@ -14,8 +14,8 @@ interface EditableMemberData {
   name: string;
   email: string;
   phoneNumber?: string;
-  membershipLevel: 'BRONZE' | 'SILVER' | 'GOLD';
-  points: number;
+  membershipLevel?: 'BRONZE' | 'SILVER' | 'GOLD' |'PLATINUM' |'GUESTS' ;
+  points?: number;
 }
 
 export default function TapPassAdmin({ members }: TapPassAdminProps) {

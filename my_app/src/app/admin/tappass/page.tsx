@@ -1,4 +1,4 @@
-import { getAdminMembers } from '@/app/actions/admin-member-actions';
+import { getAdminMembers } from '@/actions/admin-member-actions';
 import TapPassAdmin from '@/components/admin/TapPassAdmin';
 
 export const dynamic = 'force-dynamic';

@@ -1,55 +1,45 @@
 'use server';
 
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { createSuccessResponse, createErrorResponse, ApiResponse } from '@/lib/utils/api-response';
-import { AppError, ErrorCode, handlePrismaError, createValidationError, createNotFoundError } from '@/lib/utils/error-handler';
+import { handlePrismaError, createNotFoundError } from '@/lib/utils/error-handler';
+import { createModelActions } from '@/lib/server/action-factory';
+import { 
+  tapPassMemberInputSchema,
+  TapPassMember
+} from '@/types/tappass';
 
-// Schemas
-const tapPassMemberSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'PENDING'])
-});
-
-type TapPassMemberInput = z.infer<typeof tapPassMemberSchema>;
-type TapPassMember = any; // This would typically be defined in your schema
-
-// Create a new TapPassMember
-export async function createTapPassMember(data: TapPassMemberInput): Promise<ApiResponse<TapPassMember>> {
-  try {
-    // Validate the input data
-    const validationResult = tapPassMemberSchema.safeParse(data);
-    if (!validationResult.success) {
-      const error = createValidationError('Validation failed', validationResult.error.format());
-      return createErrorResponse(error.message, error.code, error.details);
-    }
-
-    // Create the TapPassMember in the database
-    const newMember = await prisma.tapPassMember.create({
-      data: validationResult.data
-    });
-
-    // Return success response
-    return createSuccessResponse(newMember);
-  } catch (error) {
-    const appError = handlePrismaError(error);
-    return createErrorResponse(appError.message, appError.code, appError.details);
+// Create model actions using factory
+const MemberActions = createModelActions(
+  "Member", // Correct Prisma model name
+  tapPassMemberInputSchema,
+  tapPassMemberInputSchema,
+  {
+    defaultSortField: "joinDate",
+    relations: ["visitHistory"]
   }
-}
+);
 
-// Get a TapPassMember by ID
-export async function getTapPassMember(id: string): Promise<ApiResponse<TapPassMember>> {
+// Export consolidated actions with correct property names
+export const {
+  create,
+  getById,
+  update,
+  remove,
+  list
+} = MemberActions;
+
+// Additional TapPass-specific actions
+export async function recordVisit(memberId: string): Promise<ApiResponse<TapPassMember>> {
   try {
-    const member = await prisma.tapPassMember.findUnique({
-      where: { id }
+    const member = await prisma.member.update({
+      where: { id: memberId },
+      data: {
+        visitCount: { increment: 1 },
+        points: { increment: 10 }, // Example: 10 points per visit
+        lastVisit: new Date()
+      }
     });
-
-    if (!member) {
-      const error = createNotFoundError('TapPassMember', id);
-      return createErrorResponse(error.message, error.code);
-    }
 
     return createSuccessResponse(member);
   } catch (error) {
@@ -58,93 +48,21 @@ export async function getTapPassMember(id: string): Promise<ApiResponse<TapPassM
   }
 }
 
-// Get a list of TapPassMembers with pagination
-interface ListOptions {
-  page?: number;
-  pageSize?: number;
-  status?: 'ACTIVE' | 'INACTIVE' | 'PENDING';
-}
-
-export async function listTapPassMembers({
-  page = 1,
-  pageSize = 10,
-  status
-}: ListOptions = {}): Promise<ApiResponse<TapPassMember[]>> {
+export async function generateCard(memberId: string): Promise<ApiResponse<{ cardUrl: string }>> {
   try {
-    // Calculate pagination
-    const skip = (page - 1) * pageSize;
-    
-    // Prepare filter
-    const where = status ? { status } : {};
-    
-    // Get members with pagination
-    const members = await prisma.tapPassMember.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' }
+    const member = await prisma.member.findUnique({
+      where: { id: memberId }
     });
 
-    // Get total count for pagination
-    const total = await prisma.tapPassMember.count({ where });
-    
-    // Calculate pagination metadata
-    const totalPages = Math.ceil(total / pageSize);
-    
-    // Return paginated response with proper pagination meta
-    return {
-      success: true,
-      data: members,
-      meta: {
-        pagination: {
-          currentPage: page,
-          pageSize,
-          totalItems: total,
-          totalPages
-        }
-      }
-    } as any; // Type assertion to meet test expectations
-  } catch (error) {
-    const appError = handlePrismaError(error);
-    return createErrorResponse(appError.message, appError.code, appError.details);
-  }
-}
-
-// Update a TapPassMember
-export async function updateTapPassMember(
-  id: string,
-  data: TapPassMemberInput
-): Promise<ApiResponse<TapPassMember>> {
-  try {
-    // Validate the input data
-    const validationResult = tapPassMemberSchema.safeParse(data);
-    if (!validationResult.success) {
-      const error = createValidationError('Validation failed', validationResult.error.format());
-      return createErrorResponse(error.message, error.code, error.details);
+    if (!member) {
+      const error = createNotFoundError('Member', memberId);
+      return createErrorResponse(error.message, error.code);
     }
 
-    // Update the TapPassMember in the database
-    const updatedMember = await prisma.tapPassMember.update({
-      where: { id },
-      data: validationResult.data
-    });
+    // TODO: Implement card generation logic
+    const cardUrl = `/api/cards/${memberId}`;
 
-    // Return success response
-    return createSuccessResponse(updatedMember);
-  } catch (error) {
-    const appError = handlePrismaError(error);
-    return createErrorResponse(appError.message, appError.code, appError.details);
-  }
-}
-
-// Delete a TapPassMember
-export async function deleteTapPassMember(id: string): Promise<ApiResponse<TapPassMember>> {
-  try {
-    const deletedMember = await prisma.tapPassMember.delete({
-      where: { id }
-    });
-
-    return createSuccessResponse(deletedMember);
+    return createSuccessResponse({ cardUrl });
   } catch (error) {
     const appError = handlePrismaError(error);
     return createErrorResponse(appError.message, appError.code, appError.details);

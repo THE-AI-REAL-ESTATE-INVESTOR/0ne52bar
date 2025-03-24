@@ -1,4 +1,4 @@
-import { MembershipLevel, type Member, type Visit, type Prisma } from '@prisma/client';
+import { type Member, type Visit, type Prisma, type MembershipLevel } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { type RegistrationFormData } from '@/lib/validations';
 import { db } from './index';
@@ -9,17 +9,17 @@ export interface CreateMemberParams {
     name: string;
     email: string;
     phoneNumber: string;
-    birthday: Date;
+    birthday?: Date;
     agreeToTerms: boolean;
-    membershipLevel?: string;
+    membershipLevel?: MembershipLevel;
     points?: number;
     visits?: number;
     lastVisit?: Date;
     visitHistory?: {
       create: {
-        visitDate: Date;
-        points: number;
-        amount: number;
+        visitDate?: Date;
+        points?: number;
+        amount?: number;
       }
     }
   };
@@ -53,7 +53,8 @@ export const memberService = {
       data: {
         ...data,
         memberId,
-        membershipLevel: data.membershipLevel || 'BRONZE'
+        membershipLevel: data.membershipLevel || 'BRONZE',
+        visits: data.visits || 0
       }
     });
   },
@@ -73,6 +74,9 @@ export const memberService = {
           phoneNumber ? { phoneNumber } : {},
           memberId ? { memberId } : {}
         ]
+      },
+      include: {
+        visitHistory: true
       }
     });
   },
@@ -122,7 +126,7 @@ export const memberService = {
     const updatedMember = await prisma.member.update({
       where: { id: member.id },
       data: {
-        visitCount: {
+        visits: {
           increment: 1
         },
         points: {
