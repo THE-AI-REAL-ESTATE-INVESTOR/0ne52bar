@@ -1,0 +1,39 @@
+{
+  "database": {
+    "glob": "**/prisma/**/*.{ts,prisma}",
+    "rule": """
+      # Database Best Practices
+    
+      - Use Prisma for all database operations
+      - Keep schema.prisma well-documented
+      - Create appropriate indexes for query performance
+      - Implement proper relations between models
+      - Use enums for fixed sets of values
+      - Create database service files in src/lib/db
+      - Validate all input with Zod before database operations
+      - Implement proper error handling for database operations
+      - Use migrations for schema changes in production
+      - Keep migration files clean and focused
+      - Add seed data for development
+      - Document complex queries with comments
+      - Use the TypeScript-to-Prisma Schema Generator to maintain schema consistency with types
+      - Run `npm run generate-schema` after significant type changes
+      - Commit the generated schema.prisma file to version control
+      - Use AI to generate database queries and optimize performance
+      - Use AI to suggest database schema improvements
+      - NEVER modify database schema without creating a migration
+      - ALWAYS test migrations on a development database first
+      - Document all schema changes in the migration file
+      - Include rollback instructions in migration files
+      - Keep migrations atomic and focused on a single change
+      - Use meaningful names for migration files
+      - Test migrations with existing data
+      - Backup database before applying migrations in production
+      - Review migration impact on existing queries and indexes
+      - Consider data migration needs when changing schema
+      - Document any manual steps needed for migration
+      - Include validation checks in migrations
+      - Test rollback procedures for all migrations
+    """
+  }
+} 

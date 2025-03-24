@@ -1,5 +1,5 @@
 # TapPass Data Flow Analysis: Before and After Zod Implementation
-
+this has been replaced by prisma full crud 
 ## Overview
 
 This document explains the TapPass data flow, specifically focusing on how member data is stored and retrieved. It compares the previous implementation with the current Zod validation implementation to identify why the lookup functionality isn't working properly.
