@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 // Component to handle search params with suspense
 function LoginForm() {
@@ -12,13 +12,6 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const rawCallbackUrl = searchParams?.get('callbackUrl') || '/admin/dashboard';
-  
-  // Ensure callback URL uses the correct domain
-  const callbackUrl = rawCallbackUrl.startsWith('http') 
-    ? new URL(rawCallbackUrl).pathname 
-    : rawCallbackUrl;
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +31,8 @@ function LoginForm() {
         return;
       }
       
-      // Redirect to dashboard or callback URL
-      const targetPath = callbackUrl.startsWith('/') ? callbackUrl : `/${callbackUrl}`;
-      router.push(targetPath);
+      // Always redirect to dashboard after successful login
+      router.push('/admin/dashboard');
     } catch (_error) {
       console.error('Login error:', _error);
       setError('An error occurred. Please try again.');
