@@ -24,6 +24,7 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
       tags: [],
       attendees: [],
       createdAt: new Date(event.date),
+      isActive: true
     }));
     
     setCombinedEvents(allEvents);
