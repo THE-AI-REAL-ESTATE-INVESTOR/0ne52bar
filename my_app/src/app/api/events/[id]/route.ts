@@ -38,10 +38,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const event = await prisma.event.update({
       where: {
-        id: params.id,
+        id
       },
       data: {
         title: body.title,
@@ -51,6 +52,7 @@ export async function PUT(
         image: body.image,
         facebookEventUrl: body.facebookEventUrl,
         eventTagId: body.eventTagId,
+        isActive: body.isActive,
       },
       include: {
         EventTag: true,

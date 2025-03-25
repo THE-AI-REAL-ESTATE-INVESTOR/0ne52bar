@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         image: body.image,
         facebookEventUrl: body.facebookEventUrl,
         eventTagId: body.eventTagId,
+        isActive: body.isActive,
       },
       include: {
         EventTag: true,

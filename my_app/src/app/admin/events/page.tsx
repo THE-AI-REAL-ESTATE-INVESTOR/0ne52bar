@@ -14,6 +14,7 @@ interface Event {
   time: string;
   image?: string;
   featured: boolean;
+  isActive: boolean;
 }
 
 export default function EventsManagement() {
@@ -33,7 +34,8 @@ export default function EventsManagement() {
     date: '',
     time: '',
     image: '',
-    featured: false
+    featured: false,
+    isActive: true
   });
 
   // Check authentication
@@ -80,7 +82,8 @@ export default function EventsManagement() {
       date: '',
       time: '',
       image: '',
-      featured: false
+      featured: false,
+      isActive: false
     });
     setEditingEvent(null);
   };
@@ -100,7 +103,8 @@ export default function EventsManagement() {
       date: event.date,
       time: event.time,
       image: event.image || '',
-      featured: event.featured
+      featured: event.featured,
+      isActive: event.isActive
     });
     setIsFormOpen(true);
   };
@@ -241,6 +245,12 @@ export default function EventsManagement() {
                   <p className="text-lg text-gray-300 mb-3">{formatDate(event.date)} at {event.time}</p>
                   <p className="text-lg text-gray-400 mb-4">{event.description}</p>
                   
+                  <div className="mb-4">
+                    <span className={`px-2 py-1 rounded text-sm font-semibold ${event.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                      {event.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  
                   <div className="flex justify-end space-x-3">
                     <button
                       onClick={() => handleEditEvent(event)}
@@ -361,6 +371,21 @@ export default function EventsManagement() {
                     <label htmlFor="featured" className="ml-2 text-gray-300">Feature this event</label>
                   </div>
                   <p className="text-base text-gray-400 mt-1">Featured events will be highlighted on the events page.</p>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-amber-500 border-gray-600 rounded focus:ring-amber-500"
+                    />
+                    <label htmlFor="isActive" className="ml-2 text-gray-300">Event is active</label>
+                  </div>
+                  <p className="text-base text-gray-400 mt-1">Active events will be visible on the website.</p>
                 </div>
                 
                 <div className="flex justify-end space-x-3">
