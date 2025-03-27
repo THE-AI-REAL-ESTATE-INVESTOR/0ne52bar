@@ -3,7 +3,6 @@
 import { useCart } from './CartContext';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { CartSummary } from './CartSummary';
 
@@ -14,15 +13,14 @@ export function CartButton() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="relative">
+        <Button 
+          className="fixed bottom-4 right-4 bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 px-4 rounded-full shadow-lg flex items-center gap-2"
+        >
           <ShoppingCart className="h-5 w-5" />
           {itemCount > 0 && (
-            <Badge 
-              variant="secondary" 
-              className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center"
-            >
+            <span className="bg-black text-amber-500 rounded-full h-5 w-5 flex items-center justify-center text-sm">
               {itemCount}
-            </Badge>
+            </span>
           )}
         </Button>
       </DialogTrigger>
