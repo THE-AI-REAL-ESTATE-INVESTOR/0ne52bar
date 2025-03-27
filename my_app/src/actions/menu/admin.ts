@@ -13,7 +13,8 @@ const menuItemSchema = z.object({
   description: z.string().optional(),
   categoryId: z.string().min(1),
   isActive: z.boolean().default(true),
-  sortOrder: z.number().default(100)
+  sortOrder: z.number().default(100),
+  status: z.enum(['AVAILABLE', 'NEEDS_PRICING', 'COMING_SOON', 'ARCHIVED']).default('AVAILABLE')
 });
 
 const categorySchema = z.object({
@@ -27,7 +28,16 @@ export async function getMenuItems(): Promise<ApiResponse<MenuItem[]>> {
     await prisma.$connect();
     
     const items = await prisma.menuItem.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        categoryId: true,
+        isActive: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         category: true
       },
       orderBy: {
@@ -58,6 +68,12 @@ export async function getMenuItems(): Promise<ApiResponse<MenuItem[]>> {
 export async function getCategories(): Promise<ApiResponse<Category[]>> {
   try {
     const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        sortOrder: true
+      },
       orderBy: {
         sortOrder: 'asc'
       }
@@ -82,7 +98,16 @@ export async function createMenuItem(data: MenuItemFormData): Promise<ApiRespons
     const validatedData = menuItemSchema.parse(data);
     const item = await prisma.menuItem.create({
       data: validatedData,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        categoryId: true,
+        isActive: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         category: true
       }
     });
@@ -101,13 +126,22 @@ export async function createMenuItem(data: MenuItemFormData): Promise<ApiRespons
   }
 }
 
-export async function updateMenuItem(id: string, data: Partial<MenuItemFormData>): Promise<ApiResponse<MenuItem>> {
+export async function updateMenuItem(id: string, data: MenuItemFormData): Promise<ApiResponse<MenuItem>> {
   try {
-    const validatedData = menuItemSchema.partial().parse(data);
+    const validatedData = menuItemSchema.parse(data);
     const item = await prisma.menuItem.update({
       where: { id },
       data: validatedData,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        categoryId: true,
+        isActive: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         category: true
       }
     });
@@ -126,18 +160,15 @@ export async function updateMenuItem(id: string, data: Partial<MenuItemFormData>
   }
 }
 
-export async function deleteMenuItem(id: string): Promise<ApiResponse<MenuItem>> {
+export async function deleteMenuItem(id: string): Promise<ApiResponse<void>> {
   try {
-    const item = await prisma.menuItem.update({
-      where: { id },
-      data: {
-        isActive: false
-      }
+    await prisma.menuItem.delete({
+      where: { id }
     });
 
     return {
       success: true,
-      data: item
+      data: undefined
     };
   } catch (error) {
     console.error('Error deleting menu item:', error);
@@ -207,6 +238,44 @@ export async function deleteCategory(id: string): Promise<ApiResponse<void>> {
     return {
       success: false,
       error: message || 'Failed to delete category'
+    };
+  }
+}
+
+export async function updateMenuItemStatus(
+  id: string,
+  status: MenuItemStatus
+): Promise<ApiResponse<MenuItem>> {
+  try {
+    await prisma.$connect();
+    
+    const item = await prisma.menuItem.update({
+      where: { id },
+      data: { status },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        categoryId: true,
+        isActive: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        category: true
+      }
+    });
+    
+    return {
+      success: true,
+      data: item
+    };
+  } catch (error) {
+    console.error('Error updating menu item status:', error);
+    const { message } = handlePrismaError(error);
+    return {
+      success: false,
+      error: message
     };
   }
 } 

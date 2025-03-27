@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { createMenuItem } from '@/actions/menu/admin';
-import type { Category } from '@/types/menu';
+import type { Category, MenuItemStatus } from '@/types/menu';
 
 const menuItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -21,7 +22,8 @@ const menuItemSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),
   isActive: z.boolean().default(true),
   sortOrder: z.number().default(100),
-  imageUrl: z.string().optional()
+  imageUrl: z.string().optional(),
+  status: z.enum(['AVAILABLE', 'NEEDS_PRICING', 'COMING_SOON', 'ARCHIVED']).default('AVAILABLE')
 });
 
 type MenuItemFormData = z.infer<typeof menuItemSchema>;
@@ -47,7 +49,8 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
       categoryId: '',
       isActive: true,
       sortOrder: 100,
-      imageUrl: ''
+      imageUrl: '',
+      status: 'AVAILABLE'
     }
   });
 
@@ -95,47 +98,49 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
-          Name
-        </label>
+        <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           {...form.register('name')}
-          className={form.formState.errors.name ? 'border-red-500' : ''}
+          disabled={isSubmitting}
         />
         {form.formState.errors.name && (
-          <p className="text-sm text-red-500 mt-1">
-            {form.formState.errors.name.message}
-          </p>
+          <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="price" className="block text-sm font-medium mb-1">
-          Price
-        </label>
+        <Label htmlFor="price">Price</Label>
         <Input
           id="price"
-          type="text"
           {...form.register('price')}
-          className={form.formState.errors.price ? 'border-red-500' : ''}
+          disabled={isSubmitting}
         />
         {form.formState.errors.price && (
-          <p className="text-sm text-red-500 mt-1">
-            {form.formState.errors.price.message}
-          </p>
+          <p className="text-sm text-red-500">{form.formState.errors.price.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="categoryId" className="block text-sm font-medium mb-1">
-          Category
-        </label>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          {...form.register('description')}
+          disabled={isSubmitting}
+        />
+        {form.formState.errors.description && (
+          <p className="text-sm text-red-500">{form.formState.errors.description.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="categoryId">Category</Label>
         <Select
           value={form.watch('categoryId')}
           onValueChange={(value) => form.setValue('categoryId', value)}
+          disabled={isSubmitting}
         >
-          <SelectTrigger className={form.formState.errors.categoryId ? 'border-red-500' : ''}>
+          <SelectTrigger>
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -147,32 +152,57 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
           </SelectContent>
         </Select>
         {form.formState.errors.categoryId && (
-          <p className="text-sm text-red-500 mt-1">
-            {form.formState.errors.categoryId.message}
-          </p>
+          <p className="text-sm text-red-500">{form.formState.errors.categoryId.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
-          Description
-        </label>
-        <Textarea
-          id="description"
-          {...form.register('description')}
-          className={form.formState.errors.description ? 'border-red-500' : ''}
+        <Label htmlFor="status">Status</Label>
+        <Select
+          value={form.watch('status')}
+          onValueChange={(value) => form.setValue('status', value as MenuItemStatus)}
+          disabled={isSubmitting}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="AVAILABLE">Available</SelectItem>
+            <SelectItem value="NEEDS_PRICING">Needs Pricing</SelectItem>
+            <SelectItem value="COMING_SOON">Coming Soon</SelectItem>
+            <SelectItem value="ARCHIVED">Archived</SelectItem>
+          </SelectContent>
+        </Select>
+        {form.formState.errors.status && (
+          <p className="text-sm text-red-500">{form.formState.errors.status.message}</p>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="isActive"
+          checked={form.watch('isActive')}
+          onCheckedChange={(checked) => form.setValue('isActive', checked)}
+          disabled={isSubmitting}
         />
-        {form.formState.errors.description && (
-          <p className="text-sm text-red-500 mt-1">
-            {form.formState.errors.description.message}
-          </p>
+        <Label htmlFor="isActive">Active</Label>
+      </div>
+
+      <div>
+        <Label htmlFor="sortOrder">Sort Order</Label>
+        <Input
+          id="sortOrder"
+          type="number"
+          {...form.register('sortOrder', { valueAsNumber: true })}
+          disabled={isSubmitting}
+        />
+        {form.formState.errors.sortOrder && (
+          <p className="text-sm text-red-500">{form.formState.errors.sortOrder.message}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Image
-        </label>
+        <Label htmlFor="imageUrl">Image</Label>
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors
@@ -209,17 +239,6 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
             </div>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="isActive"
-          checked={form.watch('isActive')}
-          onCheckedChange={(checked) => form.setValue('isActive', checked)}
-        />
-        <label htmlFor="isActive" className="text-sm font-medium">
-          Active
-        </label>
       </div>
 
       {error && (

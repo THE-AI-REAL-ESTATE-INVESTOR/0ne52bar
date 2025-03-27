@@ -10,8 +10,10 @@ export interface MenuItem {
   categoryId: string;
   isActive: boolean;
   status: MenuItemStatus;
+  sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
+  category?: Category;
 }
 
 export interface Category {

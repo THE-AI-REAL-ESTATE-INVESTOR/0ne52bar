@@ -1,5 +1,5 @@
 import { getMenuItems, getCategories } from '@/actions/menu/admin';
-import { MenuAdmin } from '../../../components/menu/MenuAdmin';
+import { MenuAdmin } from '@/components/menu/adminMenu/MenuAdmin';
 
 export const dynamic = 'force-dynamic';
 

@@ -24,7 +24,8 @@ export async function getActiveMenuItems(): Promise<ApiResponse<MenuItem[]>> {
     
     const items = await prisma.menuItem.findMany({
       where: {
-        isActive: true
+        isActive: true,
+        status: 'AVAILABLE'
       },
       include: {
         category: true

@@ -1,8 +1,8 @@
 'use client';
 
-import MenuDisplay from '@/components/menu/MenuDisplay';
-import MenuOrderSystem from '@/components/MenuOrderSystem';
-import OrderButton from '@/components/OrderButton';
+import MenuDisplay from './MenuDisplay';
+import MenuOrderModal from './MenuOrderModal';
+import OrderButton from './OrderButton';
 import type { MenuItem, Category } from '@prisma/client';
 
 type MenuItemWithCategory = MenuItem & {
@@ -18,11 +18,10 @@ interface MenuClientProps {
 
 export default function MenuClient({ items }: MenuClientProps) {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Menu</h1>
+    <>
       <MenuDisplay items={items} />
-      <MenuOrderSystem />
+      <MenuOrderModal />
       <OrderButton />
-    </div>
+    </>
   );
 } 

@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import type { Member } from '@prisma/client';
+
 
 // Validation schema for member updates
 const memberUpdateSchema = z.object({
