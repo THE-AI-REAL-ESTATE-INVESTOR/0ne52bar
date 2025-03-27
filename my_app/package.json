@@ -32,7 +32,7 @@
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node --loader ts-node/esm prisma/seed.ts",
+    "prisma:seed": "cd prisma && ts-node --project tsconfig.json seed.ts",
     "prisma:reset": "prisma migrate reset --force",
     "db:push": "prisma db push",
     "verify-schema": "node scripts/verify-schema.mjs",
@@ -112,6 +112,6 @@
     "typescript": "^5.8.2"
   },
   "prisma": {
-    "seed": "node --loader ts-node/esm prisma/seed.ts"
+    "seed": "cd prisma && ts-node --project tsconfig.json seed.ts"
   }
 }

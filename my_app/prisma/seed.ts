@@ -1,4 +1,4 @@
-import { PrismaClient, MenuItemStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -87,9 +87,6 @@ async function main() {
       continue;
     }
 
-    // Determine status based on price
-    const status = item.price === "0.00" ? MenuItemStatus.NEEDS_PRICING : MenuItemStatus.AVAILABLE;
-
     // First try to find existing item
     const existingItem = await prisma.menuItem.findFirst({
       where: { name: item.name }
@@ -104,7 +101,7 @@ async function main() {
           description: item.description,
           categoryId: categoryId,
           isActive: true,
-          status: status
+          sortOrder: 100
         }
       });
     } else {
@@ -116,8 +113,7 @@ async function main() {
           description: item.description,
           categoryId: categoryId,
           isActive: true,
-          sortOrder: 100,
-          status: status
+          sortOrder: 100
         }
       });
     }
