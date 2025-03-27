@@ -20,8 +20,11 @@ const orderSchema = z.object({
 
 export async function getActiveMenuItems(): Promise<ApiResponse<MenuItem[]>> {
   try {
+    console.log('Connecting to database...');
     await prisma.$connect();
+    console.log('Connected to database');
     
+    console.log('Fetching menu items...');
     const items = await prisma.menuItem.findMany({
       where: {
         isActive: true,
@@ -36,6 +39,7 @@ export async function getActiveMenuItems(): Promise<ApiResponse<MenuItem[]>> {
         }
       }
     });
+    console.log('Fetched items:', items);
     
     return {
       success: true,

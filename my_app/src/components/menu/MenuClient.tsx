@@ -1,22 +1,15 @@
 'use client';
 
-import MenuDisplay from './MenuDisplay';
+import { MenuDisplay } from './MenuDisplay';
 import { CartProvider } from './cart/CartContext';
 import { CartButton } from './cart/CartButton';
-import type { MenuItem, Category } from '@prisma/client';
-
-type MenuItemWithCategory = MenuItem & {
-  category: Category & {
-    sortOrder: number;
-    description?: string;
-  };
-};
+import type { MenuItemWithCategory } from '@/types/menu';
 
 interface MenuClientProps {
   items: MenuItemWithCategory[];
 }
 
-export default function MenuClient({ items }: MenuClientProps) {
+export function MenuClient({ items }: MenuClientProps) {
   return (
     <CartProvider>
       <div className="container mx-auto px-4 py-8">

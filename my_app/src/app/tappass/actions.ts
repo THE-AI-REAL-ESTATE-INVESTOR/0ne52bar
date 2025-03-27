@@ -87,8 +87,8 @@ export async function registerTapPassMember(formData: FormData) {
     
     // Generate member ID parts
     const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
-    const memberCount = await prisma.member.count();
-    const sequentialId = (memberCount + 2000).toString().padStart(4, '0');
+    const memberCount = await memberService.findAll();
+    const sequentialId = (memberCount.length + 2000).toString().padStart(4, '0');
     const memberId = `ONE52-${randomPart}-${sequentialId}`;
     
     // Create the new member with initial visit
@@ -101,7 +101,7 @@ export async function registerTapPassMember(formData: FormData) {
         agreeToTerms,
         membershipLevel: 'BRONZE',
         points: 0,
-        visits: 1,
+        visitCount: 1,
         lastVisit: new Date(),
         visitHistory: {
           create: {

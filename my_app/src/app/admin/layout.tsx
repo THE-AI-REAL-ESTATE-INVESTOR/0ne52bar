@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { AdminNavbar } from '@/components/admin/AdminNavbar';
 
 export default function AdminLayout({
   children,
@@ -20,31 +21,7 @@ export default function AdminLayout({
 
       <div className="container mx-auto p-4">
         {/* Admin Navigation */}
-        <nav className="bg-gray-900/50 p-4 mb-6 rounded-lg">
-          <div className="flex flex-wrap items-center gap-4">
-            <Link href="/admin/dashboard" className="text-gray-300 hover:text-white transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/admin/tappass" className="text-gray-300 hover:text-white transition-colors">
-              TapPass
-            </Link>
-            <Link href="/admin/menu" className="text-gray-300 hover:text-white transition-colors">
-              Menu
-            </Link>
-            <Link href="/admin/merchandise" className="text-gray-300 hover:text-white transition-colors">
-              Merchandise
-            </Link>
-            <Link href="/admin/events" className="text-gray-300 hover:text-white transition-colors">
-              Events
-            </Link>
-            <Link href="/admin/settings" className="text-gray-300 hover:text-white transition-colors">
-              Settings
-            </Link>
-            <Link href="/admin/help" className="text-gray-300 hover:text-white transition-colors ml-auto">
-              Help
-            </Link>
-          </div>
-        </nav>
+        <AdminNavbar />
 
         {/* Main Content */}
         <main className="bg-gray-900/50 p-6 rounded-lg">

@@ -1,6 +1,6 @@
 import { getActiveMenuItems } from '@/actions/menu/public';
-import MenuClient from '@/components/menu/MenuClient';
-import type { MenuItem, Category } from '@prisma/client';
+import { MenuClient } from '@/components/menu/MenuClient';
+import type { MenuItemWithCategory } from '@/types/menu';
 
 // Force dynamic rendering to prevent stale data
 export const dynamic = 'force-dynamic';
@@ -9,15 +9,10 @@ export const generateStaticParams = false;
 // Disable caching
 export const revalidate = 0;
 
-type MenuItemWithCategory = MenuItem & {
-  category: Category & {
-    sortOrder: number;
-    description?: string;
-  };
-};
-
 export default async function MenuPage() {
+  console.log('Fetching menu items...');
   const result = await getActiveMenuItems();
+  console.log('Menu items result:', result);
 
   if (!result.success) {
     return (
@@ -30,6 +25,7 @@ export default async function MenuPage() {
 
   // Filter out items without categories and cast to correct type
   const itemsWithCategories = result.data.filter(item => item.category) as MenuItemWithCategory[];
+  console.log('Filtered items:', itemsWithCategories);
 
   return <MenuClient items={itemsWithCategories} />;
 }

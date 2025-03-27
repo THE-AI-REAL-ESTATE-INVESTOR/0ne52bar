@@ -9,10 +9,11 @@ export interface MenuItem {
   price: string;
   categoryId: string;
   isActive: boolean;
-  status: MenuItemStatus;
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
+  imageUrl?: string;
+  status: MenuItemStatus;
   category?: Category;
 }
 
@@ -21,20 +22,39 @@ export interface Category {
   name: string;
   description?: string;
   sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  notes?: string;
 }
 
 export interface OrderItem {
-  menuItem: MenuItem;
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
+  notes?: string;
 }
 
 export interface Order {
   id: string;
-  memberId?: string;
+  status: 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
   items: OrderItem[];
   total: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  memberId?: string;
+  customerId: string;
+  phoneNumber: string;
+  customerName: string;
+  marketingConsent: boolean;
+  points: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MenuItemFormData {
