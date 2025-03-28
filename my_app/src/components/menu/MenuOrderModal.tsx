@@ -1,75 +1,41 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { getActiveMenuItems } from '@/actions/menu/public';
+import type { MenuItem, Category } from '@prisma/client';
 
-interface MenuItem {
-  id: string;
-  name: string;
-  price: string;
-  category: string;
-  description?: string;
-}
+type MenuItemWithCategory = MenuItem & {
+  category: Category;
+};
 
 const MenuOrderSystem: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
-  const [cart, setCart] = useState<{item: MenuItem, quantity: number}[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItemWithCategory[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MenuItemWithCategory[]>([]);
+  const [cart, setCart] = useState<{item: MenuItemWithCategory, quantity: number}[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Initialize menu items - in a real app, this would come from an API or database
+  // Fetch menu items from database
   useEffect(() => {
-    const items: MenuItem[] = [
-      // Kick Starters
-      { id: 'chips-salsa', name: 'CHIPS & SALSA', price: '$6.00', category: 'KICK STARTERS' },
-      { id: 'chips-queso', name: 'CHIPS AND QUESO', price: '$7.50', category: 'KICK STARTERS' },
-      { id: 'chips-salsa-queso', name: 'CHIPS SALSA & QUESO', price: '$8.50', category: 'KICK STARTERS' },
-      { id: 'fried-mushrooms', name: 'FRIED MUSHROOMS', price: '$6.00', category: 'KICK STARTERS' },
-      { id: 'fried-green-beans', name: 'FRIED GREEN BEANS', price: '$6.00', category: 'KICK STARTERS' },
-      { id: 'cheese-sticks', name: 'CHEESE STICKS', price: '$7.50', category: 'KICK STARTERS' },
-      { id: 'fried-pickles', name: 'FRIED PICKLES', price: '$6.00', category: 'KICK STARTERS' },
-      { id: 'fried-okra', name: 'FRIED OKRA', price: '$6.00', category: 'KICK STARTERS' },
-      { id: 'hot-wings', name: 'HOT WINGS', price: '$8.50', category: 'KICK STARTERS', description: 'Buffalo, Teriyaki, Honey BBQ, Garlic Parmesan' },
-      { id: 'basket-fries-tots', name: 'BASKET OF FRIES/TOTS', price: '$4.00', category: 'KICK STARTERS', description: 'Add all your favorite toppings for an additional charge' },
-      { id: 'onion-ring', name: 'ONION RING', price: '$4.00', category: 'KICK STARTERS' },
-      { id: 'madatots', name: 'Madatots', price: '$8.50', category: 'KICK STARTERS', description: 'Chili, Queso Cheese, Sour Cream, Tomatoes and Salsa' },
-      { id: 'sampler', name: 'ONE - 52 SAMPLER - Pick 3', price: '$15.00', category: 'KICK STARTERS', description: 'Cheese Sticks, Mushrooms, Pickles, Okra, Green beans' },
-      
-      // Main Dishes
-      { id: 'quesadillas-half', name: 'QUESADILLAS - Half', price: '$6.50', category: 'MAIN DISHES', description: 'Your Choice of Steak or Chicken Stuffed with Cheese & Onions' },
-      { id: 'quesadillas-full', name: 'QUESADILLAS - Full', price: '$10.00', category: 'MAIN DISHES', description: 'Your Choice of Steak or Chicken Stuffed with Cheese & Onions' },
-      { id: 'tacos-classic', name: 'CLASSIC TACO', price: '$3.50', category: 'MAIN DISHES', description: 'Lightly Fried Corn tortilla with Lettuce, Tomato, Cheese and Onions' },
-      { id: 'tacos-soft', name: 'SOFT TACO', price: '$3.50', category: 'MAIN DISHES', description: 'Flour Tortilla filled with Ground Beef, Lettuce, Tomato, Cheese' },
-      { id: 'tacos-street', name: 'STREET TACO', price: '$4.00', category: 'MAIN DISHES', description: 'Warm Corn Tortilla, filled with Steak or Chicken, Onion & Cilantro' },
-      { id: 'nachos', name: 'NACHOS', price: '$8.00', category: 'MAIN DISHES', description: 'Topped with Ground Beef, Cheese, Jalapeños, Diced Tomatoes, Served with Sour Cream, & Salsa' },
-      { id: 'nachos-grande', name: 'Nachos Grande', price: '$13.50', category: 'MAIN DISHES', description: 'Topped with Ground Beef, Cheese, Jalapeños, Diced Tomatoes, Served with Sour Cream, & Salsa' },
-      { id: 'fajitas', name: 'FAJITAS', price: '$4.00', category: 'MAIN DISHES', description: 'Beef or Chicken, Green Peppers & Onions & cheese' },
-      
-      // Salads & Wraps
-      { id: 'chicken-wrap', name: 'CHICKEN WRAP', price: '$8.00', category: 'SALADS & WRAPS', description: 'Grilled or breaded chicken, lettuce, tomatoes, bacon, cheese and ranch wrapped up in a flour tortilla.' },
-      { id: 'pile-up-salad', name: 'PILE UP SALAD', price: '$8.50', category: 'SALADS & WRAPS', description: 'Lettuce, tomatoes, cucumbers, cheese, bacon and your choice of fried or grilled chicken' },
-      { id: 'house-salad', name: 'HOUSE SALAD', price: '$4.50', category: 'SALADS & WRAPS' },
-      
-      // Extras
-      { id: 'bowl-chili', name: 'BOWL OF CHILI', price: '$4.50', category: 'EXTRAS' },
-      { id: 'frito-chili-pie', name: 'FRITO CHILI PIE', price: '$6.50', category: 'EXTRAS' },
-      
-      // Burgers & Sandwiches
-      { id: 'one-52-burger', name: 'ONE-52 BURGER', price: '$8.00', category: 'BURGERS & SANDWICHES', description: '½ lb 100% Beef Patty Topped with Lettuce, Tomato, Onion and Pickle, choice of Fries, Tots or Onion Rings.' },
-      { id: 'philly-steak', name: 'PHILLY STEAK', price: '$8.50', category: 'BURGERS & SANDWICHES', description: 'Philly Steak Grilled Onions, Bell Peppers and Cheese' },
-      { id: 'club-special', name: 'CLUB SPECIAL', price: '$8.50', category: 'BURGERS & SANDWICHES', description: 'Sliced Ham, Turkey & Bacon topped with Swiss & Cheddar Cheese, Lettuce & Tomato Served on Sough dough' },
-      { id: 'patty-melt', name: 'PATTY MELT', price: '$8.00', category: 'BURGERS & SANDWICHES', description: 'Topped with Cheese and Grilled Onions. Served on Sough Dough.' },
-      { id: 'blt', name: 'BLT', price: '$7.50', category: 'BURGERS & SANDWICHES' },
-      { id: 'grilled-cheese', name: 'GRILLED CHEESE', price: '$7.00', category: 'BURGERS & SANDWICHES', description: 'Texas toast with melted cheese' },
-      { id: 'yard-bird-sandwich', name: 'YARD BIRD SANDWICH', price: '$8.50', category: 'BURGERS & SANDWICHES', description: 'Grilled chicken with Lettuce, Tomato and Honey Mustard' },
-      { id: 'chicken-strip-sandwich', name: 'CHICKEN STRIP SANDWICH', price: '$8.50', category: 'BURGERS & SANDWICHES', description: 'Chicken Strips with swiss cheese on Texas Toast' },
-      { id: 'chicken-strip-basket', name: 'CHICKEN STRIP BASKET', price: '$8.50', category: 'BURGERS & SANDWICHES', description: 'Pick a Side (Tots, Fries, Onion Rings)' },
-      { id: 'hot-dog', name: 'HOT DOG', price: '$3.25', category: 'BURGERS & SANDWICHES' },
-    ];
-    
-    setMenuItems(items);
-    setFilteredItems(items);
+    async function fetchMenuItems() {
+      try {
+        const result = await getActiveMenuItems();
+        if (result.success && result.data) {
+          // Filter out items without categories
+          const itemsWithCategories = result.data.filter(item => item.category) as MenuItemWithCategory[];
+          setMenuItems(itemsWithCategories);
+          setFilteredItems(itemsWithCategories);
+        }
+      } catch (error) {
+        console.error('Error fetching menu items:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchMenuItems();
   }, []);
 
   // Listen for the custom event from OrderButton
@@ -115,7 +81,7 @@ const MenuOrderSystem: React.FC = () => {
   }, [searchTerm, menuItems]);
 
   // Add item to cart
-  const addToCart = (item: MenuItem) => {
+  const addToCart = (item: MenuItemWithCategory) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(cartItem => cartItem.item.id === item.id);
       
@@ -208,13 +174,15 @@ const MenuOrderSystem: React.FC = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4 text-white">Menu Items</h3>
             <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2">
-              {filteredItems.length > 0 ? (
+              {isLoading ? (
+                <p className="text-gray-400">Loading menu items...</p>
+              ) : filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
                   <div key={item.id} className="bg-gray-700 rounded-lg p-3 hover:bg-gray-600 transition">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-medium text-white">{item.name}</h4>
-                        <p className="text-gray-400 text-sm">{item.category}</p>
+                        <p className="text-gray-400 text-sm">{item.category.name}</p>
                         {item.description && (
                           <p className="text-gray-400 text-sm mt-1">{item.description}</p>
                         )}

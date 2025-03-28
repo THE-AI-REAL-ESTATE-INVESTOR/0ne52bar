@@ -8,8 +8,37 @@
 import { prisma } from '@/lib/prisma';
 import { memberService } from '@/lib/db/member';
 import { ZodError } from 'zod';
-import { registrationSchema } from '@/lib/validations';
+import { registrationSchema } from '@/lib/validations/tappass';
 import { revalidatePath } from 'next/cache';
+import type { MembershipLevel } from '@prisma/client';
+
+type MemberResponse = {
+  id: string;
+  memberId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  birthday: string;
+  agreeToTerms: boolean;
+  membershipLevel: MembershipLevel;
+  points: number;
+  visitCount: number;
+  joinDate: string;
+  lastVisit: string | null;
+  visitHistory: Array<{
+    id: string;
+    memberId: string;
+    visitDate: string;
+    points: number;
+    amount: number;
+  }>;
+};
+
+type RegisterResponse = {
+  success: boolean;
+  member?: MemberResponse;
+  error?: string;
+};
 
 /**
  * Get a member by email
@@ -51,7 +80,7 @@ export async function getMemberByEmail(email: string) {
 /**
  * Register a new TapPass member
  */
-export async function registerTapPassMember(formData: FormData) {
+export async function registerTapPassMember(formData: FormData): Promise<RegisterResponse> {
   try {
     // Extract form data
     const name = formData.get('name') as string;
@@ -78,31 +107,47 @@ export async function registerTapPassMember(formData: FormData) {
       }
       return { success: false, error: 'Invalid form data' };
     }
-    
-    // Check if member already exists
+
+    // First check for existing member by email
     const existingMember = await memberService.find({ email });
-    if (existingMember) {
-      return getMemberByEmail(email);
-    }
     
-    // Generate member ID parts
+    if (existingMember) {
+      console.log(`[Server] Found existing member: ${existingMember.name}, ID: ${existingMember.memberId}`);
+      return {
+        success: true,
+        member: {
+          id: existingMember.id,
+          memberId: existingMember.memberId,
+          name: existingMember.name,
+          email: existingMember.email,
+          phoneNumber: existingMember.phoneNumber,
+          birthday: existingMember.birthday.toISOString().split('T')[0],
+          agreeToTerms: existingMember.agreeToTerms,
+          membershipLevel: existingMember.membershipLevel,
+          points: existingMember.points,
+          visitCount: existingMember.visitCount,
+          joinDate: existingMember.joinDate.toISOString().split('T')[0],
+          lastVisit: existingMember.lastVisit ? existingMember.lastVisit.toISOString().split('T')[0] : null,
+          visitHistory: []
+        }
+      };
+    }
+
+    // Generate member ID
     const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
     const memberCount = await prisma.member.count();
     const sequentialId = (memberCount + 2000).toString().padStart(4, '0');
     const memberId = `ONE52-${randomPart}-${sequentialId}`;
-    
-    // Create the new member with initial visit
-    const newMember = await memberService.create({
+
+    // Create new member using memberService
+    const result = await memberService.create({
+      memberId,
       data: {
         name,
         email,
         phoneNumber,
         birthday: new Date(birthday),
         agreeToTerms,
-        membershipLevel: 'BRONZE',
-        points: 0,
-        visits: 1,
-        lastVisit: new Date(),
         visitHistory: {
           create: {
             visitDate: new Date(),
@@ -110,22 +155,40 @@ export async function registerTapPassMember(formData: FormData) {
             amount: 0
           }
         }
-      },
-      memberId
+      }
     });
+
+    // Format dates for response
+    const formattedMember: MemberResponse = {
+      id: result.id,
+      memberId: result.memberId,
+      name: result.name,
+      email: result.email,
+      phoneNumber: result.phoneNumber,
+      birthday: result.birthday.toISOString().split('T')[0],
+      agreeToTerms: result.agreeToTerms,
+      membershipLevel: result.membershipLevel,
+      points: result.points,
+      visitCount: result.visitCount,
+      joinDate: result.joinDate.toISOString().split('T')[0],
+      lastVisit: result.lastVisit ? result.lastVisit.toISOString().split('T')[0] : null,
+      visitHistory: []
+    };
     
     // Revalidate the path to ensure fresh data
     revalidatePath('/tappass');
     
-    // Return in consistent format
-    return getMemberByEmail(email);
+    // Return success response
+    return {
+      success: true,
+      member: formattedMember
+    };
     
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+  } catch (error) {
     console.error('Error registering member:', error);
     return {
       success: false,
-      error: errorMessage
+      error: error instanceof Error ? error.message : 'Failed to register member'
     };
   }
 }
@@ -293,6 +356,38 @@ export async function getMemberStats() {
     return {
       success: false,
       error: errorMessage
+    };
+  }
+}
+
+/**
+ * Check if a customer has a TapPass membership by phone number
+ */
+export async function checkMembershipByPhone(phoneNumber: string) {
+  try {
+    const member = await memberService.find({ phoneNumber });
+    
+    if (member) {
+      return {
+        success: true,
+        member: {
+          ...member,
+          birthday: member.birthday.toISOString().split('T')[0],
+          joinDate: member.joinDate.toISOString().split('T')[0],
+          lastVisit: member.lastVisit ? member.lastVisit.toISOString().split('T')[0] : null
+        }
+      };
+    } else {
+      return {
+        success: false,
+        error: "Member not found"
+      };
+    }
+  } catch (error) {
+    console.error('Error checking membership:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to check membership'
     };
   }
 } 

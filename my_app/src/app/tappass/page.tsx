@@ -6,9 +6,30 @@ import AccountCheck from '@/components/tappass/form/AccountCheck';
 import PersonalInfo from '@/components/tappass/form/PersonalInfo';
 import AdditionalDetails from '@/components/tappass/form/AdditionalDetails';
 import ConfirmSubmit from '@/components/tappass/form/ConfirmSubmit';
-import { create } from '@/actions/tapPassMember';
-import type { TapPassFormData, TapPassMemberInput } from '@/types/tappass';
-import type { SuccessResponse, ErrorResponse } from '@/lib/utils/api-response';
+import { registerTapPassMember } from '@/app/tappass/actions';
+import type { TapPassFormData } from '@/types/tappass';
+
+type RegisterResponse = {
+  success: boolean;
+  member?: {
+    id: string;
+    memberId: string;
+    name: string;
+    email: string;
+    birthday: string;
+    joinDate: string;
+    lastVisit: string | null;
+    visitHistory: Array<{
+      id: string;
+      memberId: string;
+      points: number;
+      createdAt: Date;
+      visitDate: Date;
+      amount: number;
+    }>;
+  };
+  error?: string;
+};
 
 const TapPassPage: React.FC = () => {
   const router = useRouter();
@@ -27,29 +48,34 @@ const TapPassPage: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
       
-      // Create the TapPass member with initial Bronze level
-      const result = await create({
-        email: formData.email!,
-        name: formData.name!,
-        phoneNumber: formData.phoneNumber!,
-        birthday: new Date(formData.birthday!),
-        agreeToTerms: formData.agreeToTerms!,
-        membershipLevel: 'BRONZE',
-        points: 0,
-        visits: 0,
-        lastVisit: null,
-        visitHistory: []
-      } as TapPassMemberInput);
+      // Create form data for registration
+      const formDataObj = new FormData();
+      formDataObj.append('name', formData.name!);
+      formDataObj.append('email', formData.email!);
+      formDataObj.append('phoneNumber', formData.phoneNumber!);
+      formDataObj.append('birthday', formData.birthday!);
+      formDataObj.append('agreeToTerms', String(formData.agreeToTerms!));
+
+      // Register the TapPass member
+      const result = await registerTapPassMember(formDataObj) as RegisterResponse;
 
       if (!result.success) {
-        const errorResponse = result as ErrorResponse;
-        throw new Error(errorResponse.error.message || 'Failed to create membership');
+        throw new Error(result.error || 'Failed to create membership');
       }
 
-      const successResponse = result as SuccessResponse<{ id: string }>;
-      // Show success message in the UI
-      router.push(`/tappass/dashboard/${successResponse.data.id}`);
+      // Check if member exists in the response
+      if (!result.member) {
+        throw new Error('Member data not returned');
+      }
+
+      // Log success
+      console.log('Successfully registered member:', result.member.memberId);
+
+      // Redirect to dashboard with the member ID
+      router.push(`/tappass/dashboard/${result.member.memberId}`);
+      
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Failed to create membership');
     } finally {
       setIsSubmitting(false);

@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 export async function getMenuItems() {
   try {
     const menuItems = await prisma.menuItem.findMany({
-      orderBy: { category: 'asc' }
+      orderBy: { name: 'asc' }
     });
     
     return {
