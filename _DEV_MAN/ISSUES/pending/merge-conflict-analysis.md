@@ -9,9 +9,9 @@ This document outlines the conflicts between `merge-prod-dev` and `main` branche
 - package.json: Kept main branch version with newer dependencies
 - src/app/admin/menu/page.tsx: Kept main branch implementation with server components
 - src/app/admin/events/page.tsx: Kept merge-prod-dev implementation with API integration
+- API Route Conflicts: Kept new routes with complete CRUD functionality
 
 🔄 In Progress
-- API Route Conflicts
 - Component Conflicts
 
 ## Conflict Files
@@ -75,19 +75,21 @@ graph TD
     D --> D3[Error Messages]
 ```
 
-### 5. API Route Conflicts 🔄
+### 5. API Route Conflicts ✅
 **Files:**
-- `my_app/src/app/api/events/[id]/route.ts`
 - `my_app/src/app/api/events/route.ts`
+- `my_app/src/app/api/events/[id]/route.ts`
 
-**Type:** File Deletion/Modification
-**Status:** IN PROGRESS
-**Current Implementation:**
-- RESTful endpoints
-- Prisma integration
-- Zod validation
+**Type:** File Addition
+**Status:** RESOLVED
+**Solution Applied:**
+- Kept new API routes from merge-prod-dev
+- Implemented complete CRUD functionality
+- Added proper error handling
+- Integrated with Prisma
+- Added support for related data (EventTag, EventAttendee)
 
-**Solution Strategy:**
+**Implementation Details:**
 ```mermaid
 graph TD
     A[API Routes] --> B[Events Endpoints]
@@ -95,10 +97,14 @@ graph TD
     B --> D[GET /api/events/[id]]
     B --> E[POST /api/events]
     B --> F[PUT /api/events/[id]]
+    B --> G[DELETE /api/events/[id]]
     
-    G[Solution] --> H[Keep New Routes]
-    H --> I[Update Validation]
-    H --> J[Ensure Prisma Integration]
+    H[Features] --> I[Prisma Integration]
+    H --> J[Error Handling]
+    H --> K[Type Safety]
+    
+    L[Related Data] --> M[EventTag]
+    L --> N[EventAttendee]
 ```
 
 ### 6. Component Conflicts 🔄
