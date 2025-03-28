@@ -24,9 +24,13 @@ export default async function CustomersPage({
 }: {
   searchParams: SearchParams;
 }) {
+  // Await the searchParams to fix the Next.js warning
+  const search = await Promise.resolve(searchParams.search);
+  const phone = await Promise.resolve(searchParams.phone);
+
   const customersResponse = await getCustomers({
-    search: searchParams.search,
-    phone: searchParams.phone
+    name: search,
+    phone: phone
   });
 
   if (!customersResponse.success) {
@@ -37,7 +41,7 @@ export default async function CustomersPage({
     );
   }
 
-  const { customers = [] } = customersResponse;
+  const { data: customers = [] } = customersResponse;
 
   return (
     <div className="space-y-6">
@@ -48,7 +52,7 @@ export default async function CustomersPage({
               type="search"
               placeholder="Search customers..."
               className="bg-gray-800 border-gray-700 text-gray-100"
-              defaultValue={searchParams.search}
+              defaultValue={search}
             />
           </div>
           <div className="flex gap-2">
@@ -64,6 +68,7 @@ export default async function CustomersPage({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-amber-500">Customer ID</TableHead>
               <TableHead className="text-amber-500">Name</TableHead>
               <TableHead className="text-amber-500">Phone</TableHead>
               <TableHead className="text-amber-500">Status</TableHead>
@@ -76,23 +81,31 @@ export default async function CustomersPage({
             {customers?.map((customer) => (
               <TableRow key={customer.id}>
                 <TableCell className="font-medium text-gray-100">
+                  {customer.type === 'member' ? customer.memberDetails?.memberId : customer.phoneNumber}
+                </TableCell>
+                <TableCell className="font-medium text-gray-100">
                   {customer.name}
                 </TableCell>
                 <TableCell className="text-gray-100">
                   {customer.phoneNumber}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={customer.memberId ? 'default' : 'secondary'}>
-                    {customer.memberId ? 'Member' : 'Guest'}
+                  <Badge 
+                    variant={customer.type === 'member' ? 'default' : 'secondary'}
+                    className={customer.type === 'member' ? 'bg-amber-500 text-black hover:bg-amber-600' : ''}
+                  >
+                    {customer.type === 'member' ? 'TapPass Member' : 'Guest'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-gray-100">
-                  {customer.orderCount} orders
+                  {customer.orders.length} orders
                 </TableCell>
                 <TableCell className="text-gray-300">
-                  {customer.lastVisit 
-                    ? formatDistanceToNow(new Date(customer.lastVisit), { addSuffix: true })
-                    : 'Never'
+                  {customer.memberDetails?.lastVisit 
+                    ? formatDistanceToNow(new Date(customer.memberDetails.lastVisit), { addSuffix: true })
+                    : customer.orders[0]?.createdAt 
+                      ? formatDistanceToNow(new Date(customer.orders[0].createdAt), { addSuffix: true })
+                      : 'Never'
                   }
                 </TableCell>
                 <TableCell className="text-right">
@@ -106,7 +119,7 @@ export default async function CustomersPage({
             ))}
             {(!customers || customers.length === 0) && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-400 py-12">
+                <TableCell colSpan={7} className="text-center text-gray-400 py-12">
                   No customers found
                 </TableCell>
               </TableRow>

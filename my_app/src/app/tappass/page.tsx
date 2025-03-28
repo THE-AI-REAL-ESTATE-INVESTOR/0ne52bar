@@ -12,6 +12,7 @@ import type { TapPassFormData } from '@/types/tappass';
 type RegisterResponse = {
   success: boolean;
   member?: {
+    id: string;
     memberId: string;
     name: string;
     email: string;
@@ -62,13 +63,19 @@ const TapPassPage: React.FC = () => {
         throw new Error(result.error || 'Failed to create membership');
       }
 
+      // Check if member exists in the response
       if (!result.member) {
         throw new Error('Member data not returned');
       }
 
-      // Redirect to dashboard
+      // Log success
+      console.log('Successfully registered member:', result.member.memberId);
+
+      // Redirect to dashboard with the member ID
       router.push(`/tappass/dashboard/${result.member.memberId}`);
+      
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Failed to create membership');
     } finally {
       setIsSubmitting(false);

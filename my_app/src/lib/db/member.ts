@@ -46,34 +46,70 @@ export const memberService = {
    * Create a new member
    */
   async create({ data, memberId }: CreateMemberParams) {
-    // Create both Customer and Member records in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // First create the Customer record
-      const customer = await tx.customer.create({
-        data: {
-          name: data.name,
-          phoneNumber: data.phoneNumber,
-          email: data.email,
-          marketingConsent: data.agreeToTerms,
-          orderCount: 0,
-          firstOrder: null,
-          lastOrder: null
-        }
-      });
+    // First check for existing member by email or phone
+    const existingMember = await prisma.member.findFirst({
+      where: {
+        OR: [
+          { email: data.email },
+          { phoneNumber: data.phoneNumber }
+        ]
+      }
+    });
 
-      // Then create the Member record linked to the Customer
+    if (existingMember) {
+      return existingMember;
+    }
+
+    // Check for existing customer by phone number or email
+    const existingCustomer = await prisma.customer.findFirst({
+      where: {
+        OR: [
+          { phoneNumber: data.phoneNumber },
+          { email: { not: null, equals: data.email } }
+        ]
+      }
+    });
+
+    // Create member record in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Get or create customer
+      let customer;
+      if (existingCustomer) {
+        customer = await tx.customer.update({
+          where: { id: existingCustomer.id },
+          data: {
+            name: data.name,
+            email: data.email,
+            marketingConsent: data.agreeToTerms
+          }
+        });
+      } else {
+        customer = await tx.customer.create({
+          data: {
+            name: data.name,
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+            marketingConsent: data.agreeToTerms,
+            orderCount: 0
+          }
+        });
+      }
+
+      // Create member record
       const member = await tx.member.create({
         data: {
+          memberId,
           name: data.name,
           email: data.email,
           phoneNumber: data.phoneNumber,
           birthday: data.birthday || new Date(),
           agreeToTerms: data.agreeToTerms,
-          memberId,
           customerId: customer.id,
           membershipLevel: data.membershipLevel || 'BRONZE',
+          points: data.points || 0,
           visitCount: data.visitCount || 0,
-          joinDate: new Date()
+          joinDate: new Date(),
+          lastVisit: data.lastVisit || new Date()
         }
       });
 
@@ -280,4 +316,16 @@ export const memberService = {
       },
     });
   },
+
+  /**
+   * Get a member by email
+   */
+  async getMemberByEmail(email: string) {
+    return prisma.member.findUnique({
+      where: { email },
+      include: {
+        visitHistory: true
+      }
+    });
+  }
 }; 

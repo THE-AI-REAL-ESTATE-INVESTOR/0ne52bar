@@ -3,7 +3,13 @@
 import { useCart } from './CartContext';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription 
+} from '@/components/ui/dialog';
 import { CartSummary } from './CartSummary';
 
 export function CartButton() {
@@ -25,6 +31,10 @@ export function CartButton() {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-gray-900 border-gray-800">
+        <DialogTitle className="text-lg font-semibold text-gray-100">Your Cart</DialogTitle>
+        <DialogDescription className="text-sm text-gray-400">
+          Review your items before checkout
+        </DialogDescription>
         <CartSummary />
       </DialogContent>
     </Dialog>

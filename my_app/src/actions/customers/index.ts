@@ -126,7 +126,7 @@ export async function getCustomers(search?: { name?: string; phone?: string }): 
 
     // Convert members to CustomerResponse format
     const memberCustomers: CustomerResponse[] = members.map((member) => ({
-      id: member.id,
+      id: member.memberId,
       name: member.name,
       phoneNumber: member.phoneNumber,
       type: 'member',
@@ -144,10 +144,10 @@ export async function getCustomers(search?: { name?: string; phone?: string }): 
     const orderMap = new Map<string, CustomerResponse>();
     
     nonMemberOrders.forEach((order: OrderWithMember) => {
-      const key = `${order.phoneNumber}-${order.customerName}`;
+      const key = order.phoneNumber;
       if (!orderMap.has(key)) {
         orderMap.set(key, {
-          id: key,
+          id: order.phoneNumber,
           name: order.customerName,
           phoneNumber: order.phoneNumber,
           type: 'non-member',

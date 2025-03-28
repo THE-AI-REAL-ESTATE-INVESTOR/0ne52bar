@@ -2,22 +2,26 @@
 
 import { useCart } from './CartContext';
 import { Button } from '@/components/ui/button';
-import PersonalInfo from '@/components/tappass/form/PersonalInfo';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { createOrder } from '@/actions/orders';
-import type { TapPassFormData } from '@/types/tappass';
 import { useRouter } from 'next/navigation';
+import { TapPassSignup } from './TapPassSignup';
+import { checkMembershipByPhone } from '@/app/tappass/actions';
 
 export function CartSummary() {
-  const { state, clearCart, setPhoneNumber, setCustomerName } = useCart();
+  const { state, clearCart, setCustomer } = useCart();
   const [showPhoneCollection, setShowPhoneCollection] = useState(false);
+  const [showTapPassSignup, setShowTapPassSignup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const router = useRouter();
 
   // Calculate subtotal
   const subtotal = state.items.reduce((sum, item) => {
-    const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-    return sum + (price * item.quantity);
+    return sum + (item.price * item.quantity);
   }, 0);
 
   // Calculate tax (10%)
@@ -27,24 +31,36 @@ export function CartSummary() {
   const total = subtotal + tax;
 
   const handleCheckout = async () => {
-    if (!state.phoneNumber || !state.customerName) {
+    if (!phoneNumber || !name) {
       setShowPhoneCollection(true);
       return;
     }
 
     setIsLoading(true);
     try {
+      // First create the order
       const result = await createOrder({
         items: state.items,
         total,
-        phoneNumber: state.phoneNumber,
-        customerName: state.customerName
+        phoneNumber,
+        customerName: name
       });
 
       if (result.success) {
-        clearCart();
-        // Redirect to merch page after successful order
-        router.push('/merch');
+        // Set customer info in cart context
+        setCustomer(phoneNumber, name);
+        
+        // Check for existing TapPass membership
+        const membershipResult = await checkMembershipByPhone(phoneNumber);
+        
+        if (membershipResult.success) {
+          // If they're already a member, just clear cart and redirect to dashboard
+          clearCart();
+          router.push('/tappass/dashboard');
+        } else {
+          // Show TapPass signup offer for new customers
+          setShowTapPassSignup(true);
+        }
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -53,11 +69,16 @@ export function CartSummary() {
     }
   };
 
-  const handlePersonalInfoComplete = (data: Partial<TapPassFormData>) => {
-    if (data.phoneNumber) setPhoneNumber(data.phoneNumber);
-    if (data.name) setCustomerName(data.name);
-    setShowPhoneCollection(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     handleCheckout();
+  };
+
+  const handleSkipTapPass = () => {
+    setShowTapPassSignup(false);
+    // Clear the cart and redirect to merch page after skipping TapPass
+    clearCart();
+    router.push('/merch');
   };
 
   if (state.items.length === 0) {
@@ -68,17 +89,53 @@ export function CartSummary() {
     );
   }
 
+  if (showTapPassSignup) {
+    return <TapPassSignup 
+      orderTotal={total}
+      customerName={name}
+      phoneNumber={phoneNumber}
+      onSkip={handleSkipTapPass}
+      clearCart={clearCart}
+    />;
+  }
+
   if (showPhoneCollection) {
     return (
       <div className="p-4">
         <h2 className="text-xl font-semibold text-white mb-4">Complete Your Order</h2>
-        <PersonalInfo
-          onNext={handlePersonalInfoComplete}
-          initialData={{
-            phoneNumber: state.phoneNumber,
-            name: state.customerName
-          }}
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-gray-300">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="bg-gray-800/50 border-gray-700"
+              placeholder="John Doe"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-gray-300">Phone Number</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+              className="bg-gray-800/50 border-gray-700"
+              placeholder="(555) 555-5555"
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-amber-600 hover:bg-amber-700"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Processing...' : 'Continue'}
+          </Button>
+        </form>
       </div>
     );
   }
@@ -88,15 +145,12 @@ export function CartSummary() {
       <h2 className="text-xl font-semibold text-white">Order Summary</h2>
       
       <div className="space-y-2">
-        {state.items.map((item) => {
-          const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-          return (
-            <div key={item.id} className="flex justify-between text-gray-300">
-              <span>{item.name} × {item.quantity}</span>
-              <span>${(price * item.quantity).toFixed(2)}</span>
-            </div>
-          );
-        })}
+        {state.items.map((item) => (
+          <div key={item.id} className="flex justify-between text-gray-300">
+            <span>{item.name} × {item.quantity}</span>
+            <span>${(item.price * item.quantity).toFixed(2)}</span>
+          </div>
+        ))}
       </div>
 
       <div className="border-t border-gray-700 pt-4 space-y-2">
