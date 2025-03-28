@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Event } from '@/types/events';
+import { events } from '@/data/events';
+import { pastEvents } from '@/data/past-events';
 
 interface EventsClientPageProps {
   initialEvents: Event[];
@@ -13,9 +15,20 @@ interface EventsClientPageProps {
 export default function EventsClientPage({ initialEvents }: EventsClientPageProps) {
   const searchParams = useSearchParams();
   const [appDate, setAppDate] = useState<Date>(new Date());
-  const [events, setEvents] = useState(initialEvents);
+  const [combinedEvents, setCombinedEvents] = useState<Event[]>([]);
   
-  useEffect(() => {
+  useEffect(() => {    
+    // Combine all events and add required properties
+    const allEvents = [...events, ...pastEvents, ...initialEvents].map(event => ({
+      ...event,
+      tags: [],
+      attendees: [],
+      createdAt: new Date(event.date),
+      isActive: true
+    }));
+    
+    setCombinedEvents(allEvents);
+
     // Check if there's a date parameter for demo/testing purposes
     const dateParam = searchParams.get('demoDate');
     
@@ -25,14 +38,14 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
         setAppDate(parsedDate);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, initialEvents]);
 
   // Reset time component to compare dates only
   const today = new Date(appDate);
   today.setHours(0, 0, 0, 0);
   
   // Split events into upcoming (including today) and past
-  const upcomingEvents = events
+  const upcomingEvents = combinedEvents
     .filter(event => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
@@ -40,7 +53,7 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
-  const pastEvents = events
+  const pastEventsArray = combinedEvents
     .filter(event => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
@@ -125,12 +138,12 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
       </section>
       
       {/* Past Events Section */}
-      {pastEvents.length > 0 && (
+      {pastEventsArray.length > 0 && (
         <section className="mt-16 pt-8 border-t border-gray-700">
           <h2 className="text-2xl font-bold mb-8 text-center text-gray-400">Past Events</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pastEvents.map((event) => (
+            {pastEventsArray.map((event) => (
               <div key={event.id} className="flex flex-col bg-gray-800/50 rounded-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <Link 
                   href={`/events/${event.id}`}

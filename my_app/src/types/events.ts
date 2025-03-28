@@ -84,4 +84,7 @@ export interface Event {
   
   /** Updated at timestamp */
   updatedAt?: Date;
+  
+  /** Event is active */
+  isActive: boolean;
 } 

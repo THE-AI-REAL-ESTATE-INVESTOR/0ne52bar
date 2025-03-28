@@ -63,6 +63,7 @@ model Event {
   eventTagId       String?
   EventTag         EventTag?       @relation(fields: [eventTagId], references: [id])
   EventAttendee    EventAttendee[]
+  isActive         Boolean   @default(true)
 }
 
 model EventTag {
