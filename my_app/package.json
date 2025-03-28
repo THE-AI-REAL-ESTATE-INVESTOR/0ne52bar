@@ -49,6 +49,7 @@
     "check-members": "ts-node src/scripts/check-members.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.8.0",
     "@hookform/resolvers": "^4.1.3",
     "@prisma/client": "6.5.0",
     "@radix-ui/react-checkbox": "^1.1.4",
