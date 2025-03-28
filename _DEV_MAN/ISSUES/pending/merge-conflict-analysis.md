@@ -8,9 +8,9 @@ This document outlines the conflicts between `merge-prod-dev` and `main` branche
 - pnpm-lock.yaml: Resolved by regenerating lock file
 - package.json: Kept main branch version with newer dependencies
 - src/app/admin/menu/page.tsx: Kept main branch implementation with server components
+- src/app/admin/events/page.tsx: Kept merge-prod-dev implementation with API integration
 
 🔄 In Progress
-- src/app/admin/events/page.tsx
 - API Route Conflicts
 - Component Conflicts
 
@@ -41,36 +41,38 @@ This document outlines the conflicts between `merge-prod-dev` and `main` branche
 - Maintained server actions
 - Kept proper separation of concerns
 
-### 4. `my_app/src/app/admin/events/page.tsx` 🔄
+### 4. `my_app/src/app/admin/events/page.tsx` ✅
 **Type:** Code Conflict
-**Status:** IN PROGRESS
-**Current Implementation:**
-- Uses Zod validation
-- Implements event CRUD operations
-- Integrates with Prisma models
+**Status:** RESOLVED
+**Solution Applied:**
+- Kept merge-prod-dev implementation
+- Added API integration
+- Enhanced features:
+  - Active/inactive status
+  - Improved error handling
+  - Better state management
+  - Enhanced UI components
+- Renamed imageUrl to image for consistency
+- Added proper loading and error states
 
-**Proposed Changes:**
-- Enhanced event filtering
-- Improved UI components
-- Additional validation rules
-
-**Solution Strategy:**
+**Implementation Details:**
 ```mermaid
 graph TD
-    A[Current Implementation] --> B[Event Management]
-    B --> C[Zod Validation]
-    B --> D[Prisma Models]
-    B --> E[UI Components]
+    A[Events Page] --> B[API Integration]
+    A --> C[Enhanced Features]
+    A --> D[UI Improvements]
     
-    F[Proposed Changes] --> G[Enhanced Features]
-    G --> H[New Filters]
-    G --> I[Improved UI]
-    G --> J[Additional Validation]
+    B --> B1[CRUD Operations]
+    B --> B2[Error Handling]
+    B --> B3[Loading States]
     
-    K[Solution] --> L[Merge Both]
-    L --> M[Keep Current Validation]
-    L --> N[Add New Features]
-    L --> O[Update UI Components]
+    C --> C1[Active Status]
+    C --> C2[Image Handling]
+    C --> C3[Date Formatting]
+    
+    D --> D1[Status Indicators]
+    D --> D2[Form Validation]
+    D --> D3[Error Messages]
 ```
 
 ### 5. API Route Conflicts 🔄
