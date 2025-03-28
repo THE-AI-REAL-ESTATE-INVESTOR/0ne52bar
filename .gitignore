@@ -46,4 +46,7 @@ next-env.d.ts
 
 # Dev tooling
 _DEV_MAN/temp
-_DEV_MAN/git-history 
+_DEV_MAN/git-history
+
+# Temporary backup directory
+temp_backup/ 
