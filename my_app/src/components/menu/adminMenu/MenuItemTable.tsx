@@ -43,7 +43,9 @@ export function MenuItemTable({ items, categories, onItemsUpdate }: MenuItemTabl
         const categoryB = categories.find(c => c.id === b.categoryId)?.name || '';
         return direction * categoryA.localeCompare(categoryB);
       case 'price':
-        return direction * (parseFloat(a.price) - parseFloat(b.price));
+        const priceA = parseFloat(a.price.replace('$', '')) || 0;
+        const priceB = parseFloat(b.price.replace('$', '')) || 0;
+        return direction * (priceA - priceB);
       case 'status':
         return direction * (a.status || 'AVAILABLE').localeCompare(b.status || 'AVAILABLE');
       default:
@@ -342,8 +344,8 @@ export function MenuItemTable({ items, categories, onItemsUpdate }: MenuItemTabl
                     <TableCell className="text-white">
                       {categories.find(c => c.id === item.categoryId)?.name}
                     </TableCell>
-                    <TableCell className="text-white">
-                      ${parseFloat(item.price).toFixed(2)}
+                    <TableCell>
+                      ${parseFloat(item.price.replace('$', '')).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status || 'AVAILABLE')}`}>

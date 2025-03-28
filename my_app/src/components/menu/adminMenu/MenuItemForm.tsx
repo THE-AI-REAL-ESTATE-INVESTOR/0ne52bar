@@ -17,7 +17,14 @@ import type { Category, MenuItemStatus } from '@/types/menu';
 
 const menuItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  price: z.string().min(1, 'Price is required'),
+  price: z.string()
+    .min(1, 'Price is required')
+    .transform((val) => {
+      // Remove any existing $ and format as number with 2 decimal places
+      const price = parseFloat(val.replace('$', ''));
+      if (isNaN(price)) throw new Error('Invalid price format');
+      return price.toFixed(2);
+    }),
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
   isActive: z.boolean().default(true),
@@ -114,6 +121,17 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
         <Input
           id="price"
           {...form.register('price')}
+          placeholder="0.00"
+          onChange={(e) => {
+            // Remove non-numeric characters except decimal point
+            const value = e.target.value.replace(/[^\d.]/g, '');
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            const formatted = parts.length > 1 
+              ? `${parts[0]}.${parts[1].slice(0, 2)}`
+              : value;
+            form.setValue('price', formatted);
+          }}
           disabled={isSubmitting}
         />
         {form.formState.errors.price && (
