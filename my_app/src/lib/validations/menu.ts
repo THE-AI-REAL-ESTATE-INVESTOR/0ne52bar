@@ -10,7 +10,7 @@ export const categorySchema = z.object({
 export const menuItemSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  price: z.number().min(0, 'Price must be positive'),
+  price: z.string().min(1, 'Price is required'),
   categoryId: z.string().min(1, 'Category is required'),
   imageUrl: z.string().url().optional(),
   isActive: z.boolean().default(true),
