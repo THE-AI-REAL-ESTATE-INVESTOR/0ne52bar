@@ -69,6 +69,7 @@
     "dom-to-image-more": "^3.5.0",
     "dotenv": "^16.4.7",
     "facebook-nodejs-business-sdk": "^22.0.0",
+    "framer-motion": "^12.6.2",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.479.0",

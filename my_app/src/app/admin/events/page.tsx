@@ -22,10 +22,12 @@ export default function EventsManagement() {
   const [formData, setFormData] = useState<Partial<Event>>({
     title: '',
     description: '',
-    date: '',
+    date: new Date(),
     time: '',
     image: '',
-    isActive: true
+    isActive: true,
+    isPublic: true,
+    showPastDate: true
   });
 
   // Check authentication
@@ -60,6 +62,18 @@ export default function EventsManagement() {
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData({ ...formData, [name]: checked });
+    } else if (type === 'datetime-local') {
+      const dateValue = new Date(value);
+      const timeString = dateValue.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      setFormData({ 
+        ...formData, 
+        date: dateValue,
+        time: timeString
+      });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -70,10 +84,12 @@ export default function EventsManagement() {
     setFormData({
       title: '',
       description: '',
-      date: '',
+      date: new Date(),
       time: '',
       image: '',
-      isActive: true
+      isActive: true,
+      isPublic: true,
+      showPastDate: true
     });
     setEditingEvent(null);
   };
@@ -87,13 +103,17 @@ export default function EventsManagement() {
   // Open form for editing
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
+    const dateObj = new Date(event.date);
+    
     setFormData({
       title: event.title,
       description: event.description,
-      date: event.date,
+      date: dateObj,
       time: event.time,
       image: event.image || '',
-      isActive: event.isActive
+      isActive: event.isActive,
+      isPublic: event.isPublic,
+      showPastDate: event.showPastDate
     });
     setIsFormOpen(true);
   };
@@ -119,8 +139,8 @@ export default function EventsManagement() {
       time: formData.time,
       image: formData.image || '',
       isActive: formData.isActive ?? true,
-      isPublic: true,
-      showPastDate: true,
+      isPublic: formData.isPublic ?? true,
+      showPastDate: formData.showPastDate ?? true,
       facebookEventUrl: undefined,
       eventTagId: undefined
     };
@@ -167,13 +187,13 @@ export default function EventsManagement() {
   };
 
   // Format date for display
-  const formatDate = (dateString: string) => {
+  const formatDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric' 
+      day: 'numeric'
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return date.toLocaleDateString(undefined, options);
   };
   
   if (status === 'loading' || loading) {
@@ -325,23 +345,24 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-300 mb-2">Date</label>
+                    <label className="block text-gray-300 mb-2">Date & Time</label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       name="date"
-                      value={formData.date || ''}
+                      value={formData.date ? formData.date.toISOString().slice(0, 16) : ''}
                       onChange={handleInputChange}
                       className="w-full bg-gray-700 text-white rounded px-3 py-2"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-300 mb-2">Time</label>
+                    <label className="block text-gray-300 mb-2">Display Time</label>
                     <input
-                      type="time"
+                      type="text"
                       name="time"
                       value={formData.time || ''}
                       onChange={handleInputChange}
+                      placeholder="e.g., 8:00 PM"
                       className="w-full bg-gray-700 text-white rounded px-3 py-2"
                       required
                     />
@@ -357,15 +378,40 @@ export default function EventsManagement() {
                     className="w-full bg-gray-700 text-white rounded px-3 py-2"
                   />
                 </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <label className="text-gray-300">Active</label>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                      id="isActive"
+                    />
+                    <label htmlFor="isActive" className="text-gray-300">Active</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isPublic"
+                      checked={formData.isPublic}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                      id="isPublic"
+                    />
+                    <label htmlFor="isPublic" className="text-gray-300">Public</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="showPastDate"
+                      checked={formData.showPastDate}
+                      onChange={handleInputChange}
+                      className="mr-2"
+                      id="showPastDate"
+                    />
+                    <label htmlFor="showPastDate" className="text-gray-300">Show Past Date</label>
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-4 mt-6">
                   <button

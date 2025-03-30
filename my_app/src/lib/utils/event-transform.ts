@@ -3,7 +3,7 @@ import type { Event, EventTag, EventAttendee } from '@/types/events';
 interface PrismaEvent {
   id: string;
   title: string;
-  date: string;
+  date: Date;
   time: string;
   description: string;
   image: string;
@@ -28,8 +28,8 @@ export function transformPrismaEvent(prismaEvent: PrismaEvent): Event {
     image: prismaEvent.image,
     facebookEventUrl: prismaEvent.facebookEventUrl || undefined,
     eventTagId: prismaEvent.eventTagId || undefined,
-    EventTag: prismaEvent.EventTag || undefined,
-    EventAttendee: prismaEvent.EventAttendee || undefined,
+    eventTag: prismaEvent.EventTag || undefined,
+    attendees: prismaEvent.EventAttendee || undefined,
     isActive: prismaEvent.isActive,
     isPublic: prismaEvent.isPublic,
     showPastDate: prismaEvent.showPastDate,

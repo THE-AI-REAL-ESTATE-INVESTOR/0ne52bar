@@ -2,7 +2,6 @@
 
 import { prisma } from '@/lib/prisma';
 import { handlePrismaError } from '@/lib/utils/error-handler';
-import type { Event } from '@/types/events';
 
 /**
  * Get all events (for /events page)
@@ -15,10 +14,6 @@ export async function getAllEvents() {
       },
       orderBy: {
         date: 'asc'
-      },
-      include: {
-        EventTag: true,
-        EventAttendee: true
       }
     });
     
@@ -44,15 +39,11 @@ export async function getHomePageEvents() {
       where: {
         isActive: true,
         date: {
-          gte: today.toISOString()
+          gte: today
         }
       },
       orderBy: {
         date: 'asc'
-      },
-      include: {
-        EventTag: true,
-        EventAttendee: true
       }
     });
 
@@ -61,17 +52,13 @@ export async function getHomePageEvents() {
       where: {
         isActive: true,
         date: {
-          lt: today.toISOString()
+          lt: today
         }
       },
       orderBy: {
         date: 'desc'
       },
-      take: 5,
-      include: {
-        EventTag: true,
-        EventAttendee: true
-      }
+      take: 5
     });
     
     return {

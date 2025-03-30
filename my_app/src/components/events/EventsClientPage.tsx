@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -11,8 +10,6 @@ interface EventsClientPageProps {
 }
 
 export default function EventsClientPage({ initialEvents }: EventsClientPageProps) {
-  const searchParams = useSearchParams();
-  const [appDate, setAppDate] = useState<Date>(new Date());
   const [combinedEvents, setCombinedEvents] = useState<Event[]>([]);
   
   useEffect(() => {    
@@ -26,20 +23,10 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
     }));
     
     setCombinedEvents(allEvents);
+  }, [initialEvents]);
 
-    // Check if there's a date parameter for demo/testing purposes
-    const dateParam = searchParams.get('demoDate');
-    
-    if (dateParam) {
-      const parsedDate = new Date(dateParam);
-      if (!isNaN(parsedDate.getTime())) {
-        setAppDate(parsedDate);
-      }
-    }
-  }, [searchParams, initialEvents]);
-
-  // Reset time component to compare dates only
-  const today = new Date(appDate);
+  // Get current date for comparison
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
   
   // Split events into upcoming (including today) and past
@@ -60,21 +47,7 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <>
-      {/* Date Override Demo Controls (only visible in development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-gray-800 p-4 mb-8 rounded-lg">
-          <h3 className="text-xl text-amber-400 mb-2">Demo Date Controls</h3>
-          <p className="text-gray-300 mb-2">Current app date: {today.toDateString()}</p>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/events" className="px-3 py-1 bg-blue-600 rounded text-white text-sm">Current Date</Link>
-            <Link href="/events?demoDate=2025-03-14" className="px-3 py-1 bg-amber-500 rounded text-white text-sm">Mar 14, 2025</Link>
-            <Link href="/events?demoDate=2024-10-30" className="px-3 py-1 bg-purple-600 rounded text-white text-sm">Oct 30, 2024</Link>
-            <Link href="/events?demoDate=2025-04-01" className="px-3 py-1 bg-green-600 rounded text-white text-sm">Apr 1, 2025</Link>
-          </div>
-        </div>
-      )}
-      
+    <>      
       {/* Upcoming Events Section */}
       <section className="mb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
