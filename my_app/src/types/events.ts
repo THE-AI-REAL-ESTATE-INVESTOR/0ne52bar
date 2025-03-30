@@ -4,7 +4,6 @@
 
 /**
  * Represents an event tag for categorization
- * @prisma.model
  */
 export interface EventTag {
   /** Unique identifier */
@@ -14,15 +13,17 @@ export interface EventTag {
   name: string;
   
   /** Tag color */
-  color?: string;
+  color: string;
   
-  /** Events with this tag */
-  events: Event[];
+  /** Event with this tag */
+  events?: Event;
+  
+  /** Events through many-to-many relation */
+  Event_EventToTags?: Event[];
 }
 
 /**
  * Represents an event attendee for registration tracking
- * @prisma.model
  */
 export interface EventAttendee {
   /** Unique identifier */
@@ -34,22 +35,36 @@ export interface EventAttendee {
   /** Attendee email */
   email: string;
   
+  /** Event ID */
+  eventId: string;
+  
   /** Number of guests */
   guestCount: number;
   
-  /** Event the attendee is registered for */
-  eventId: string;
+  /** Whether registered through Facebook */
+  isRegisteredOnFacebook: boolean;
+  
+  /** Facebook registration ID */
+  facebookRegistrationId?: string;
+  
+  /** Customer ID */
+  customerId?: string;
+  
+  /** Member ID */
+  memberId?: string;
+  
+  /** Creation timestamp */
+  createdAt: Date;
+  
+  /** Last update timestamp */
+  updatedAt: Date;
   
   /** Reference to the event */
   event: Event;
-  
-  /** Registration date */
-  registeredAt: Date;
 }
 
 /**
  * Represents an event
- * @prisma.model
  */
 export interface Event {
   /** Unique identifier */
@@ -58,10 +73,10 @@ export interface Event {
   /** Event title */
   title: string;
   
-  /** Event date (YYYY-MM-DD) */
-  date: string;
+  /** Event date */
+  date: Date;
   
-  /** Event time (HH:MM) */
+  /** Event time */
   time: string;
   
   /** Event description */
@@ -73,18 +88,30 @@ export interface Event {
   /** Facebook event URL */
   facebookEventUrl?: string;
   
-  /** Event tags */
-  tags: EventTag[];
+  /** Event tag ID */
+  eventTagId?: string;
   
-  /** Registered attendees */
-  attendees: EventAttendee[];
+  /** Event tag */
+  eventTag?: EventTag;
   
-  /** Created at timestamp */
-  createdAt: Date;
+  /** Event tags through many-to-many relation */
+  EventTag_EventToTags?: EventTag[];
   
-  /** Updated at timestamp */
-  updatedAt?: Date;
+  /** Event attendees */
+  attendees?: EventAttendee[];
   
   /** Event is active */
   isActive: boolean;
+
+  /** Event is public */
+  isPublic: boolean;
+
+  /** Show past date */
+  showPastDate: boolean;
+
+  /** Creation timestamp */
+  createdAt: Date;
+
+  /** Last update timestamp */
+  updatedAt: Date;
 } 

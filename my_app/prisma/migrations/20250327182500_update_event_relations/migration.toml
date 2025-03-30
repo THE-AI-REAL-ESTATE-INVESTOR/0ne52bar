@@ -1,0 +1,8 @@
+# Migration: Update Event Relations
+# Applied: 2025-03-27 18:25:00
+# Status: Applied
+
+[migration]
+name = "update_event_relations"
+applied = 2025-03-27T18:25:00Z
+status = "applied" 

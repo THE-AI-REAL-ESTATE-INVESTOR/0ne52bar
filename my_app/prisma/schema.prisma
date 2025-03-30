@@ -10,8 +10,6 @@ datasource db {
 /// Member data type including additional fields for storage
 model Member {
   id              String          @id @default(cuid())
-  customerId      String          @unique
-  customer        Customer        @relation(fields: [customerId], references: [id])
   memberId        String          @unique
   name            String
   email           String          @unique
@@ -25,6 +23,9 @@ model Member {
   lastVisit       DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  customerId      String          @unique
+  EventAttendee   EventAttendee[]
+  customer        Customer        @relation(fields: [customerId], references: [id])
   orders          Order[]
   Reward          Reward[]
   visitHistory    Visit[]
@@ -35,8 +36,8 @@ model Visit {
   id        String   @id @default(cuid())
   memberId  String
   visitDate DateTime @default(now())
-  points    Int      @default(0)
   amount    Float    @default(0)
+  points    Int      @default(0)
   createdAt DateTime @default(now())
   member    Member   @relation(fields: [memberId], references: [id])
 }
@@ -53,44 +54,63 @@ model TapPassFormData {
 
 /// Event type definitions
 model Event {
-  id               String          @id @default(cuid())
-  title            String
-  date             String
-  time             String
-  description      String
-  image            String
-  facebookEventUrl String?
-  eventTagId       String?
-  EventTag         EventTag?       @relation(fields: [eventTagId], references: [id])
-  EventAttendee    EventAttendee[]
-  isActive         Boolean   @default(true)
+  id                   String          @id @default(cuid())
+  title                String
+  time                 String
+  description          String
+  image                String
+  facebookEventUrl     String?
+  eventTagId           String?         @unique
+  createdAt            DateTime        @default(now())
+  isActive             Boolean         @default(true)
+  isPublic             Boolean         @default(true)
+  showPastDate         Boolean         @default(false)
+  updatedAt            DateTime        @default(now()) @updatedAt
+  date                 DateTime        @default(now())
+  eventTag             EventTag?       @relation(fields: [eventTagId], references: [id])
+  attendees            EventAttendee[]
+  EventTag_EventToTags EventTag[]      @relation("EventToTags")
 }
 
 model EventTag {
-  id    String  @id @default(cuid())
-  name  String
-  color String
-  Event Event[]
+  id                String  @id @default(cuid())
+  name              String
+  color             String
+  events            Event?
+  Event_EventToTags Event[] @relation("EventToTags")
 }
 
 model EventAttendee {
-  id      String @id @default(cuid())
-  name    String
-  email   String
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id])
+  id                     String    @id @default(cuid())
+  name                   String
+  email                  String
+  eventId                String
+  createdAt              DateTime  @default(now())
+  customerId             String?
+  facebookRegistrationId String?
+  guestCount             Int       @default(1)
+  isRegisteredOnFacebook Boolean   @default(false)
+  memberId               String?
+  updatedAt              DateTime
+  Customer               Customer? @relation(fields: [customerId], references: [id])
+  event                  Event     @relation(fields: [eventId], references: [id])
+  Member                 Member?   @relation(fields: [memberId], references: [id])
+
+  @@index([customerId])
+  @@index([eventId])
+  @@index([memberId])
 }
 
 model MenuItem {
   id          String         @id @default(uuid())
   name        String
-  price       String
   description String?
+  price       String
   isActive    Boolean        @default(true)
   sortOrder   Int            @default(100)
+  categoryId  String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  categoryId  String?
   imageUrl    String?
   status      MenuItemStatus @default(AVAILABLE)
   category    Category?      @relation(fields: [categoryId], references: [id])
@@ -148,15 +168,15 @@ model BusinessInfo {
   description String
   address     String
   phone       String
-  createdAt   DateTime        @default(now())
   email       String          @unique
+  createdAt   DateTime        @default(now())
   updatedAt   DateTime        @default(now()) @updatedAt
   hours       BusinessHours[]
 }
 
 /// Authentication models - required for admin functionality
 model Account {
-  id                String     @id @default(cuid())
+  id                String    @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -168,7 +188,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  adminUser         AdminUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminUser         AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -217,18 +237,19 @@ model Reward {
 }
 
 model Customer {
-  id              String      @id @default(cuid())
-  phoneNumber     String      @unique
-  name            String?
-  email           String?
-  firstOrder      DateTime?
-  lastOrder       DateTime?
-  orderCount      Int         @default(0)
-  marketingConsent Boolean    @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  orders          Order[]
-  member          Member?
+  id               String          @id @default(cuid())
+  phoneNumber      String          @unique
+  name             String?
+  email            String?
+  firstOrder       DateTime?
+  lastOrder        DateTime?
+  orderCount       Int             @default(0)
+  marketingConsent Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  EventAttendee    EventAttendee[]
+  member           Member?
+  orders           Order[]
 }
 
 model Order {
@@ -241,11 +262,11 @@ model Order {
   customerName     String
   marketingConsent Boolean     @default(false)
   customerId       String?
-  customer         Customer?   @relation(fields: [customerId], references: [id])
   memberId         String?
-  member           Member?     @relation(fields: [memberId], references: [id])
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
+  customer         Customer?   @relation(fields: [customerId], references: [id])
+  member           Member?     @relation(fields: [memberId], references: [id])
 
   @@index([memberId])
   @@index([customerId])

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "build:fixed": "node scripts/fix-css-build.js && next build",
     "build:spa": "next build -output-standalone",
@@ -99,7 +99,7 @@
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.24",
-    "@types/react": "^19",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "chokidar": "^4.0.3",

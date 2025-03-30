@@ -1,26 +1,54 @@
 import Link from 'next/link';
 import { UpcomingEvents } from '@/components/UpcomingEvents';
-import { getAllEvents } from '@/services/alternativeEvents';
+import { getHomePageEvents, getAllEvents } from '@/actions/event-queries';
+import { transformPrismaEvent } from '@/lib/utils/event-transform';
 
 // Force dynamic rendering for this page to avoid CSS issues with Next.js 15
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // Get all events
-  const allEvents = getAllEvents();
+  // Get events for home page
+  const eventsResult = await getHomePageEvents();
+  const allEventsResult = await getAllEvents();
+  
+  // Ensure we have valid data and transform events
+  const { upcomingEvents = [] } = 'success' in eventsResult && eventsResult.success && eventsResult.data ? eventsResult.data : {};
+  const transformedUpcomingEvents = upcomingEvents.map(event => transformPrismaEvent({
+    ...event,
+    date: event.date.toISOString()
+  }));
   
   // Get the three 2025 events which should be displayed first
-  const upcomingEvents = allEvents
+  const featuredEvents = transformedUpcomingEvents
     .filter(event => {
       // Extract the year from the date string
-      const eventYear = new Date(event.date).getFullYear();
+      const eventYear = event.date ? new Date(event.date).getFullYear() : 0;
       // We want to show 2025 events first
       return eventYear === 2025;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateA - dateB;
+    })
     .slice(0, 3);
+
+  // Get past events
+  const pastEvents = 'success' in allEventsResult && allEventsResult.success && allEventsResult.data
+    ? allEventsResult.data
+        .map(event => transformPrismaEvent({
+          ...event,
+          date: event.date.toISOString()
+        }))
+        .filter(event => {
+          const eventDate = new Date(event.date);
+          return eventDate < new Date();
+        })
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5)
+    : [];
   
-  console.log('Upcoming events:', upcomingEvents.map(e => e.title));
+  console.log('Featured events:', featuredEvents.map(e => e.title || 'Untitled Event'));
   
   return (
     <main className="min-h-screen bg-gray-50">
@@ -43,8 +71,8 @@ export default async function Home() {
       {/* Events Section */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          {upcomingEvents.length > 0 ? (
-            <UpcomingEvents events={upcomingEvents} />
+          {featuredEvents.length > 0 ? (
+            <UpcomingEvents events={featuredEvents} />
           ) : (
             <div className="text-center">
               <h2 className="text-3xl font-bold mb-6">Upcoming Events</h2>
@@ -63,6 +91,41 @@ export default async function Home() {
               View All Events
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Past Events Section */}
+      <section className="py-12 bg-gray-100">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-6 text-center">Past Events</h2>
+          {pastEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastEvents.map((event) => (
+                <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  {event.image && (
+                    <div className="relative h-48">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
+                    <p className="text-gray-600 mb-2">
+                      {new Date(event.date).toLocaleDateString()} at {event.time}
+                    </p>
+                    <p className="text-gray-700">{event.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-600 py-8">
+              <p className="text-lg">No past events found</p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Event } from '@/types/events';
-import { events } from '@/data/events';
-import { pastEvents } from '@/data/past-events';
 
 interface EventsClientPageProps {
   initialEvents: Event[];
@@ -18,8 +16,8 @@ export default function EventsClientPage({ initialEvents }: EventsClientPageProp
   const [combinedEvents, setCombinedEvents] = useState<Event[]>([]);
   
   useEffect(() => {    
-    // Combine all events and add required properties
-    const allEvents = [...events, ...pastEvents, ...initialEvents].map(event => ({
+    // Process events from Prisma
+    const allEvents = initialEvents.map(event => ({
       ...event,
       tags: [],
       attendees: [],
