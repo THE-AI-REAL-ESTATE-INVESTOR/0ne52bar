@@ -86,10 +86,10 @@ export interface Event {
   image: string;
   
   /** Facebook event URL */
-  facebookEventUrl?: string;
+  facebookEventUrl: string | null;
   
   /** Event tag ID */
-  eventTagId?: string;
+  eventTagId: string | null;
   
   /** Event tag */
   eventTag?: EventTag;
@@ -114,4 +114,22 @@ export interface Event {
 
   /** Last update timestamp */
   updatedAt: Date;
-} 
+
+  /** Event is recurring */
+  isRecurring?: boolean;
+
+  /** Recurring pattern */
+  recurringPattern?: string;
+}
+
+export type RecurringPattern = 
+  | 'WEEKLY_SUNDAY'
+  | 'WEEKLY_MONDAY'
+  | 'WEEKLY_TUESDAY'
+  | 'WEEKLY_WEDNESDAY'
+  | 'WEEKLY_THURSDAY'
+  | 'WEEKLY_FRIDAY'
+  | 'WEEKLY_SATURDAY'
+  | 'BIWEEKLY'
+  | 'MONTHLY'
+  | ''; 

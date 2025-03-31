@@ -117,6 +117,9 @@ export function Hero() {
           <span className="bg-gradient-to-r from-blue-500 via-blue-300 to-blue-500 text-transparent bg-clip-text">
             ONE-52 BAR
           </span>
+          <div className="text-2xl md:text-3xl font-medium text-blue-300 mt-2">
+            & GRILL
+          </div>
         </motion.h1>
         
         <motion.h2
@@ -125,8 +128,17 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-2xl md:text-4xl font-semibold text-blue-300"
         >
-          MUSTANG, OKLAHOMA
+          211 N Trade Center Terrace
         </motion.h2>
+        
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="text-xl md:text-3xl font-semibold text-blue-300"
+        >
+          MUSTANG, OKLAHOMA
+        </motion.h3>
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}

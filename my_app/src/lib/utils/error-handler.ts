@@ -5,28 +5,7 @@
  */
 
 import { ZodError } from 'zod';
-// Import { Prisma } from '@prisma/client';
-
-// For testing, we'll mock the Prisma error classes
-// In a real app, you'd use the import above
-class PrismaClientKnownRequestError extends Error {
-  code: string;
-  meta?: { target?: string[] };
-  
-  constructor(message: string, { code, meta }: { code: string; meta?: { target?: string[] } }) {
-    super(message);
-    this.name = 'PrismaClientKnownRequestError';
-    this.code = code;
-    this.meta = meta;
-  }
-}
-
-class PrismaClientValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PrismaClientValidationError';
-  }
-}
+import { Prisma } from '@prisma/client';
 
 // Error codes
 export enum ErrorCode {
@@ -63,18 +42,12 @@ export function formatZodError(error: ZodError): Record<string, string> {
   }, {});
 }
 
-// Type for Prisma-like errors
-interface PrismaLikeError extends Error {
-  code?: string;
-  meta?: { target?: string[] };
-}
-
 /**
  * Handle Prisma errors and convert them to AppError
  */
 export function handlePrismaError(error: unknown): AppError {
   // Handle Prisma errors
-  if (error instanceof PrismaClientKnownRequestError) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
     // Unique constraint violation
     if (error.code === 'P2002') {
       const target = error.meta?.target as string[] || ['record'];
@@ -112,7 +85,7 @@ export function handlePrismaError(error: unknown): AppError {
   }
   
   // Handle Prisma validation errors
-  if (error instanceof PrismaClientValidationError) {
+  if (error instanceof Prisma.PrismaClientValidationError) {
     return new AppError(
       'Invalid data provided.',
       ErrorCode.VALIDATION_ERROR,
@@ -136,25 +109,6 @@ export function handlePrismaError(error: unknown): AppError {
   
   // Handle generic errors
   if (error instanceof Error) {
-    // Check if it might be a Prisma error by checking the error name or message
-    if (error.name.includes('Prisma') || error.message.includes('Prisma')) {
-      if (error.message.includes('not found')) {
-        return new AppError('Record not found.', ErrorCode.NOT_FOUND, error);
-      }
-      
-      if (error.message.includes('already exists') || error.message.includes('Unique constraint')) {
-        return new AppError('Record already exists.', ErrorCode.CONFLICT, error);
-      }
-      
-      // Check for P2002 error code in the error object
-      const prismaError = error as PrismaLikeError;
-      if (prismaError.code === 'P2002') {
-        return new AppError('Record already exists.', ErrorCode.CONFLICT, error);
-      }
-      
-      return new AppError('Database error occurred.', ErrorCode.DATABASE_ERROR, error);
-    }
-    
     return new AppError(
       error.message,
       ErrorCode.SERVER_ERROR,

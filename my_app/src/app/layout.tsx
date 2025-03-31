@@ -3,6 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Providers } from "./providers";
 import Nav from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "ONE-52 Bar & Grill",
@@ -40,16 +41,8 @@ export default function RootLayout({
             {children}
           </main>
           
-          {/* Footer Links for Legal Pages */}
-          <div className="bg-gray-900/50 text-gray-400 text-sm py-4">
-            <div className="container mx-auto px-4 text-center">
-              <p className="mb-2">© {new Date().getFullYear()} 152 Bar & Restaurant. All rights reserved.</p>
-              <div className="flex justify-center space-x-4">
-                <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
-              </div>
-            </div>
-          </div>
+          {/* Footer Component */}
+          <Footer />
         </Providers>
       </body>
     </html>

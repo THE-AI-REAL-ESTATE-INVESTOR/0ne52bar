@@ -29,27 +29,14 @@ export default async function HomePage() {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  // Filter and transform events
-  const allEvents = eventsResponse.data.pastEvents
-    .filter(event => event.isActive && event.isPublic)
-    .map(transformPrismaEvent);
-
-  // Split into upcoming and past events
-  const upcomingEvents = allEvents
-    .filter(event => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate >= now;
-    })
+  // Transform events
+  const upcomingEvents = eventsResponse.data.upcomingEvents
+    .map(transformPrismaEvent)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 5);
 
-  const pastEvents = allEvents
-    .filter(event => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate < now;
-    })
+  const pastEvents = eventsResponse.data.pastEvents
+    .map(transformPrismaEvent)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
@@ -61,32 +48,40 @@ export default async function HomePage() {
       {upcomingEvents.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
-            <EventsList events={upcomingEvents} title="Upcoming Events" />
-            <div className="mt-8 text-center">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-white">Upcoming Events</h2>
               <Link 
                 href="/events" 
-                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="text-blue-400 hover:text-blue-300 flex items-center"
               >
                 View All Events
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             </div>
+            <EventsList events={upcomingEvents} />
           </div>
         </section>
       )}
 
       {/* Past Events Section */}
-      {pastEvents.length > 0 && !upcomingEvents.length && (
-        <section className="py-16 px-4">
+      {pastEvents.length > 0 && (
+        <section className="py-16 px-4 bg-gray-900">
           <div className="max-w-7xl mx-auto">
-            <EventsList events={pastEvents} title="Past Events" />
-            <div className="mt-8 text-center">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-white">Recent Events</h2>
               <Link 
                 href="/events" 
-                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="text-blue-400 hover:text-blue-300 flex items-center"
               >
                 View All Events
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             </div>
+            <EventsList events={pastEvents} title="Recent Events" />
           </div>
         </section>
       )}

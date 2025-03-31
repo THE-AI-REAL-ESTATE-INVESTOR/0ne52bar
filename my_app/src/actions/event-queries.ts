@@ -10,7 +10,8 @@ export async function getAllEvents() {
   try {
     const events = await prisma.event.findMany({
       where: {
-        isActive: true
+        isActive: true,
+        isPublic: true
       },
       orderBy: {
         date: 'asc'
@@ -38,6 +39,7 @@ export async function getHomePageEvents() {
     const upcomingEvents = await prisma.event.findMany({
       where: {
         isActive: true,
+        isPublic: true,
         date: {
           gte: today
         }
@@ -51,6 +53,7 @@ export async function getHomePageEvents() {
     const pastEvents = await prisma.event.findMany({
       where: {
         isActive: true,
+        isPublic: true,
         date: {
           lt: today
         }
@@ -67,6 +70,26 @@ export async function getHomePageEvents() {
         upcomingEvents,
         pastEvents
       }
+    };
+  } catch (error) {
+    return handlePrismaError(error);
+  }
+}
+
+/**
+ * Get all events for admin panel
+ */
+export async function getEvents() {
+  try {
+    const events = await prisma.event.findMany({
+      orderBy: {
+        date: 'desc'
+      }
+    });
+    
+    return {
+      success: true as const,
+      data: events
     };
   } catch (error) {
     return handlePrismaError(error);
