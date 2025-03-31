@@ -29,6 +29,7 @@ model Member {
   orders          Order[]
   Reward          Reward[]
   visitHistory    Visit[]
+  merchandiseOrders MerchandiseOrder[]
 }
 
 /// Visit records for members

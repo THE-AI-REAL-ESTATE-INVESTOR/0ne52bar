@@ -15,7 +15,6 @@ export default function Nav() {
     { label: 'Menu', href: '/menu' },
     { label: 'Merch', href: '/merch', icon: '👕' },
     { label: 'About', href: '/about' },
-    { label: 'One52stories', href: '/one52stories', icon: '📖' },
     { label: 'Events', href: '/events', icon: '📅' },
   ];
 
