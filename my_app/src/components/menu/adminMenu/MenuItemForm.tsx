@@ -267,7 +267,7 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1"
+          className="flex-1 bg-amber-500 hover:bg-amber-600"
         >
           {isSubmitting ? 'Saving...' : initialData ? 'Update Menu Item' : 'Create Menu Item'}
         </Button>
@@ -277,6 +277,7 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
+            className="bg-gray-500 hover:bg-gray-600 text-white"
           >
             Cancel
           </Button>
