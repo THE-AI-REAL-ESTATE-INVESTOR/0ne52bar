@@ -6,21 +6,22 @@ import { useDropzone } from 'react-dropzone';
 import Image from 'next/image';
 import { 
   getCategories, 
-  getMerchandiseById, 
+  getMerchandise, 
   createMerchandise, 
   updateMerchandise 
 } from '@/actions/merchandiseActions';
 import { MerchandiseCategory } from '@prisma/client';
 
 interface MerchandiseItemFormProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function MerchandiseItemForm({ params }: MerchandiseItemFormProps) {
   const router = useRouter();
-  const isNew = params.id === 'new';
+  const resolvedParams = React.use(params);
+  const isNew = resolvedParams.id === 'new';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<MerchandiseCategory[]>([]);
@@ -72,39 +73,40 @@ export default function MerchandiseItemForm({ params }: MerchandiseItemFormProps
       try {
         // Load categories
         const categoryResponse = await getCategories();
-        if (categoryResponse.success) {
+        if (categoryResponse.success && categoryResponse.categories) {
           setCategories(categoryResponse.categories);
           
           // If there are categories, set the first one as default for new items
-          if (!isNew || categoryResponse.categories.length === 0) return;
-          
-          setFormData(prev => ({
-            ...prev,
-            categoryId: categoryResponse.categories[0]?.id || '',
-          }));
+          if (!isNew && categoryResponse.categories.length > 0) {
+            setFormData(prev => ({
+              ...prev,
+              categoryId: categoryResponse.categories[0]?.id || '',
+            }));
+          }
         } else {
           setError(`Error loading categories: ${categoryResponse.error}`);
         }
 
         // Load merchandise item if editing
         if (!isNew) {
-          const itemResponse = await getMerchandiseById(params.id);
-          if (itemResponse.success && itemResponse.item) {
-            const item = itemResponse.item;
-            setFormData({
-              id: item.id,
-              name: item.name,
-              description: item.description,
-              price: item.price,
-              categoryId: item.categoryId,
-              sortOrder: item.sortOrder.toString(),
-              inStock: item.inStock,
-              comingSoon: item.comingSoon,
-              imagePath: item.imagePath || '',
-            });
-            
-            if (item.imagePath) {
-              setPreviewImage(item.imagePath);
+          const itemResponse = await getMerchandise(resolvedParams.id);
+          if (itemResponse.success && itemResponse.items) {
+            const item = itemResponse.items.find(i => i.id === resolvedParams.id);
+            if (item) {
+              setFormData({
+                id: item.id,
+                name: item.name,
+                description: item.description || '',
+                price: item.price.toString(),
+                categoryId: item.categoryId,
+                sortOrder: item.sortOrder.toString(),
+                inStock: item.inStock,
+                comingSoon: item.comingSoon,
+                imagePath: item.imagePath || '',
+              });
+              setPreviewImage(item.imagePath || null);
+            } else {
+              setError('Item not found');
             }
           } else {
             setError(`Error loading merchandise item: ${itemResponse.error}`);
@@ -119,7 +121,7 @@ export default function MerchandiseItemForm({ params }: MerchandiseItemFormProps
     };
 
     loadData();
-  }, [isNew, params.id]);
+  }, [isNew, resolvedParams.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -143,36 +145,34 @@ export default function MerchandiseItemForm({ params }: MerchandiseItemFormProps
     setError(null);
 
     try {
-      // Prepare form data for submission
       const submitFormData = new FormData();
       
-      if (!isNew) {
-        submitFormData.append('id', formData.id);
-      }
-      
-      submitFormData.append('name', formData.name);
-      submitFormData.append('description', formData.description);
-      submitFormData.append('price', formData.price);
-      submitFormData.append('categoryId', formData.categoryId);
-      submitFormData.append('sortOrder', formData.sortOrder);
-      submitFormData.append('inStock', formData.inStock.toString());
-      submitFormData.append('comingSoon', formData.comingSoon.toString());
-      
-      // Image handling would normally go here
-      // For now, we'll just use the imagePath field
-      if (formData.imagePath) {
-        submitFormData.append('imagePath', formData.imagePath);
-      }
-      
-      // If there's a new image file, you would upload it here
-      // and then get the path to include in the merchandise record
-      if (imageFile) {
-        // This is where you would upload the file
-        // For now, we'll just simulate it
-        const mockUploadedPath = `/images/merch/${imageFile.name}`;
-        submitFormData.append('imagePath', mockUploadedPath);
-      }
+      // Add all form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        submitFormData.append(key, value.toString());
+      });
 
+      // Handle image upload
+      if (imageFile) {
+        // Upload image first
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', imageFile);
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+        
+        const uploadResult = await uploadResponse.json();
+        
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || 'Error uploading image');
+        }
+        
+        // Set the image path to the uploaded file URL
+        submitFormData.set('imagePath', uploadResult.url);
+      }
+      
       // Submit form
       const response = isNew 
         ? await createMerchandise(submitFormData)
@@ -181,11 +181,11 @@ export default function MerchandiseItemForm({ params }: MerchandiseItemFormProps
       if (response.success) {
         router.push('/admin/merchandise');
       } else {
-        setError(`Error saving merchandise: ${response.error}`);
+        setError(response.error || 'Error saving merchandise item');
       }
     } catch (e) {
-      setError('Error saving data. Please try again.');
-      console.error(e);
+      console.error('Error saving merchandise item:', e);
+      setError('Error saving merchandise item. Please try again.');
     } finally {
       setSaving(false);
     }
