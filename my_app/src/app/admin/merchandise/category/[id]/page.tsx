@@ -6,14 +6,15 @@ import { getCategories, createCategory, updateCategory } from '@/actions/merchan
 import { MerchandiseCategory } from '@prisma/client';
 
 interface CategoryFormProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function CategoryForm({ params }: CategoryFormProps) {
   const router = useRouter();
-  const isNew = params.id === 'new';
+  const resolvedParams = React.use(params);
+  const isNew = resolvedParams.id === 'new';
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +30,9 @@ export default function CategoryForm({ params }: CategoryFormProps) {
       
       try {
         const response = await getCategories();
-        if (response.success) {
+        if (response.success && response.categories) {
           const category = response.categories.find(
-            (c: MerchandiseCategory) => c.id === params.id
+            (c: MerchandiseCategory) => c.id === resolvedParams.id
           );
           
           if (category) {
@@ -55,7 +56,7 @@ export default function CategoryForm({ params }: CategoryFormProps) {
     };
 
     loadCategory();
-  }, [isNew, params.id]);
+  }, [isNew, resolvedParams.id]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -101,84 +102,77 @@ export default function CategoryForm({ params }: CategoryFormProps) {
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center space-x-2">
-        <button 
-          onClick={() => router.push('/admin/merchandise?tab=categories')}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
-        >
-          Back to Categories
-        </button>
-        <h1 className="text-3xl font-bold">
-          {isNew ? 'Add New Category' : 'Edit Category'}
-        </h1>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-lg text-white text-center">Loading...</div>
+        </div>
       </div>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-3 text-gray-300">Loading...</p>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-6 shadow-lg max-w-2xl mx-auto">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-300 mb-2" htmlFor="name">
-                Category Name*
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-gray-300 mb-2" htmlFor="description">
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2"
-              />
-            </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-white mb-6">
+          {isNew ? 'Create New Category' : 'Edit Category'}
+        </h1>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-          
-          <div className="mt-8 flex justify-end">
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
               onClick={() => router.push('/admin/merchandise?tab=categories')}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md mr-2"
+              className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className={`px-4 py-2 rounded-md ${saving 
-                ? 'bg-blue-800 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50"
             >
-              {saving ? 'Saving...' : isNew ? 'Create Category' : 'Update Category'}
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
-      )}
+      </div>
     </div>
   );
 } 

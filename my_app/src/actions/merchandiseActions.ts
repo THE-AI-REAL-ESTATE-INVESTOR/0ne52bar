@@ -279,6 +279,18 @@ export async function updateMerchandise(formData: FormData) {
       };
     }
     
+    // Check if item exists
+    const existingItem = await prisma.merchandise.findUnique({
+      where: { id },
+    });
+    
+    if (!existingItem) {
+      return {
+        success: false,
+        error: "Item not found",
+      };
+    }
+    
     const item = await prisma.merchandise.update({
       where: { id },
       data,
