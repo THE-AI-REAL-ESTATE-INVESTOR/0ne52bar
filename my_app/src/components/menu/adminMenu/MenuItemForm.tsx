@@ -103,7 +103,7 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
   };
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 bg-gray-800 p-4 rounded-lg">
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
