@@ -41,7 +41,7 @@ export function MenuAdmin({ initialMenuItems, initialCategories }: MenuAdminProp
               <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700">Add New Item</Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#0A0B0D] border-gray-800">
+              <DialogContent className="bg-gray-800 p-4 rounded-lg border-gray-800">
                 <DialogHeader>
                   <DialogTitle className="text-white">Add New Item</DialogTitle>
                 </DialogHeader>
