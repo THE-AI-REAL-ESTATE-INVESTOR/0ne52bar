@@ -3,14 +3,16 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Event } from '@/types';
+import { Event } from '@/types/events';
 
 /**
  * UpcomingEvents component to display the most recent events from our data
  */
 export function UpcomingEvents({ events }: { events: Event[] }) {
   // Format date to readable string
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Date not available';
+    
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', 
       year: 'numeric', 
@@ -41,7 +43,7 @@ export function UpcomingEvents({ events }: { events: Event[] }) {
               <div className="relative w-full h-48">
                 <Image
                   src={event.image}
-                  alt={event.title}
+                  alt={event.title || 'Event image'}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover"
@@ -51,7 +53,7 @@ export function UpcomingEvents({ events }: { events: Event[] }) {
             
             <div className="p-5">
               <h3 className="text-xl font-bold mb-2 text-gray-800">
-                {event.title}
+                {event.title || 'Untitled Event'}
               </h3>
               
               <div className="mb-4">
@@ -62,18 +64,22 @@ export function UpcomingEvents({ events }: { events: Event[] }) {
                   <span>{formatDate(event.date)}</span>
                 </div>
                 
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  <span>{event.time}</span>
-                </div>
+                {event.time && (
+                  <div className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                    <span>{event.time}</span>
+                  </div>
+                )}
               </div>
               
-              <p className="text-gray-600 mb-4 line-clamp-3">
-                {event.description.split('\n')[0]}
-              </p>
+              {event.description && (
+                <p className="text-gray-600 mb-4 line-clamp-3">
+                  {event.description.split('\n')[0]}
+                </p>
+              )}
               
               <div className="flex justify-end items-center">
                 <span className="text-blue-600 hover:text-blue-800 font-medium flex items-center">

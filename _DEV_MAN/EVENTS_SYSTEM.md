@@ -1,147 +1,172 @@
-# Events System Documentation
+# Events System Documentation (Updated March 30, 2024) 🗓️
 
-## Overview
-The events system currently uses a hybrid approach with both hardcoded events and Facebook event integration capabilities. This document explains how events are managed, sorted, and displayed across different parts of the application.
+## System Overview 🌐
 
-## Current Date Definition
+Our events system is now fully database-driven with a complete admin interface. Here's how it all works:
 
-### 1. Date Source
-The current date is defined in the `EventsClient` component with the following logic:
-
-```typescript
-const [appDate, setAppDate] = useState<Date | null>(null);
-
-useEffect(() => {
-  // Check if there's a date parameter for demo/testing purposes
-  const dateParam = searchParams.get('demoDate');
-  
-  if (dateParam) {
-    // If date parameter exists, use it
-    const parsedDate = new Date(dateParam);
-    
-    // Check if the parsed date is valid
-    if (!isNaN(parsedDate.getTime())) {
-      setAppDate(parsedDate);
-    } else {
-      setAppDate(new Date());
-    }
-  } else {
-    // Use the current date
-    setAppDate(new Date());
-  }
-}, [searchParams]);
+### 1. Directory Structure 📁
+```
+my_app/
+├── src/
+│   ├── components/events/
+│   │   ├── EventsList.tsx         # Reusable events grid component
+│   │   ├── EventsClientPage.tsx   # Client-side events page logic
+│   │   ├── UpcomingEvents.tsx     # Homepage events display
+│   │   └── EventsPageSkeleton.tsx # Loading state
+│   │
+│   ├── app/
+│   │   ├── events/
+│   │   │   ├── page.tsx           # Public events page
+│   │   │   └── EventsClient.tsx   # Client-side logic
+│   │   │
+│   │   ├── admin/events/
+│   │   │   └── page.tsx           # Admin events management
+│   │   │
+│   │   └── api/events/
+│   │       └── route.ts           # Events API endpoints
+│   │
+│   └── lib/
+│       └── utils/
+│           └── event-transform.ts  # Prisma to App type conversion
 ```
 
-### 2. Date Normalization
-For consistent date comparisons, the time component is set to midnight:
-```typescript
-const today = new Date(appDate);
-today.setHours(0, 0, 0, 0);
+### 2. Data Flow 🔄
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Server Actions
+    participant Prisma
+    participant Database
+
+    %% Public View
+    Client->>API: GET /api/events
+    API->>Prisma: Query Events
+    Prisma->>Database: Select Active & Public
+    Database-->>Prisma: Return Events
+    Prisma-->>API: Transform Events
+    API-->>Client: JSON Response
+
+    %% Admin View
+    Client->>Server Actions: Create/Update Event
+    Server Actions->>Prisma: Execute Operation
+    Prisma->>Database: Persist Changes
+    Database-->>Prisma: Confirm
+    Prisma-->>Server Actions: Return Result
+    Server Actions-->>Client: Success/Error
 ```
 
-### 3. Development Mode Date Controls
-In development mode, there are controls to override the current date for testing:
-- Default: Uses actual current date (`new Date()`)
-- Demo dates available:
-  - Current Date
-  - March 14, 2025
-  - October 30, 2024
-  - April 1, 2025
+### 3. Event Display Settings 🎯
 
-### 4. Date Usage
-The normalized date (`today`) is used to:
-1. Split events into upcoming and past categories
-2. Sort events within each category
-3. Display the current date in the UI for development purposes
+Each event has three visibility flags:
+- `isActive` ✅: Event is enabled in the system
+- `isPublic` 🌍: Event is visible to the public
+- `showPastDate` ⏰: Event remains visible after its date
 
-## Data Sources
+Example:
+```typescript
+const event = {
+  title: "LIVE MUSIC! TYLER RUSSELL!",
+  date: new Date("2024-08-09"),
+  time: "8:00 PM",
+  isActive: true,
+  isPublic: true,
+  showPastDate: false
+};
+```
 
-### 1. Hardcoded Events (`src/data/events.ts`)
-- Contains a static array of upcoming events
-- Each event has properties:
-  - `id`: Unique identifier
-  - `title`: Event name
-  - `date`: Date in YYYY-MM-DD format
-  - `time`: Time in HH:MM AM/PM format
-  - `description`: Event details
-  - `image`: Path to event image
-  - `facebookEventUrl`: Link to Facebook event
+### 4. Admin Interface Features 🛠️
 
-### 2. Facebook Events (`src/components/EventsList.tsx`)
-- Component designed to display Facebook events
-- Currently using mock data but structured for Facebook API integration
-- Different data structure from hardcoded events:
-  - Uses `start_time` instead of separate date/time
-  - Includes Facebook-specific fields like `attending_count`, `cover`, `place`
+The admin interface (`/admin/events`) provides:
+- Create new events
+- Edit existing events
+- Delete events
+- Toggle visibility settings
+- Set display time format
+- Upload event images
+- Preview event details
 
-## Date Sorting Logic
+Example form data:
+```typescript
+const formData = {
+  title: "LIVE MUSIC! TYLER RUSSELL!",
+  description: "Join us at One-52 Bar and Grill for LIVE MUSIC!",
+  date: new Date("2024-08-09T20:00:00"),
+  time: "8:00 PM",
+  image: "https://content-lax3-1.xx.fbcdn.net/v/t39.30808-6/454241592_10473634940654",
+  isActive: true,
+  isPublic: true,
+  showPastDate: false
+};
+```
 
-### 1. Events Page (`/events`)
-The events page uses a sophisticated date sorting system:
+### 5. Public Display Features 🎪
 
-1. **Initial Data Loading**:
-   ```typescript
-   const allEvents = getAllEvents();
-   ```
+The public events page (`/events`) includes:
+- Upcoming events section
+- Optional past events section
+- Event details with images
+- Date and time formatting
+- Responsive grid layout
+- Loading states
 
-2. **Date Processing**:
-   - Current date is normalized (time set to midnight) for consistent comparison
-   - Events are split into two categories:
-     - Upcoming Events: Events with dates >= today
-     - Past Events: Events with dates < today
+Example display:
+```typescript
+const displayEvent = {
+  title: "LIVE MUSIC! TYLER RUSSELL!",
+  formattedDate: "Friday, August 9, 2024",
+  time: "8:00 PM",
+  description: "Join us at One-52 Bar and Grill for LIVE MUSIC!",
+  image: "https://content-lax3-1.xx.fbcdn.net/v/t39.30808-6/454241592_10473634940654"
+};
+```
 
-3. **Sorting Rules**:
-   - Upcoming Events: Sorted by date (earliest first)
-   - Past Events: Sorted by date (most recent first)
+### 6. Date Handling 📅
 
-### 2. Main Page Events Display
-The main page uses the `EventsList` component which:
-- Displays events in a grid layout
-- Formats dates using `toLocaleDateString` with options:
-  ```typescript
-  {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }
-  ```
+The system handles dates in multiple formats:
+- Database: DateTime (ISO format)
+- Admin Form: datetime-local input
+- Display Time: Custom format string
+- Public Display: Localized format
 
-## Date Handling
+Example transformations:
+```typescript
+// Database format
+const dbDate = "2024-08-09T20:00:00.000Z";
 
-### 1. Date Formatting
-- Input format: YYYY-MM-DD (from events.ts)
-- Display format: "Weekday, Month Day, Year" (e.g., "Friday, March 14, 2025")
-- Time is displayed separately in 12-hour format with AM/PM
+// Form input format
+const formDate = "2024-08-09T20:00";
 
-### 2. Date Comparisons
-- All date comparisons are done with normalized dates (time set to midnight)
-- This ensures consistent sorting regardless of event time
-- Example:
-  ```typescript
-  const today = new Date(appDate);
-  today.setHours(0, 0, 0, 0);
-  ```
+// Display format
+const displayDate = "Friday, August 9, 2024";
+const displayTime = "8:00 PM";
+```
 
-## Current Event Dates (as of last update)
-- KOBY ALLEN LIVE: March 14, 2025
-- St. Paddy's Bash: March 17, 2025
-- Country Western Live: March 21, 2025
-- Halloween Karaoke: October 31, 2024
-- New Year's Eve Party: December 31, 2024
+### 7. Implementation Notes 📝
 
-## Development Notes
-1. The system is designed to handle both hardcoded and Facebook events
-2. Date sorting is consistent across the application
-3. All dates are preserved as specified in the events.ts file
-4. The system can handle future dates for upcoming events
-5. Past events are automatically filtered and displayed in a separate section
+1. **Server Actions**
+   - Used for all database operations
+   - Proper error handling
+   - Type-safe operations
 
-## Future Considerations
-1. Facebook API integration for real-time event data
-2. Database storage for events
-3. Admin interface for event management
-4. Event categories and filtering
-5. Recurring events support
+2. **Client Components**
+   - Optimistic updates
+   - Loading states
+   - Error boundaries
+
+3. **Data Validation**
+   - Required fields checking
+   - Date format validation
+   - Image URL validation
+
+Would you like me to explain any of these sections in more detail? 🤔
+
+Next topics we could explore:
+1. 📊 Event analytics and tracking
+2. 🎟️ Event registration system
+3. 🔄 Recurring events
+4. 📱 Mobile event notifications
+5. 🗺️ Event location integration
+
+Let me know which aspect you'd like to dive deeper into! 🚀

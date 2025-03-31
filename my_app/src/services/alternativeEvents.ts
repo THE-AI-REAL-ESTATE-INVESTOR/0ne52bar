@@ -1,79 +1,87 @@
-import { Event } from '@/types';
-import { events as localEvents } from '@/data/events';
-import { pastEvents as localPastEvents } from '@/data/past-events';
+import { Event } from '@/types/events';
+import { getEvents, getEventById, addEvent as addEventAction, updateEvent as updateEventAction, deleteEvent as deleteEventAction } from '@/actions/event-actions';
 
-// In-memory storage for events (in a real app, this would be a database)
-let events: Event[] = [...localEvents];
-const pastEvents: Event[] = [...localPastEvents];
+/**
+ * Transform Prisma Event to application Event type
+ */
+function transformPrismaEvent(prismaEvent: any): Event {
+  return {
+    id: prismaEvent.id,
+    title: prismaEvent.title,
+    date: prismaEvent.date,
+    time: prismaEvent.time,
+    description: prismaEvent.description,
+    image: prismaEvent.image,
+    facebookEventUrl: prismaEvent.facebookEventUrl || undefined,
+    eventTagId: prismaEvent.eventTagId || undefined,
+    EventTag: prismaEvent.EventTag || undefined,
+    EventAttendee: prismaEvent.EventAttendee || undefined,
+    isActive: prismaEvent.isActive || true
+  };
+}
 
 /**
  * Get all events
  */
-export function getAllEvents(): Event[] {
-  return [...events].sort((a, b) => {
-    // Sort by date (upcoming first)
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
+export async function getAllEvents(): Promise<Event[]> {
+  const result = await getEvents();
+  if ('success' in result && result.success && result.data) {
+    return result.data.map(transformPrismaEvent);
+  }
+  return [];
 }
 
 /**
  * Get all past events
  */
 export function getAllPastEvents(): Event[] {
-  return [...pastEvents].sort((a, b) => {
-    // Sort by date (most recent first)
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  // This function is no longer used in the new implementation
+  return [];
 }
 
 /**
- * Get a single event by ID (from either upcoming or past events)
+ * Get a single event by ID
  */
-export function getEvent(id: string): Event | undefined {
-  // First check upcoming events
-  const upcomingEvent = events.find(event => event.id === id);
-  if (upcomingEvent) return upcomingEvent;
-  
-  // Then check past events
-  return pastEvents.find(event => event.id === id);
+export async function getEvent(id: string): Promise<Event | undefined> {
+  const result = await getEventById(id);
+  if ('success' in result && result.success && result.data) {
+    return transformPrismaEvent(result.data);
+  }
+  return undefined;
 }
 
 /**
  * Add a new event
  */
-export function addEvent(event: Omit<Event, 'id'>): Event {
-  const newEvent: Event = {
+export async function addEvent(event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event | null> {
+  const eventWithDefaults = {
     ...event,
-    id: Date.now().toString(), // Simple ID generation
+    isActive: true
   };
-  
-  events.push(newEvent);
-  return newEvent;
+  const result = await addEventAction(eventWithDefaults);
+  if ('success' in result && result.success && result.data) {
+    return transformPrismaEvent(result.data);
+  }
+  return null;
 }
 
 /**
  * Update an existing event
  */
-export function updateEvent(id: string, eventData: Partial<Event>): Event | null {
-  const index = events.findIndex(event => event.id === id);
-  if (index === -1) return null;
-  
-  const updatedEvent = {
-    ...events[index],
-    ...eventData,
-  };
-  
-  events[index] = updatedEvent;
-  return updatedEvent;
+export async function updateEvent(id: string, eventData: Partial<Event>): Promise<Event | null> {
+  const result = await updateEventAction(id, eventData);
+  if ('success' in result && result.success && result.data) {
+    return transformPrismaEvent(result.data);
+  }
+  return null;
 }
 
 /**
  * Delete an event
  */
-export function deleteEvent(id: string): boolean {
-  const initialLength = events.length;
-  events = events.filter(event => event.id !== id);
-  return events.length < initialLength;
+export async function deleteEvent(id: string): Promise<boolean> {
+  const result = await deleteEventAction(id);
+  return 'success' in result && result.success;
 }
 
 /**
@@ -81,7 +89,5 @@ export function deleteEvent(id: string): boolean {
  * In the future, you can replace this with the real Facebook integration
  */
 export async function syncWithExternalSource(): Promise<Event[]> {
-  // In a real implementation, this would fetch from Facebook
-  // For now, we're just returning the events we already have
   return getAllEvents();
 } 

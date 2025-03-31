@@ -1,82 +1,126 @@
+import { getHomePageEvents } from '@/actions/event-queries';
+import { transformPrismaEvent } from '@/lib/utils/event-transform';
+import { EventsList } from '@/components/events/EventsList';
+import { Hero } from '@/components/hero/Hero';
 import Link from 'next/link';
-import { UpcomingEvents } from '@/components/UpcomingEvents';
-import { getAllEvents } from '@/services/alternativeEvents';
 
 // Force dynamic rendering for this page to avoid CSS issues with Next.js 15
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  // Get all events
-  const allEvents = getAllEvents();
-  
-  // Get the three 2025 events which should be displayed first
-  const upcomingEvents = allEvents
-    .filter(event => {
-      // Extract the year from the date string
-      const eventYear = new Date(event.date).getFullYear();
-      // We want to show 2025 events first
-      return eventYear === 2025;
-    })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 3);
-  
-  console.log('Upcoming events:', upcomingEvents.map(e => e.title));
-  
-  return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-blue-800 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">ONE-52 BAR AND GRILL</h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Discover our upcoming events and join us for great food, drinks, and unforgettable moments.
-          </p>
-          <Link 
-            href="/tappass" 
-            className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg font-medium transition duration-300 inline-block transform hover:scale-105 shadow-lg"
-          >
-            Sign up for your TapPass today for exclusive ONE-52 deals!
-          </Link>
-        </div>
-      </section>
+export default async function HomePage() {
+  // Get events for the homepage
+  const eventsResponse = await getHomePageEvents();
+  console.log('Events response:', eventsResponse);
 
-      {/* Events Section */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          {upcomingEvents.length > 0 ? (
-            <UpcomingEvents events={upcomingEvents} />
-          ) : (
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-6">Upcoming Events</h2>
-              <div className="text-center text-gray-600 py-8">
-                <p className="text-lg mb-4">No upcoming events found</p>
-                <p>Check back later for new events or visit our Facebook page.</p>
-              </div>
-            </div>
-          )}
-          
-          <div className="text-center mt-8">
-            <Link 
-              href="/events" 
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
-            >
-              View All Events
-            </Link>
+  if (!('success' in eventsResponse) || !eventsResponse.success) {
+    return (
+      <main className="min-h-screen bg-gray-950 text-white">
+        <Hero />
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <p className="text-gray-400 text-center">Unable to load events at this time.</p>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
+    );
+  }
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-xl font-bold">ONE-52 BAR AND GRILL</h3>
-              <p className="text-gray-400 mt-1">Great drinks, great times.</p>
+  // Get current date for comparison
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // Transform events
+  const upcomingEvents = eventsResponse.data.upcomingEvents
+    .map(transformPrismaEvent)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
+
+  const pastEvents = eventsResponse.data.pastEvents
+    .map(transformPrismaEvent)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
+  return (
+    <main className="min-h-screen bg-gray-950 text-white">
+      <Hero />
+      
+      {/* Upcoming Events Section */}
+      {upcomingEvents.length > 0 && (
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-white">Upcoming Events</h2>
+              <Link 
+                href="/events" 
+                className="text-blue-400 hover:text-blue-300 flex items-center"
+              >
+                View All Events
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            <EventsList events={upcomingEvents} />
+          </div>
+        </section>
+      )}
+
+      {/* Past Events Section */}
+      {pastEvents.length > 0 && (
+        <section className="py-16 px-4 bg-gray-900">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-white">Recent Events</h2>
+              <Link 
+                href="/events" 
+                className="text-blue-400 hover:text-blue-300 flex items-center"
+              >
+                View All Events
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            <EventsList events={pastEvents} title="Recent Events" />
+          </div>
+        </section>
+      )}
+
+      {/* No Events Message */}
+      {!upcomingEvents.length && !pastEvents.length && (
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <p className="text-gray-400 text-center">No events to display at this time.</p>
+          </div>
+        </section>
+      )}
+
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-white">152 Bar</h3>
+              <p>Your premier destination for nightlife and entertainment.</p>
             </div>
             <div>
-              <p className="text-gray-400">© {new Date().getFullYear()} 152 Bar. All rights reserved.</p>
+              <h3 className="text-xl font-bold mb-4 text-white">Quick Links</h3>
+              <ul className="space-y-2">
+                <li><Link href="/events" className="hover:text-amber-500">Events</Link></li>
+                <li><Link href="/tappass" className="hover:text-amber-500">TapPass</Link></li>
+                <li><Link href="/contact" className="hover:text-amber-500">Contact</Link></li>
+              </ul>
             </div>
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-white">Follow Us</h3>
+              <div className="flex space-x-4">
+                <a href="#" className="hover:text-amber-500">Facebook</a>
+                <a href="#" className="hover:text-amber-500">Instagram</a>
+                <a href="#" className="hover:text-amber-500">Twitter</a>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center">
+            <p>&copy; {new Date().getFullYear()} 152 Bar. All rights reserved.</p>
           </div>
         </div>
       </footer>

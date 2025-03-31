@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { memberService } from '@/lib/db/member';
 import type { Member } from '@prisma/client';
 
 export default function TapPassDashboard() {
@@ -15,7 +14,11 @@ export default function TapPassDashboard() {
   React.useEffect(() => {
     async function loadMember() {
       try {
-        const result = await memberService.find({ memberId });
+        const response = await fetch(`/api/dashboard/${memberId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch member data');
+        }
+        const result = await response.json();
         if (result) {
           setMember(result);
         } else {
@@ -69,7 +72,7 @@ export default function TapPassDashboard() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Membership Info */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white text-black rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Membership Info</h2>
           <div className="space-y-2">
             <p><span className="font-medium">Member ID:</span> {member.memberId}</p>
@@ -81,7 +84,7 @@ export default function TapPassDashboard() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white text-black rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Contact Info</h2>
           <div className="space-y-2">
             <p><span className="font-medium">Email:</span> {member.email}</p>
@@ -91,7 +94,7 @@ export default function TapPassDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white text-black rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
           <div className="space-y-2">
             <p><span className="font-medium">Member Since:</span> {new Date(member.joinDate).toLocaleDateString()}</p>
