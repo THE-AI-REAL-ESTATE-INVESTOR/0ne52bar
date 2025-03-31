@@ -277,7 +277,7 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="bg-gray-500 hover:bg-gray-600 text-white"
+            className="bg-gray-500 hover:bg-gray-700 text-white"
           >
             Cancel
           </Button>

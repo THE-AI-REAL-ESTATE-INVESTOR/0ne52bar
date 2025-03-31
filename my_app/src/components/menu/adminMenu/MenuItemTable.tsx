@@ -231,7 +231,7 @@ export function MenuItemTable({ items, categories, onItemsUpdate }: MenuItemTabl
       </Dialog>
 
       {editingItem ? (
-        <div className="bg-gray-500 p-4 rounded-lg">
+        <div className="bg-gray-800 p-4 rounded-lg">
           <h3 className="text-lg font-medium mb-4">Edit Menu Item</h3>
           <MenuItemForm
             initialData={editingItem}
