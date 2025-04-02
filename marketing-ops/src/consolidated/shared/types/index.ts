@@ -2,7 +2,13 @@
  * Shared type definitions for ONE52 Bar & Grill marketing operations
  */
 
-export * from './campaign';
+// Base Types
+export * from './base';
+
+// App Types
+export * from './app';
+
+// Excel Types
 export * from './excel';
 
 /**

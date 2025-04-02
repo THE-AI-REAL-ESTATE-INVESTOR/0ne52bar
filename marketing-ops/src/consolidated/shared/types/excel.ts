@@ -1,28 +1,27 @@
+import { z } from 'zod';
+import { MarketingCampaignData, marketingCampaignDataSchema } from './base';
+
 /**
  * Excel cell style configuration
  */
 export interface ExcelStyle {
   /** Font configuration */
   font?: {
-    /** Font family */
-    family?: string;
-    /** Font size */
-    size?: number;
-    /** Font color (hex) */
-    color?: string;
-    /** Bold text */
+    /** Whether the font is bold */
     bold?: boolean;
-    /** Italic text */
+    /** Whether the font is italic */
     italic?: boolean;
+    /** Font color in hex format */
+    color?: string;
   };
   /** Fill configuration */
   fill?: {
     /** Fill type */
-    type: 'pattern' | 'gradient';
-    /** Fill color (hex) */
-    color?: string;
-    /** Pattern type */
-    pattern?: 'solid' | 'none';
+    type: string;
+    /** Fill pattern */
+    pattern: string;
+    /** Foreground color in hex format */
+    fgColor: string;
   };
   /** Alignment configuration */
   alignment?: {
@@ -30,39 +29,29 @@ export interface ExcelStyle {
     horizontal?: 'left' | 'center' | 'right';
     /** Vertical alignment */
     vertical?: 'top' | 'middle' | 'bottom';
-    /** Wrap text */
+    /** Whether to wrap text */
     wrapText?: boolean;
   };
-  /** Border configuration */
-  border?: {
-    /** Border style */
-    style?: 'thin' | 'medium' | 'thick';
-    /** Border color (hex) */
-    color?: string;
-  };
-  /** Number format */
-  numFmt?: string;
 }
 
 /**
  * Excel cell configuration
  */
 export interface ExcelCell {
+  /** Row number (1-based) */
+  row: number;
+  /** Column number (1-based) */
+  col: number;
   /** Cell value */
-  value: string | number | Date;
+  value: string | number;
   /** Cell style */
   style?: ExcelStyle;
-  /** Cell formula */
-  formula?: string;
-  /** Cell comment */
-  comment?: string;
-  /** Cell merge configuration */
-  merge?: {
-    /** Number of rows to merge */
-    rows: number;
-    /** Number of columns to merge */
-    columns: number;
-  };
+  /** Whether to merge cells */
+  merge?: boolean;
+  /** End row for merged cells */
+  mergeEndRow?: number;
+  /** End column for merged cells */
+  mergeEndCol?: number;
 }
 
 /**
@@ -71,45 +60,80 @@ export interface ExcelCell {
 export interface ExcelWorksheet {
   /** Worksheet name */
   name: string;
-  /** Worksheet data */
-  data: ExcelCell[][];
+  /** Worksheet cells */
+  cells: ExcelCell[];
   /** Column widths */
-  columnWidths?: number[];
-  /** Row heights */
-  rowHeights?: number[];
-  /** Freeze panes configuration */
-  freezePanes?: {
-    /** Row to freeze at */
-    row: number;
-    /** Column to freeze at */
-    column: number;
-  };
-  /** Auto filter configuration */
-  autoFilter?: {
-    /** Start row */
-    startRow: number;
-    /** End row */
-    endRow: number;
-    /** Start column */
-    startColumn: number;
-    /** End column */
-    endColumn: number;
-  };
+  columnWidths: number[];
 }
 
 /**
- * Excel workbook configuration
+ * Excel generation data
  */
-export interface ExcelWorkbook {
-  /** Workbook name */
-  name: string;
-  /** Worksheets */
-  worksheets: ExcelWorksheet[];
-  /** Default styles */
-  defaultStyles?: {
-    /** Default cell style */
-    cell?: ExcelStyle;
-    /** Default header style */
-    header?: ExcelStyle;
-  };
+export interface ExcelGenerationData {
+  /** Marketing campaign data */
+  campaignData: MarketingCampaignData;
+  /** Default style for the worksheet */
+  style: ExcelStyle;
+  /** Worksheet configuration */
+  worksheet: ExcelWorksheet;
+}
+
+// Zod Schemas
+
+export const excelStyleSchema = z.object({
+  font: z.object({
+    bold: z.boolean().optional(),
+    italic: z.boolean().optional(),
+    color: z.string().optional(),
+  }).optional(),
+  fill: z.object({
+    type: z.string(),
+    pattern: z.string(),
+    fgColor: z.string(),
+  }).optional(),
+  alignment: z.object({
+    horizontal: z.enum(['left', 'center', 'right']).optional(),
+    vertical: z.enum(['top', 'middle', 'bottom']).optional(),
+    wrapText: z.boolean().optional(),
+  }).optional(),
+});
+
+export const excelCellSchema = z.object({
+  row: z.number().min(1),
+  col: z.number().min(1),
+  value: z.union([z.string(), z.number()]),
+  style: excelStyleSchema.optional(),
+  merge: z.boolean().optional(),
+  mergeEndRow: z.number().min(1).optional(),
+  mergeEndCol: z.number().min(1).optional(),
+});
+
+export const excelWorksheetSchema = z.object({
+  name: z.string(),
+  cells: z.array(excelCellSchema),
+  columnWidths: z.array(z.number().min(0)),
+});
+
+export const excelGenerationDataSchema = z.object({
+  campaignData: marketingCampaignDataSchema,
+  style: excelStyleSchema,
+  worksheet: excelWorksheetSchema,
+});
+
+// Type Guards
+
+export function isExcelStyle(data: unknown): data is ExcelStyle {
+  return excelStyleSchema.safeParse(data).success;
+}
+
+export function isExcelCell(data: unknown): data is ExcelCell {
+  return excelCellSchema.safeParse(data).success;
+}
+
+export function isExcelWorksheet(data: unknown): data is ExcelWorksheet {
+  return excelWorksheetSchema.safeParse(data).success;
+}
+
+export function isExcelGenerationData(data: unknown): data is ExcelGenerationData {
+  return excelGenerationDataSchema.safeParse(data).success;
 } 
