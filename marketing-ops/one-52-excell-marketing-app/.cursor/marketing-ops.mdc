@@ -1,0 +1,196 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+[marketin-ops-cursor-rule.md](mdc:marketing-ops/one-52-excell-marketing-app/_DEV_MAN/marketin-ops-cursor-rule.md)
+
+# Marketing Operations Cursor Rules
+
+## Project Structure Rules
+
+### 1. Version Management
+- Never modify versioned files directly (files in `src/versions/`)
+- All changes must go through the versioning system
+- Use `pnpm generate-version` to create new versions
+- Current version is always in `src/utils/current-version.ts`
+- Previous versions are stored in `src/versions/prev-version/`
+- Version numbers follow semantic versioning (e.g., v1.0, v1.1)
+- Version management utilities are in `src/utils/versioning.ts`
+
+### 2. Configuration Management
+- All configuration changes must be made in `config.ts`
+- Never hardcode values in versioned files
+- Use the centralized config system for all parameters
+- Configuration changes should be documented in versions.md
+
+### 3. Type System
+- Follow the type system defined in `consolidated/type_system_consolidation.md`
+- Use interfaces from `types/types.ts`
+- Never modify core types without updating documentation
+- All new types must be added to the type system documentation
+
+### 4. File Organization
+- Keep all shared code in `consolidated/shared/`
+- Version-specific code goes in `versions/`
+- Current implementation stays in `utils/current-version.ts`
+- Previous versions go in `versions/prev-version/`
+- Versioning utilities stay in `utils/`
+- Follow the established directory structure
+
+## Development Workflow Rules
+
+### 1. Making Changes
+1. Update `config.ts` for parameter changes
+2. Test changes using `utils/current-version.ts`
+3. Create new version when changes are stable using `utils/create-version.ts`
+4. Update documentation in `versions.md`
+
+### 2. Version Creation
+1. Never manually copy files
+2. Use `utils/create-version.ts` for version creation
+3. Update version documentation
+4. Test new version thoroughly
+
+### 3. Code Modifications
+1. Never modify files in `versions/` directly
+2. Make changes to `utils/current-version.ts`
+3. Create new version when ready using versioning utilities
+4. Update all related documentation
+
+### 4. Configuration Updates
+1. Only modify `config.ts`
+2. Document changes in versions.md
+3. Test with `utils/current-version.ts`
+4. Create new version if needed
+
+## TypeScript Rules
+
+### 1. Module Resolution
+- Use path aliases defined in tsconfig.json
+- Never use relative paths for imports
+- Follow the established import patterns
+- Keep imports consistent across versions
+
+### 2. Type Safety
+- No `any` types allowed
+- Use proper type definitions
+- Follow the type system guidelines
+- Add proper type guards
+
+### 3. Configuration
+- Use tsconfig.json for build settings
+- Use tsconfig.node.json for runtime
+- Never modify TypeScript config without testing
+- Keep configurations consistent
+
+## Documentation Rules
+
+### 1. Version Documentation
+- Update versions.md for all changes
+- Document configuration changes
+- Include migration notes
+- Keep version history accurate
+
+### 2. Type Documentation
+- Document all type changes
+- Update type system documentation
+- Include usage examples
+- Keep documentation in sync
+
+### 3. Code Documentation
+- Add JSDoc comments
+- Document complex logic
+- Include examples
+- Keep documentation current
+
+## Testing Rules
+
+### 1. Version Testing
+- Test all new versions
+- Verify configuration changes
+- Check type safety
+- Ensure backward compatibility
+
+### 2. Configuration Testing
+- Test all config changes
+- Verify parameter updates
+- Check type safety
+- Ensure proper validation
+
+## Error Prevention Rules
+
+### 1. File Modifications
+- Never modify files in `versions/` directly
+- Use versioning system for changes
+- Keep `utils/current-version.ts` clean
+- Follow the workflow strictly
+
+### 2. Configuration Changes
+- Only modify `config.ts`
+- Document all changes
+- Test thoroughly
+- Create new versions when needed
+
+### 3. Type System Changes
+- Follow type system guidelines
+- Update documentation
+- Test type safety
+- Keep types consistent
+
+## Version Control Rules
+
+### 1. Git Workflow
+- Create feature branches
+- Follow conventional commits
+- Keep PRs focused
+- Update documentation
+
+### 2. Version Management
+- Use semantic versioning
+- Document all changes
+- Keep versions clean
+- Follow the workflow
+
+## AI Assistant Rules
+
+### 1. Code Changes
+- Never modify files in `versions/` directly
+- Use versioning system
+- Follow the workflow
+- Document all changes
+
+### 2. Configuration Updates
+- Only modify `config.ts`
+- Document changes
+- Test thoroughly
+- Create new versions
+
+### 3. Type System
+- Follow type guidelines
+- Update documentation
+- Keep types consistent
+- Test type safety
+
+## Emergency Procedures
+
+### 1. Breaking Changes
+1. Document the issue
+2. Create emergency branch
+3. Fix in `utils/current-version.ts`
+4. Create new version
+5. Update documentation
+
+### 2. Configuration Issues
+1. Document the problem
+2. Check `config.ts`
+3. Test `utils/current-version.ts`
+4. Create new version if needed
+5. Update documentation
+
+### 3. Type System Problems
+1. Document the issue
+2. Check type definitions
+3. Update documentation
+4. Test thoroughly
+5. Create new version if needed

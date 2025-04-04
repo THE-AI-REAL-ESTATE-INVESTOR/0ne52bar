@@ -1,0 +1,110 @@
+{
+  "name": "exceljs-analyzer",
+  "version": "1.1.0",
+  "description": "A comprehensive analysis and fix tool for ExcelJS workbooks",
+  "author": "THE AI RE INVESTOR - AIREINVESTOR.COM",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifiers": true,
+    "files": true
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "analyze": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/run-analysis.mts",
+    "analyze:all": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/index.mts --analyze",
+    "fix:all": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/index.mts --fix",
+    "verify:all": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/index.mts --verify",
+    "analyze:worksheets": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/worksheets.mts",
+    "analyze:types": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/types.mts",
+    "analyze:styles": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/styles.mts",
+    "analyze:code": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/code.mts",
+    "analyze:cleanup": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/cleanup.mts",
+    "analyze:campaign-data": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/campaign-data.mts",
+    "analyze:features": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/features.mts",
+    "analyze:compatibility": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/compatibility.mts",
+    "fix:types": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/types.mts --fix",
+    "fix:styles": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/styles.mts --fix",
+    "fix:cleanup": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/cleanup.mts --fix",
+    "fix:worksheets": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/fixes/worksheets.mts --fix",
+    "cleanup:legacy": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json scripts/cleanup.ts",
+    "version:track": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/version/track.mts",
+    "version:history": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/version/history.mts",
+    "test:analyzer": "NODE_OPTIONS='--loader ts-node/esm' ts-node-esm --project tsconfig.json src/test-analyzer.mts"
+  },
+  "bin": {
+    "exceljs-analyzer": "./dist/cli.js"
+  },
+  "keywords": [
+    "excel",
+    "exceljs",
+    "analyzer",
+    "typescript",
+    "validation"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "commander": "^11.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.19",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/parser": "^7.0.1",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1"
+  },
+  "peerDependencies": {
+    "exceljs": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/exceljs-analyzer"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/exceljs-analyzer/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "exceljs-analyzer": {
+    "ignorePatterns": [
+      "node_modules",
+      "dist",
+      "tests",
+      "**/*.test.ts",
+      "**/*.test.mts",
+      "**/*.spec.ts",
+      "**/*.spec.mts"
+    ],
+    "targetExtensions": [
+      ".ts",
+      ".mts",
+      ".xlsx",
+      ".xls"
+    ]
+  }
+} 

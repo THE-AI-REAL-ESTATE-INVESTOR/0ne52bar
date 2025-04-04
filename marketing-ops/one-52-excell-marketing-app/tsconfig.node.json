@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifiers": true,
+    "moduleTypes": {
+      "**/*": "esm"
+    }
+  },
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "node"
+  }
+} 

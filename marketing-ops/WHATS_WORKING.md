@@ -244,4 +244,40 @@ marketing-ops/
 - `npm run build` - Build the project
 - `npm test` - Run tests
 - `npm run lint` - Run linting
-- `npm run format` - Format code with Prettier 
+- `npm run format` - Format code with Prettier
+
+### Code Analysis Tools
+
+- ✅ `src/analyzer/` - Code analysis and documentation tools
+  - ✅ `test-analyzer.ts` - Main test runner for analyzers
+  - ✅ `typescript-analyzer.ts` - TypeScript code analysis
+  - ✅ `markdown-history-analyzer.ts` - Git history analysis
+  - ✅ `code-fixer.ts` - Code quality suggestions
+  - ✅ `tsconfig.analyzer.json` - Analyzer TypeScript configuration
+
+### Analysis Features
+
+- ✅ TypeScript Code Analysis
+  - Lines of code counting
+  - Function and class detection
+  - Complexity analysis
+  - Dependency mapping
+  - Mermaid diagram generation
+
+- ✅ Git History Analysis
+  - Branch analysis
+  - Commit history tracking
+  - History file generation
+  - Project structure documentation
+
+- ✅ Code Quality Analysis
+  - Code metrics generation
+  - Quality suggestions
+  - Best practices validation
+  - Performance recommendations
+
+### Output Reports
+
+- ✅ `output/code-analysis.md` - Comprehensive code analysis
+- ✅ `output/suggestions.md` - Code quality suggestions
+- ✅ `output/WHATS_WORKING_HISTORY.md` - Historical updates 

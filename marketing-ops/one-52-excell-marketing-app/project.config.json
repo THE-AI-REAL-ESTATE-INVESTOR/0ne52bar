@@ -1,0 +1,7 @@
+{
+  "name": "one-52-marketing",
+  "version": "1.0.0",
+  "filePrefix": "one-52-marketing",
+  "outputDir": "dist",
+  "versionsDir": "src/versions"
+}

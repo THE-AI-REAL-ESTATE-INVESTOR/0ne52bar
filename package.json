@@ -1,0 +1,19 @@
+{
+	"name": "marketing-spreadsheet-generator",
+	"version": "1.0.0",
+	"description": "Comprehensive marketing spreadsheet generator for direct mail and app campaigns",
+	"main": "src/generate-marketing-spreadsheet.legacy.ts",
+	"scripts": {
+		"start": "ts-node src/generate-marketing-spreadsheet.legacy.ts",
+		"build": "tsc",
+		"test": "jest"
+	},
+	"dependencies": {
+		"exceljs": "^4.4.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
+	}
+}

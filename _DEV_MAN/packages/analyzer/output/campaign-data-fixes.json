@@ -1,0 +1,12 @@
+[
+  {
+    "name": "marketing-calculator.ts",
+    "changes": [
+      {
+        "type": "structure",
+        "description": "Updated property definitions for MarketingCampaignData",
+        "fix": "interface MarketingCampaignData {\n  campaignParameters: CampaignParameters;\n  weeklyCalculations: WeeklyCalculations;\n  monthlyCalculations: MonthlyCalculations;\n  annualCalculations: AnnualCalculations;\n  appMetrics: AppMetrics;\n  revenueImpact: RevenueImpact;\n}"
+      }
+    ]
+  }
+]

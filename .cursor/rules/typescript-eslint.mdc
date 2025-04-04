@@ -1,0 +1,111 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+# TypeScript and ESLint Configuration Rules
+
+## Overview
+This rule file defines the standards and practices for TypeScript and ESLint configurations in the marketing-ops project.
+
+## TypeScript Configuration Rules
+
+### Base Configuration
+- Always use strict mode (`"strict": true`)
+- Maintain consistent path aliases using `@/*` pattern
+- Keep target and module settings aligned with project requirements
+- Document all configuration changes in CHANGELOG.md
+
+### Path Aliases
+```typescript
+// Correct
+import { something } from '@/components/something';
+import { type } from '@types/something';
+
+// Incorrect
+import { something } from '../../../components/something';
+```
+
+### Type Safety
+- Never use `any` type without explicit justification
+- Always define explicit return types for functions
+- Use interfaces over type aliases for object types
+- Document complex types with JSDoc comments
+
+## ESLint Configuration Rules
+
+### Import Order
+```typescript
+// Correct
+import { useState } from 'react';
+import { Button } from '@/components/ui';
+import { type User } from '@types/user';
+
+// Incorrect
+import { Button } from '@/components/ui';
+import { useState } from 'react';
+import { type User } from '@types/user';
+```
+
+### Code Style
+- Use consistent naming conventions
+- Maintain proper spacing and indentation
+- Follow import grouping rules
+- Document complex functions and components
+
+## Change Management
+
+### When to Modify Configurations
+1. **TypeScript Configuration Changes**
+   - When adding new path aliases
+   - When updating TypeScript version
+   - When changing module system
+   - When adding new type checking rules
+   - When modifying build output settings
+
+2. **ESLint Configuration Changes**
+   - When adding new plugins
+   - When updating import rules
+   - When modifying code style requirements
+   - When adding new TypeScript-specific rules
+
+### Change Documentation Requirements
+1. **CHANGELOG.md Entry Format**
+   ```markdown
+   ## [Unreleased]
+   
+   ### Changed
+   - [TypeScript] Updated target to ES2022 for better async/await support
+   - [ESLint] Added import/order rule for consistent imports
+   
+   ### Added
+   - [TypeScript] New path alias @components for UI components
+   - [ESLint] New rule for explicit function return types
+   
+   ### Removed
+   - [TypeScript] Removed deprecated path alias @old
+   - [ESLint] Removed redundant no-console rule
+   ```
+
+2. **README Update Requirements**
+   - Document the reason for the change
+   - Provide examples of affected code
+   - Update configuration documentation
+   - List any migration steps required
+
+### Review Process
+1. Create a PR with proposed changes
+2. Update CHANGELOG.md
+3. Update relevant README files
+4. Run full test suite
+5. Get approval from team lead
+
+## References
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [ESLint Documentation](https://eslint.org/docs/)
+- [Project Configuration Guidelines](@marketing-ops/README.md)

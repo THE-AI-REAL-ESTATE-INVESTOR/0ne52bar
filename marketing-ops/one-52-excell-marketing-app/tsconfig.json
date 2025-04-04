@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "declaration": true,
+    "lib": ["ES2020"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/config": ["src/config.ts"],
+      "@/types/*": ["src/types/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/excel/*": ["src/exceljs/*"],
+      "@/worksheets/*": ["src/consolidated/shared/excel/worksheets/*"],
+      "@/formatting/*": ["src/consolidated/shared/excel/formatting/*"],
+      "@/charts/*": ["src/consolidated/shared/excel/charts/*"],
+      "@/calculations/*": ["src/consolidated/shared/calculations/*"]
+    },
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+} 

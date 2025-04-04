@@ -6,46 +6,52 @@ A comprehensive suite of marketing operations tools for ONE52 Bar & Grill, inclu
 
 ```mermaid
 graph TD
-    A[marketing-ops/] --> B[src/]
-    A --> C[tests/]
-    A --> D[docs/]
+    A[marketing-ops/] --> B[packages/]
+    A --> C[one-52-excell-marketing-app/]
+    A --> D[_DEV_MAN/]
     
-    B --> E[consolidated/]
+    B --> E[analyzer/]
     B --> F[exceljs/]
-    B --> G[excel4node/]
-    B --> H[legacy/]
+    B --> G[shared/]
     
-    E --> I[one52bar-current/]
-    E --> J[one52bar-direct-mail/]
-    E --> K[one52bar-app/]
-    E --> L[shared/]
+    E --> H[src/]
+    E --> I[tests/]
+    E --> J[output/]
     
-    I --> M[src/]
-    I --> N[tests/]
-    I --> O[docs/]
+    H --> K[file/]
+    H --> L[fixes/]
+    H --> M[verify/]
+    H --> N[index.mts]
+    H --> O[cli.mts]
     
-    J --> P[src/]
-    J --> Q[tests/]
-    J --> R[docs/]
-    
-    K --> S[src/]
-    K --> T[tests/]
-    K --> U[docs/]
-    
-    L --> V[types/]
-    L --> W[utils/]
-    L --> X[config/]
-    L --> Y[excel/]
+    C --> P[src/]
+    C --> Q[tests/]
+    C --> R[docs/]
 ```
 
-## Implementation Comparison
+## Core Components
 
-| Implementation | Total Size | Main File Size | Lines of Code | File Organization |
-|----------------|------------|----------------|---------------|-------------------|
-| ExcelJS | 10KB | 3.1KB | 86 | Modern, modular |
-| Excel4Node | 12KB | 279 lines | 279 | Legacy, monolithic |
-| Legacy | 20KB | 480 lines | 480 | Legacy, monolithic |
-| JavaScript | 289 lines | 289 lines | 289 | Legacy, monolithic |
+### ExcelJS Analyzer
+A comprehensive analysis and fix tool for ExcelJS workbooks, providing:
+- Type analysis and fixes
+- Style standardization
+- Worksheet structure validation
+- Campaign data formatting
+- Code quality improvements
+
+### Marketing App
+The main application for marketing operations, including:
+- Campaign calculators
+- Excel generators
+- Analytics tools
+- Data visualization
+
+### Development Manual
+Documentation and guidelines for:
+- Architecture decisions
+- Development workflows
+- Best practices
+- Testing procedures
 
 ## Project Evolution
 
@@ -63,7 +69,7 @@ timeline
     section Modern Implementation
         ExcelJS Migration : 2024-04-01
         Modular Architecture : 2024-04-15
-        Comprehensive Testing : 2024-05-01
+        ExcelJS Analyzer : 2024-04-15
     section Documentation
         API Documentation : 2024-05-15
         Usage Examples : 2024-06-01
@@ -72,17 +78,19 @@ timeline
 
 ## Key Features
 
-1. **Multiple Implementations**
-   - ExcelJS (modern)
-   - Excel4Node (legacy)
-   - JavaScript (legacy)
-   - Consolidated (new)
+1. **ExcelJS Analyzer**
+   - Comprehensive workbook analysis
+   - Automated fixes for common issues
+   - Style standardization
+   - Type validation
+   - Code quality improvements
 
-2. **Comprehensive Documentation**
-   - Architecture diagrams
-   - API documentation
-   - Usage examples
-   - Type definitions
+2. **Marketing Operations**
+   - Campaign calculations
+   - Revenue projections
+   - Cost analysis
+   - Break-even calculations
+   - Data visualization
 
 3. **Type Safety**
    - TypeScript interfaces
@@ -96,12 +104,6 @@ timeline
    - Formula support
    - Data validation
 
-5. **Business Logic**
-   - Campaign calculations
-   - Revenue projections
-   - Cost analysis
-   - Break-even calculations
-
 ## Dependencies
 
 - TypeScript
@@ -110,27 +112,30 @@ timeline
 - Jest
 - ESLint
 - Prettier
+- pnpm (package manager)
 
 ## Getting Started
 
+For detailed usage instructions, please refer to [HOW_TO_USE.md](./HOW_TO_USE.md).
+
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. Build the project:
    ```bash
-   npm run build
+   pnpm build
    ```
 
 3. Run tests:
    ```bash
-   npm test
+   pnpm test
    ```
 
 4. Generate documentation:
    ```bash
-   npm run docs
+   pnpm docs
    ```
 
 ## Development
@@ -144,8 +149,8 @@ timeline
 
 3. Run tests and linting:
    ```bash
-   npm run test
-   npm run lint
+   pnpm test
+   pnpm lint
    ```
 
 4. Commit your changes:

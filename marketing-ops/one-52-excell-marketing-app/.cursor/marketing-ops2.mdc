@@ -1,0 +1,112 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ # Marketing Ops Versioning System
+
+## Overview
+The versioning system is designed to maintain different versions of the marketing spreadsheet generator while ensuring backward compatibility and easy rollback capabilities.
+
+## Implementation Details
+
+### Versioning Structure
+- All versioned files are stored in `src/utils/versions/`
+- Each version follows the format: `generate-marketing-spreadsheet.vX.Y.ts`
+- Version numbers increment by 0.1 for each new version
+- Current version is always maintained in `src/utils/generate-marketing-spreadsheet.ts`
+
+### Key Components
+
+1. **Versioning Utilities** (`src/utils/versioning.ts`)
+   - `getNextVersion`: Determines the next version number based on existing versions
+   - `createVersionedCopy`: Creates a new versioned copy of the current implementation
+
+2. **Version Creation Script** (`src/utils/create-version.ts`)
+   - Handles the version creation process
+   - Uses path aliases for clean imports
+   - Maintains CommonJS compatibility for ts-node execution
+
+3. **Configuration** (`tsconfig.json`)
+   - Path aliases configured for clean imports
+   - CommonJS module system for ts-node compatibility
+   - TypeScript strict mode enabled
+
+### Usage
+
+1. **Creating a New Version**
+   ```bash
+   pnpm generate-version
+   ```
+   This will:
+   - Determine the next version number
+   - Create a versioned copy of the current implementation
+   - Store it in the versions directory
+
+2. **Running Specific Versions**
+   ```bash
+   pnpm generate-v1.0  # Run version 1.0
+   pnpm generate-v1.1  # Run version 1.1
+   ```
+
+### Best Practices
+
+1. **Version Creation**
+   - Always create a new version before making significant changes
+   - Use the `generate-version` script to ensure proper versioning
+   - Document changes in the versioned file
+
+2. **Code Organization**
+   - Keep versioned files in the `versions` directory
+   - Maintain the current version in the root `utils` directory
+   - Use path aliases for clean imports
+
+3. **TypeScript Configuration**
+   - Use CommonJS module system for ts-node compatibility
+   - Maintain strict type checking
+   - Use path aliases for clean imports
+
+4. **Testing**
+   - Test each version independently
+   - Ensure backward compatibility
+   - Document any breaking changes
+
+### Example Version Creation Process
+
+```mermaid
+graph TD
+    A[Current Implementation] --> B[Run generate-version]
+    B --> C[Determine Next Version]
+    C --> D[Create Versioned Copy]
+    D --> E[Store in versions/]
+    E --> F[Update Documentation]
+```
+
+### Troubleshooting
+
+1. **Version Generation Issues**
+   - Ensure ts-node is properly configured
+   - Check path aliases in tsconfig.json
+   - Verify CommonJS compatibility
+
+2. **Import Issues**
+   - Verify path aliases are correctly configured
+   - Check module system compatibility
+   - Ensure proper file extensions
+
+### Future Improvements
+
+1. **Automated Testing**
+   - Add version-specific test suites
+   - Implement regression testing
+   - Add performance benchmarks
+
+2. **Documentation**
+   - Add version-specific documentation
+   - Create change logs
+   - Document breaking changes
+
+3. **Tooling**
+   - Add version comparison tools
+   - Implement automated version creation
+   - Add version rollback capabilities

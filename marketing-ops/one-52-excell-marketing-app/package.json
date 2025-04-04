@@ -1,0 +1,50 @@
+{
+  "name": "one-52-excell-marketing-app",
+  "version": "1.0.0",
+  "description": "Marketing operations app for ONE52 Bar & Grill",
+  "main": "dist/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=10.4.1"
+  },
+  "packageManager": "pnpm@10.4.1",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "start": "node --experimental-specifier-resolution=node dist/index.js",
+    "build": "tsc",
+    "build:version": "node --loader ts-node/esm src/utils/build-version.ts",
+    "test": "node --experimental-specifier-resolution=node node_modules/jest/bin/jest.js",
+    "generate-spreadsheet": "node --experimental-specifier-resolution=node dist/utils/current-version.js",
+    "generate-version": "node --loader ts-node/esm --experimental-specifier-resolution=node src/utils/create-version.ts",
+    "version:create": "pnpm generate-version",
+    "version:build": "pnpm build:version",
+    "version:run": "node --experimental-specifier-resolution=node dist/versions/generate-marketing-spreadsheet.v",
+    "lint": "eslint --config eslint.config.ts src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "cli": "node --loader ts-node/esm src/cli.ts",
+    "cli:list": "pnpm cli list",
+    "cli:run": "pnpm cli run"
+  },
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "exceljs": "^4.4.0",
+    "isomorphic-fetch": "^3.0.0",
+    "open": "^10.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.30",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
+    "jest": "^29.7.0",
+    "jiti": "^2.4.2",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
+  }
+}

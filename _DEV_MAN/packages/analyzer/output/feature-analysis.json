@@ -1,0 +1,10 @@
+{
+  "missingWorksheets": [],
+  "invalidFormulas": [
+    "Missing formula definitions"
+  ],
+  "styleIssues": [],
+  "calculationIssues": [
+    "Missing calculation methods"
+  ]
+}

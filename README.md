@@ -235,4 +235,126 @@ Visit [aireinvestor.com](https://aireinvestor.com) to learn more about how we ca
 
 ---
 
-*This application is a showcase of modern web development capabilities, demonstrating how technology can transform the restaurant industry. Built with passion and expertise, it represents the future of restaurant management and customer engagement.* 
+*This application is a showcase of modern web development capabilities, demonstrating how technology can transform the restaurant industry. Built with passion and expertise, it represents the future of restaurant management and customer engagement.*
+
+# Marketing Spreadsheet Generator
+
+A comprehensive spreadsheet generator for analyzing direct mail and app marketing campaigns.
+
+## Features
+
+- Direct mail campaign analysis
+- App marketing analysis
+- Combined growth projections
+- Break-even analysis
+- ROI calculations
+- Additional revenue projections
+- Comprehensive validation checks
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+
+## Usage
+
+1. Create a configuration object with your marketing parameters:
+
+```typescript
+const marketingData: MarketingCampaignData = {
+  // Direct Mail Parameters
+  stampCost: 0.55,
+  recipientTarget: 1000,
+  conversionRate: 0.05,
+  revenuePerConversion: 100,
+  
+  // App Parameters
+  appUserTarget: 5000,
+  appConversionRate: 0.03,
+  appRevenuePerUser: 50,
+  appMonthlyCost: 1000,
+  
+  // Growth Parameters
+  monthlyGrowthRate: 0.1,
+  campaignDuration: 12
+};
+```
+
+2. Generate the spreadsheet:
+
+```typescript
+import { generateMarketingSpreadsheet } from './src/generate-marketing-spreadsheet.legacy';
+
+async function main() {
+  const workbook = await generateMarketingSpreadsheet(marketingData);
+  await workbook.xlsx.writeFile('marketing-analysis.xlsx');
+}
+
+main();
+```
+
+3. Run the generator:
+
+```bash
+npm start
+```
+
+## Output
+
+The generator creates an Excel workbook with the following worksheets:
+
+1. Direct Mail Parameters
+   - Stamp costs
+   - Recipient targets
+   - Conversion rates
+   - Revenue projections
+
+2. Direct Mail Growth Projection
+   - Monthly growth calculations
+   - Revenue projections
+   - Cost analysis
+   - Net revenue calculations
+
+3. ONE52 Bar App
+   - App-specific parameters
+   - User metrics
+   - Cost structures
+   - Revenue projections
+
+4. App Growth Projection
+   - Monthly user growth
+   - Revenue projections
+   - Cost analysis
+   - Net revenue calculations
+
+5. Combined Growth Projection
+   - Integrated direct mail and app growth
+   - Combined revenue projections
+   - Total cost analysis
+   - Overall net revenue
+
+6. Validation
+   - Parameter validation
+   - Formula checks
+   - Data consistency verification
+
+## Development
+
+To build the project:
+
+```bash
+npm run build
+```
+
+To run tests:
+
+```bash
+npm test
+```
+
+## License
+
+MIT 

@@ -1,0 +1,99 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+# Your rule content
+https://www.npmjs.com/package/exceljs?activeTab=readme
+
+[exceljs-consolidation.md](mdc:marketing-ops/_DEV_MAN/pending-issue/exceljs-consolidation.md)
+- You can @ files here
+- You can use markdown but dont have to
+
+# ExcelJS Best Practices
+
+## Installation and Setup
+- Install ExcelJS using npm: `pnpm install exceljs`
+- Import ExcelJS in your files: `import ExcelJS from 'exceljs'`
+- Use TypeScript for better type safety and autocompletion
+
+## Workbook Operations
+- Create new workbooks: `const workbook = new ExcelJS.Workbook()`
+- Load existing workbooks: `await workbook.xlsx.readFile('path/to/file.xlsx')`
+- Save workbooks: `await workbook.xlsx.writeFile('path/to/file.xlsx')`
+- Use proper error handling with try/catch blocks for file operations
+
+## Worksheet Management
+- Create worksheets with meaningful names: `const worksheet = workbook.addWorksheet('SheetName')`
+- Access existing worksheets: `const worksheet = workbook.getWorksheet('SheetName')`
+- Set worksheet properties (page setup, views, etc.)
+- Use worksheet protection when needed
+
+## Cell Operations
+- Access cells using getCell: `const cell = worksheet.getCell('A1')`
+- Set cell values with proper typing: `cell.value = 'Text'` or `cell.value = 42`
+- Use cell styles for formatting (fonts, fills, borders, alignment)
+- Apply number formats for different data types
+- Use formulas when needed: `cell.value = { formula: 'SUM(A1:A10)' }`
+
+## Row and Column Operations
+- Add rows with data: `worksheet.addRow([1, 'Text', new Date()])`
+- Set row height: `row.height = 20`
+- Set column width: `worksheet.getColumn(1).width = 15`
+- Use column headers for better data organization
+- Apply column styles consistently
+
+## Styling
+- Create and reuse style objects
+- Use proper color codes (RGB or theme colors)
+- Apply consistent formatting across similar data types
+- Use borders and fills for better readability
+- Implement conditional formatting when needed
+
+## Performance Optimization
+- Use streaming for large files: `const workbook = new ExcelJS.stream.xlsx.WorkbookWriter()`
+- Batch cell updates when possible
+- Minimize style changes
+- Use proper data types for values
+- Implement proper error handling
+
+## TypeScript Integration
+- Use proper type definitions
+- Create interfaces for complex data structures
+- Use enums for style constants
+- Implement proper error types
+- Use generics when working with different data types
+
+## Error Handling
+- Implement proper try/catch blocks
+- Handle file system errors
+- Validate data before writing
+- Provide meaningful error messages
+- Log errors appropriately
+
+## Best Practices
+- Keep workbook operations atomic
+- Use meaningful variable names
+- Document complex operations
+- Implement proper cleanup
+- Follow consistent coding style
+- Use proper indentation and formatting
+- Add comments for complex logic
+- Test thoroughly before deployment
+
+## Common Use Cases
+- Data export from database
+- Report generation
+- Data transformation
+- Template filling
+- Chart creation
+- Data validation
+- Format conversion
+
+## Security Considerations
+- Validate input data
+- Sanitize file paths
+- Handle large files safely
+- Implement proper access controls
+- Use secure file operations

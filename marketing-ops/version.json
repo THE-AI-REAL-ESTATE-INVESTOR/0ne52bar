@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "changes": [
+    {
+      "type": "fix",
+      "component": "formulas",
+      "description": "Fixed calculation formulas"
+    },
+    {
+      "type": "fix",
+      "component": "calculations",
+      "description": "Fixed calculation methods"
+    }
+  ],
+  "timestamp": "2025-04-03T11:37:01.296Z"
+}

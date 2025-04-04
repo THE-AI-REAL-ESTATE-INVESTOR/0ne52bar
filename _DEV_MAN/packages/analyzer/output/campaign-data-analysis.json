@@ -1,0 +1,11 @@
+{
+  "typeIssues": [],
+  "structureIssues": [
+    "Missing required property: campaignParameters",
+    "Missing required property: weeklyCalculations",
+    "Missing required property: monthlyCalculations",
+    "Missing required property: annualCalculations"
+  ],
+  "validationIssues": [],
+  "formulaIssues": []
+}
